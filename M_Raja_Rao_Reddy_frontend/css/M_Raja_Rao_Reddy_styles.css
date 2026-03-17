@@ -180,3 +180,151 @@ section p {
 #education tbody tr:hover {
   background-color: #ecf0f1;
 }
+
+/* ============ PROJECTS SECTION STYLING ============ */
+#projects article {
+  background-color: #f9f9f9;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+#projects article:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  /* Lift effect on hover */
+}
+
+#projects a {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+#projects a:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
+/* ============ CONTACT FORM STYLING ============ */
+#contact form {
+  max-width: 600px;
+  margin: 20px auto;
+  background-color: #f9f9f9;
+  padding: 30px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+ 
+
+/* Block display puts label above input field */
+#contact label {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 0.95em;
+}
+ 
+#contact div {
+  margin-bottom: 20px;
+
+}
+ 
+#contact input[type="text"],
+#contact input[type="email"],
+#contact textarea,
+#contact select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1em;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+ 
+/* Focus state improves accessibility and UX */
+#contact input:focus,
+#contact textarea:focus,
+#contact select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+ 
+/* Radio buttons and checkboxes - separate group styling */
+#contact div:has(input[type="radio"]),
+#contact div:has(input[type="checkbox"]) {
+  margin-bottom: 20px;
+}
+ 
+/* Group labels for radio/checkbox groups */
+#contact strong {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 0.95em;
+}
+ 
+/* Radio buttons and checkboxes */
+#contact input[type="radio"],
+#contact input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+  margin-bottom: 10px;/
+}
+ 
+/* Inline labels for radio/checkbox */
+#contact input[type="radio"] + label,
+#contact input[type="checkbox"] + label {
+  display: inline;
+  margin-left: 0;
+  margin-bottom: 0;
+  font-weight: normal;
+  margin-top: 0;
+  font-size: 0.95em;
+}
+ 
+/* Line break styling for radio/checkbox groups */
+#contact br {
+  margin-bottom: 5px;
+}
+ 
+#contact button {
+  background-color: #3498db;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-right: 10px;
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+ 
+/* Button hover effect */
+#contact button:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+ 
+/* Reset button styling */
+#contact button[type="reset"] {
+  background-color: #95a5a6;
+  margin-right: 0;
+}
+ 
+#contact button[type="reset"]:hover {
+  background-color: #7f8c8d;
+}
