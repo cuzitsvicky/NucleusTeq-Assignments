@@ -1,0 +1,3 @@
+[submodule "git-assignment"]
+	path = git-assignment
+	url = https://github.com/cuzitsvicky/git-assignment.git
