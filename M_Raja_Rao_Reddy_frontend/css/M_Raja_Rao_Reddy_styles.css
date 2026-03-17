@@ -328,3 +328,36 @@ section p {
 #contact button[type="reset"]:hover {
   background-color: #7f8c8d;
 }
+
+/* ============ FOOTER STYLING ============ */
+footer {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  text-align: center;
+  padding: 30px 20px;
+  margin-top: 40px;
+  border-top: 3px solid #3498db;
+}
+
+footer p {
+  margin: 10px 0;
+  font-size: 0.95em;
+}
+
+footer a {
+  color: #3498db;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #ecf0f1;
+  text-decoration: underline;
+}
+
+hr {
+  border: none;
+  height: 2px;
+  background-color: #ddd;
+  margin: 20px 0;
+}
