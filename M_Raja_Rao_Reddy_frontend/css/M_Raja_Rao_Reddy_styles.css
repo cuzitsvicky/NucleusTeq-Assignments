@@ -50,3 +50,38 @@ header img {
 header img:hover {
   transform: scale(1.05);
 }
+
+/* ============ NAVIGATION STYLING ============ */
+nav {
+  background-color: #34495e;
+  padding: 15px 20px;
+  position: sticky;
+  top: 0;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  padding: 10px 15px;
+  display: block;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+nav a:active {
+  background-color: #2980b9;
+}
+
