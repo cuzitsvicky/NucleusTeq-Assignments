@@ -361,3 +361,101 @@ hr {
   background-color: #ddd;
   margin: 20px 0;
 }
+
+/* ============ RESPONSIVE DESIGN - TABLET ============ */
+@media (max-width: 768px) {
+  header {
+    padding: 30px 15px;
+  }
+
+  header h1 {
+    font-size: 1.8em;
+  }
+
+  header h2 {
+    font-size: 1em;
+  }
+
+  header img {
+    width: 100px;
+    height: 100px;
+  }
+
+  nav ul {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  nav a {
+    width: 100%;
+    text-align: center;
+  }
+
+  section {
+    padding: 20px;
+    margin: 20px 0;
+    max-width: 100%;
+  }
+
+  section h2 {
+    font-size: 1.5em;
+  }
+
+  #education td,
+  #education th {
+    padding: 10px 8px;
+  }
+
+  #contact form {
+    max-width: 100%;
+  }
+
+  #contact button {
+    width: 100%;
+  }
+}
+
+/* ============ RESPONSIVE DESIGN - MOBILE ============ */
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+
+  header {
+    padding: 20px 10px;
+  }
+
+  header h1 {
+    font-size: 1.5em;
+  }
+
+  header img {
+    width: 80px;
+    height: 80px;
+  }
+
+  nav ul {
+    gap: 5px;
+  }
+
+  nav a {
+    padding: 8px 10px;
+    font-size: 0.9em;
+  }
+
+  section {
+    padding: 15px;
+    margin: 15px 0;
+  }
+
+  section h2 {
+    font-size: 1.3em;
+  }
+
+  #contact input[type="text"],
+  #contact input[type="email"],
+  #contact textarea {
+    font-size: 16px;
+  }
+}
