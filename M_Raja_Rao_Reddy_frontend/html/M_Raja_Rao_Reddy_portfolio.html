@@ -195,5 +195,121 @@
     <hr>
   </section>
 
+
+  <!-- CONTACT SECTION -->
+  <section id="contact">
+    <h2>Contact Me</h2>
+    <!-- Form tag wraps all input elements for semantic grouping -->
+    <form>
+      <!-- Using a table for form layout to improve formatting and readability -->
+      <table border="0" cellpadding="5">
+        <tbody>
+          <!-- Name input row -->
+          <tr>
+            <td>
+              <label for="name">Name:</label>
+            </td>
+            <td>
+              <!-- Input field with unique id matching the label's for attribute -->
+              <input type="text" id="name" name="name" required>
+            </td>
+          </tr>
+ 
+          <!-- Email input row -->
+          <tr>
+            <td>
+              <label for="email">Email:</label>
+            </td>
+            <td>
+              <!-- Email input type provides built-in validation -->
+              <input type="email" id="email" name="email" required>
+            </td>
+          </tr>
+ 
+          <!-- Subject input row -->
+          <tr>
+            <td>
+              <label for="subject">Subject:</label>
+            </td>
+            <td>
+              <input type="text" id="subject" name="subject">
+            </td>
+          </tr>
+ 
+          <!-- Radio buttons row for inquiry type -->
+          <tr>
+            <td>
+              <strong>Inquiry Type:</strong>
+            </td>
+            <td>
+              <!-- Radio buttons grouped together with the same name attribute -->
+              <input type="radio" id="inquiry-freelance" name="inquiry_type" value="Freelance">
+              <label for="inquiry-freelance">Freelance</label>
+              <br>
+              <input type="radio" id="inquiry-fulltime" name="inquiry_type" value="Full-time">
+              <label for="inquiry-fulltime">Full-time</label>
+              <br>
+              <input type="radio" id="inquiry-other" name="inquiry_type" value="Other">
+              <label for="inquiry-other">Other</label>
+            </td>
+          </tr>
+ 
+          <!-- Dropdown select row for contact method -->
+          <tr>
+            <td>
+              <label for="contact-method">Preferred Contact Method:</label>
+            </td>
+            <td>
+              <select id="contact-method" name="contact_method">
+                <option value="">-- Select a Method --</option>
+                <option value="email">Email</option>
+                <option value="phone">Phone</option>
+                <option value="linkedin">LinkedIn</option>
+              </select>
+            </td>
+          </tr>
+ 
+          <!-- Checkboxes row for skills -->
+          <tr>
+            <td>
+              <strong>Skills Interested In:</strong>
+            </td>
+            <td>
+              <!-- Multiple checkboxes allow selecting more than one option -->
+              <input type="checkbox" id="skill-frontend" name="skills" value="Frontend">
+              <label for="skill-frontend">Frontend Development</label>
+              <br>
+              <input type="checkbox" id="skill-backend" name="skills" value="Backend">
+              <label for="skill-backend">Backend Development</label>
+              <br>
+              <input type="checkbox" id="skill-fullstack" name="skills" value="Full-stack">
+              <label for="skill-fullstack">Full-stack Development</label>
+            </td>
+          </tr>
+ 
+          <!-- Textarea row for message -->
+          <tr>
+            <td>
+              <label for="message">Message:</label>
+            </td>
+            <td>
+              <textarea id="message" name="message" rows="5" cols="40"></textarea>
+            </td>
+          </tr>
+ 
+          <!-- Buttons row for form submission and reset -->
+          <tr>
+            <td colspan="2">
+              <button type="submit">Submit</button>
+              &nbsp;&nbsp;
+              <button type="reset">Reset</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+    <hr>
+  </section>
+
 </body>
 </html>
