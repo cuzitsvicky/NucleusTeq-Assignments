@@ -27,3 +27,9 @@
 #### Output :-
 
 ![alt text](<Screenshot 2026-03-19 220009.png>)
+
+### Screenshot 4: Subject-wise Highest Score
+
+#### Output :-
+
+![alt text](<Screenshot 2026-03-19 220723.png>)

@@ -95,3 +95,27 @@ for (let i = 0; i < subjects.length; i++) {
   const highest = findhighestinsubject(subjects[i]);
   console.log(`Highest in ${subjects[i]}: ${highest.name} (${highest.score})`);
 }
+
+
+// Function to calculate average score for a subject
+function calculateSubjectAverage(subjectName) {
+  let total = 0;
+  let count = 0;
+  
+  for (let i = 0; i < students.length; i++) {
+    for (let j = 0; j < students[i].marks.length; j++) {
+      if (students[i].marks[j].subject === subjectName) {
+        total += students[i].marks[j].score;
+        count++;
+      }
+    }
+  }
+  return total / count;
+}
+
+console.log("\nSubject-Wise Average Scores:");
+
+for (let i = 0; i < subjects.length; i++) {
+  const average = calculateSubjectAverage(subjects[i]);
+  console.log(`Average ${subjects[i]} Score: ${average.toFixed(2)}`);
+}
