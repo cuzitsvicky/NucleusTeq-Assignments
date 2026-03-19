@@ -28,7 +28,7 @@
 
 ![alt text](<Screenshot 2026-03-19 220009.png>)
 
-### Screenshot 4: Subject-wise Highest Score
+### Screenshot 4: Subject-wise Average Score
 
 #### Output :-
 
