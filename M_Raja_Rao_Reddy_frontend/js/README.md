@@ -28,8 +28,14 @@
 
 ![alt text](<Screenshot 2026-03-19 220009.png>)
 
-### Screenshot 4: Subject-wise Average Score
+### Screenshot 5: Subject-wise Average Score
 
 #### Output :-
 
 ![alt text](<Screenshot 2026-03-19 220723.png>)
+
+### Screenshot 6: Class Topper Identification
+
+#### Output :-
+
+![alt text](<Screenshot 2026-03-19 221502.png>)

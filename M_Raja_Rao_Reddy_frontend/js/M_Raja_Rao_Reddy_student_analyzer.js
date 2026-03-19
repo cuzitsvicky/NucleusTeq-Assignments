@@ -119,3 +119,25 @@ for (let i = 0; i < subjects.length; i++) {
   const average = calculateSubjectAverage(subjects[i]);
   console.log(`Average ${subjects[i]} Score: ${average.toFixed(2)}`);
 }
+
+// Function to find class topper
+function findClassTopper() {
+  let topper = {
+    name: "",
+    totalMarks: -1
+  };
+  
+  for (let i = 0; i < students.length; i++) {
+    const total = calculatetotalmarks(students[i]);
+    
+    if (total > topper.totalMarks) {
+      topper.name = students[i].name;
+      topper.totalMarks = total;
+    }
+  }
+  
+  return topper;
+}
+
+const topper = findClassTopper();
+console.log(`Class Topper: ${topper.name} with ${topper.totalMarks} marks`);
