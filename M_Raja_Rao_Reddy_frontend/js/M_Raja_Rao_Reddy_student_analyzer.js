@@ -53,3 +53,16 @@ for (let i = 0; i < students.length; i++) {
   const total = calculatetotalmarks(students[i]);
   console.log(`${students[i].name} Total Marks: ${total}`);
 }
+
+// Function to calculate average marks for a student
+function calculateaverageMarks(student) {
+  const total = calculatetotalmarks(student);
+  const numberOfSubjects = student.marks.length;
+  return total / numberOfSubjects;
+}
+
+console.log("\nAverage Marks For Each Student: ");
+for (let i = 0; i < students.length; i++) {
+  const average = calculateaverageMarks(students[i]);
+  console.log(`${students[i].name} Average: ${average.toFixed(2)}`);
+}
