@@ -39,3 +39,13 @@
 #### Output :-
 
 ![alt text](<Screenshot 2026-03-19 221502.png>)
+
+### Screenshot 7: Grade Assignment Logic
+
+#### Input :-
+
+![alt text](<Screenshot 2026-03-19 222533.png>)
+
+#### Output :-
+
+![alt text](<Screenshot 2026-03-19 222541.png>)

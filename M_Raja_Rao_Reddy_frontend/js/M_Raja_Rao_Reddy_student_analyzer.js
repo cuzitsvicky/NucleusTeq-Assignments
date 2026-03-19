@@ -141,3 +141,56 @@ function findClassTopper() {
 
 const topper = findClassTopper();
 console.log(`Class Topper: ${topper.name} with ${topper.totalMarks} marks`);
+
+// Function to assign grade to a student
+function assignGrade(student) {
+  const average = calculateaverageMarks(student);
+  // First check fail conditions
+  // Check if any subject score is <= 40
+  for (let i = 0; i < student.marks.length; i++) {
+    if (student.marks[i].score <= 40) {
+      return {
+        grade: "Fail",
+        reason: `Failed in ${student.marks[i].subject}`
+      };
+    }
+  }
+  if (student.attendance < 75) {
+    return {
+      grade: "Fail",
+      reason: "Low Attendance"
+    };
+  }
+  if (average >= 85) {
+    return {
+      grade: "A",
+      reason: ""
+    };
+  } else if (average >= 70) {
+    return {
+      grade: "B",
+      reason: ""
+    };
+  } else if (average >= 50) {
+    return {
+      grade: "C",
+      reason: ""
+    };
+  } else {
+    return {
+      grade: "Fail",
+      reason: "Low Average"
+    };
+  }
+}
+
+console.log("\nGrades:");
+for (let i = 0; i < students.length; i++) {
+  const gradeInfo = assignGrade(students[i]);
+  
+  if (gradeInfo.reason) {
+    console.log(`${students[i].name} Grade: ${gradeInfo.grade} (${gradeInfo.reason})`);
+  } else {
+    console.log(`${students[i].name} Grade: ${gradeInfo.grade}`);
+  }
+}
