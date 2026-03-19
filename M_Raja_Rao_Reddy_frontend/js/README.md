@@ -44,7 +44,7 @@
 
 #### Input :-
 
-![alt text](<Screenshot 2026-03-19 222533.png>)
+![alt text](<Screenshot 2026-03-19 222958.png>)
 
 #### Output :-
 
