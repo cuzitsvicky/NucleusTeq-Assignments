@@ -9,3 +9,9 @@
 #### Output :-
 
 ![alt text](<Screenshot 2026-03-19 212137.png>)
+
+### Screenshot 2: Calculate Total Marks
+
+#### Output :-
+
+![alt text](<Screenshot 2026-03-19 214642.png>)

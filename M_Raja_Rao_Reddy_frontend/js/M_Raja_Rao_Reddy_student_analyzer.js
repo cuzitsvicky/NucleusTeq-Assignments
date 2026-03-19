@@ -34,3 +34,22 @@ const students = [
   }
 ];
 console.log(students);
+
+// 2.2 Required Calculations
+
+// Function to calculate total marks for a student
+function calculatetotalmarks(student) {
+  let total = 0;
+  
+  for (let i = 0; i < student.marks.length; i++) {
+    total += student.marks[i].score;
+  }
+  
+  return total;
+}
+
+console.log("\nTotal Marks For Each Student: ");
+for (let i = 0; i < students.length; i++) {
+  const total = calculatetotalmarks(students[i]);
+  console.log(`${students[i].name} Total Marks: ${total}`);
+}
