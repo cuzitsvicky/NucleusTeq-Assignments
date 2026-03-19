@@ -66,3 +66,32 @@ for (let i = 0; i < students.length; i++) {
   const average = calculateaverageMarks(students[i]);
   console.log(`${students[i].name} Average: ${average.toFixed(2)}`);
 }
+
+// Function to find highest score in a subject
+function findhighestinsubject(subjectName) {
+  let highest = {
+    name: "",
+    score: -1
+  };
+
+  for (let i = 0; i < students.length; i++) {
+    for (let j = 0; j < students[i].marks.length; j++) {
+      if (students[i].marks[j].subject === subjectName) {
+        if (students[i].marks[j].score > highest.score) {
+          highest.name = students[i].name;
+          highest.score = students[i].marks[j].score;
+        }
+      }
+    }
+  }
+  
+  return highest;
+}
+
+console.log("\nSubject-Wise Highest Scores:");
+const subjects = ["Math", "English", "Science", "History", "Computer"];
+
+for (let i = 0; i < subjects.length; i++) {
+  const highest = findhighestinsubject(subjects[i]);
+  console.log(`Highest in ${subjects[i]}: ${highest.name} (${highest.score})`);
+}
