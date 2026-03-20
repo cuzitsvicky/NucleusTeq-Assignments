@@ -55,7 +55,7 @@ for (let i = 0; i < students.length; i++) {
 }
 
 // Function to calculate average marks for a student
-function calculateaverageMarks(student) {
+function calculateaveragemarks(student) {
   const total = calculatetotalmarks(student);
   const numberOfSubjects = student.marks.length;
   return total / numberOfSubjects;
@@ -63,7 +63,7 @@ function calculateaverageMarks(student) {
 
 console.log("\nAverage Marks For Each Student: ");
 for (let i = 0; i < students.length; i++) {
-  const average = calculateaverageMarks(students[i]);
+  const average = calculateaveragemarks(students[i]);
   console.log(`${students[i].name} Average: ${average.toFixed(2)}`);
 }
 
@@ -142,11 +142,12 @@ function findClassTopper() {
 const topper = findClassTopper();
 console.log(`Class Topper: ${topper.name} with ${topper.totalMarks} marks`);
 
+//2.3 Grade Logic 
+
 // Function to assign grade to a student
 function assignGrade(student) {
-  const average = calculateaverageMarks(student);
+  const average = calculateaveragemarks(student);
   // First check fail conditions
-  // Check if any subject score is <= 40
   for (let i = 0; i < student.marks.length; i++) {
     if (student.marks[i].score <= 40) {
       return {
