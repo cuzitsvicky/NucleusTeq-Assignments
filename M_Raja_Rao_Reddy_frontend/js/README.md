@@ -112,7 +112,6 @@ function findhighestinsubject(subjectName) {
     
     // Outer loop: all students
     for (let i = 0; i < students.length; i++) {
-        // Inner loop: each student's marks
         for (let j = 0; j < students[i].marks.length; j++) {
             if (students[i].marks[j].subject === subjectName) {
                 if (students[i].marks[j].score > highest.score) {
