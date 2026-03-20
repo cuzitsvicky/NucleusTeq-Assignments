@@ -207,7 +207,7 @@ function findClassTopper() {
     
     // Loop through all students
     for (let i = 0; i < students.length; i++) {
-        const total = calculateTotalMarks(students[i]);
+        const total = calculatetotalmarks(students[i]);
         
         // Update if this student has higher total
         if (total > topper.totalMarks) {
