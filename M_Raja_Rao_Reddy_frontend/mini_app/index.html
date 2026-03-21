@@ -4,8 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Inventory DashBoard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+    <!-- Header Section -->
+    <header class="header">
+        <h1>Product Inventory Dashboard</h1>
+    </header>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <p>Loading products...</p>
+    </div>
+
+    <!-- Main Container -->
+    <div id="mainContainer" class="main-container" style="display:none;">
+        
+        <!-- Controls Section -->
+        <section class="controls-section">
+            <h2>Filters & Search</h2>
+            
+            <!-- Search Input -->
+            <div class="control-group">
+                <label for="searchInput">Search Product:</label>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Enter product name..."
+                >
+            </div>
+
+            <!-- Category Filter -->
+            <div class="control-group">
+                <label for="categoryFilter">Category:</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <!-- Options will be added by JavaScript -->
+                </select>
+            </div>
+
+            <!-- Low Stock Filter -->
+            <div class="control-group checkbox">
+                <input 
+                    type="checkbox" 
+                    id="lowStockFilter"
+                >
+                <label for="lowStockFilter">Show Low Stock (< 5)</label>
+            </div>
+
+            <!-- Sort Dropdown -->
+            <div class="control-group">
+                <label for="sortDropdown">Sort By:</label>
+                <select id="sortDropdown">
+                    <option value="">Default</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name-asc">Alphabetically A-Z</option>
+                    <option value="name-desc">Alphabetically Z-A</option>
+                </select>
+            </div>
+
+            <!-- Clear Filters Button -->
+            <button id="clearFiltersBtn" class="btn-secondary">Clear All Filters</button>
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="analytics-section">
+            <h2>Inventory Analytics</h2>
+            <div class="analytics-cards">
+                <div class="analytics-card">
+                    <h3>Total Products</h3>
+                    <p id="totalProducts" class="analytics-value">0</p>
+                </div>
+                <div class="analytics-card">
+                    <h3>Total Inventory Value</h3>
+                    <p id="totalValue" class="analytics-value">Rs. 0</p>
+                </div>
+                <div class="analytics-card">
+                    <h3>Out of Stock</h3>
+                    <p id="outOfStock" class="analytics-value">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Grid Section -->
+        <section class="products-section">
+            <h2>Products</h2>
+            <div id="noProductsMessage" class="no-products" style="display: none;">
+                <p>No products found. Try adjusting your filters.</p>
+            </div>
+            <div id="productGrid" class="product-grid">
+                <!-- Products will be rendered here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Add Product Form Section -->
+        <section class="add-product-section">
+            <h2>Add New Product</h2>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label for="productName">Product Name:</label>
+                    <input 
+                        type="text" 
+                        id="productName" 
+                        placeholder="Enter product name"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="productPrice">Price (Rs):</label>
+                    <input 
+                        type="number" 
+                        id="productPrice" 
+                        placeholder="Enter price"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="productStock">Stock Quantity:</label>
+                    <input 
+                        type="number" 
+                        id="productStock" 
+                        placeholder="Enter stock quantity"
+                        min="0"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="productCategory">Category:</label>
+                    <select id="productCategory" required>
+                        <option value="">Select a category</option>
+                        <!-- Options will be added by JavaScript -->
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary">Add Product</button>
+            </form>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
