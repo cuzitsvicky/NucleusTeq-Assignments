@@ -201,3 +201,59 @@ function updateAnalytics() {
     })}`;
     outOfStock.textContent = outOfStockCount;
 }
+
+// Apply all filters and search
+function applyFilters() {
+    const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const lowStockFilter = document.getElementById('lowStockFilter').checked;
+    
+    filteredProducts = allProducts.filter(product => {
+        // Search filter - case insensitive
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery);
+        
+        // Category filter
+        const matchesCategory = !categoryFilter || product.category === categoryFilter;
+        
+        // Low stock filter
+        const matchesStock = !lowStockFilter || product.stock < 5;
+        
+        return matchesSearch && matchesCategory && matchesStock;
+    });
+    
+    applySort();
+    renderProducts();
+    updateAnalytics();
+}
+
+// Sort products
+function applySort() {
+    const sortOption = document.getElementById('sortDropdown').value;
+    
+    switch (sortOption) {
+        case 'price-low':
+            filteredProducts.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-high':
+            filteredProducts.sort((a, b) => b.price - a.price);
+            break;
+        case 'name-asc':
+            filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case 'name-desc':
+            filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+        default:
+            // Keep original order
+            break;
+    }
+}
+
+// Clear all filters
+function clearAllFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('lowStockFilter').checked = false;
+    document.getElementById('sortDropdown').value = '';
+    applyFilters();
+}
