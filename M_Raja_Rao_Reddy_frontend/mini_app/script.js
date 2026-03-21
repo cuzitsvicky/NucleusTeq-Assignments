@@ -174,3 +174,30 @@ function populateCategoryFilters() {
         productCategorySelect.appendChild(option2);
     });
 }
+
+// Update analytics dashboard
+function updateAnalytics() {
+    const totalProducts = document.getElementById('totalProducts');
+    const totalValue = document.getElementById('totalValue');
+    const outOfStock = document.getElementById('outOfStock');
+    
+    // Calculate metrics
+    let total = filteredProducts.length;
+    let value = 0;
+    let outOfStockCount = 0;
+    
+    filteredProducts.forEach(product => {
+        value += product.price * product.stock;
+        if (product.stock === 0) {
+            outOfStockCount++;
+        }
+    });
+    
+    // Update DOM
+    totalProducts.textContent = total;
+    totalValue.textContent = `Rs. ${value.toLocaleString('en-IN', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2 
+    })}`;
+    outOfStock.textContent = outOfStockCount;
+}
