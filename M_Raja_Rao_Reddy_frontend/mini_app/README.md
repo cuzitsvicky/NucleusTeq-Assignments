@@ -1,4 +1,4 @@
-# Product Inventory Dashboard - Complete README
+# Product Inventory Dashboard
 
 ## 📋 Project Overview
 
