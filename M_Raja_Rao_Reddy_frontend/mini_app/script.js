@@ -200,6 +200,8 @@ function updateAnalytics() {
         maximumFractionDigits: 2 
     })}`;
     outOfStock.textContent = outOfStockCount;
+
+    updateCategoryCount();
 }
 
 // Apply all filters and search
@@ -545,4 +547,12 @@ function addProduct(event) {
     saveProductsToStorage();
     document.getElementById('addProductForm').reset();
     applyFilters();
+}
+
+// Calculate and display unique category count
+function updateCategoryCount() {
+    const uniqueCategories = new Set(filteredProducts.map(p => p.category));
+    const categoryCount = uniqueCategories.size;
+    
+    document.getElementById('categoryCount').textContent = categoryCount;
 }
