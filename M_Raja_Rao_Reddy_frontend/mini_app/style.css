@@ -350,3 +350,40 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Pagination Styling */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.pagination button {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #667eea;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.pagination button:hover {
+    background-color: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.pagination button.active {
+    background-color: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
