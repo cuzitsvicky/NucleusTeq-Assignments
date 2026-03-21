@@ -69,7 +69,6 @@
 - Search field with "Smartphone" entered
 - Only Smartphone product displayed
 - Search is case-insensitive
-- "No products found" message appears when needed
 
 **Demonstrates:**
 - Real-time search ✓
