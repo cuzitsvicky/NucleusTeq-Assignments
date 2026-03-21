@@ -85,3 +85,92 @@ function renderInitialUI() {
 
 // Start the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', initApp);
+
+// Render products to the grid
+function renderProducts() {
+    const productGrid = document.getElementById('productGrid');
+    const noProductsMsg = document.getElementById('noProductsMessage');
+    
+    // Clear grid
+    productGrid.innerHTML = '';
+    
+    // Check if products found
+    if (filteredProducts.length === 0) {
+        noProductsMsg.style.display = 'block';
+        return;
+    }
+    
+    noProductsMsg.style.display = 'none';
+    
+    // Create product cards dynamically
+    filteredProducts.forEach(product => {
+        const card = createProductCard(product);
+        productGrid.appendChild(card);
+    });
+}
+
+// Create a single product card element
+function createProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    
+    // Determine stock status
+    let stockClass = 'stock-high';
+    if (product.stock === 0) {
+        stockClass = 'stock-out';
+    } else if (product.stock < 5) {
+        stockClass = 'stock-low';
+    }
+    
+    // Create card content
+    card.innerHTML = `
+        <h3>${product.name}</h3>
+        <div class="product-info">
+            <div class="product-detail">
+                <strong>Category:</strong>
+                <span>${product.category}</span>
+            </div>
+            <div class="product-detail">
+                <strong>Price:</strong>
+                <span>Rs. ${product.price.toFixed(2)}</span>
+            </div>
+            <div class="product-detail">
+                <strong>Stock:</strong>
+                <span>${product.stock} units</span>
+            </div>
+        </div>
+        <div class="product-stock ${stockClass}">
+            ${product.stock === 0 ? 'Out of Stock' : 
+              product.stock < 5 ? 'Low Stock' : 
+              'In Stock'}
+        </div>
+        <button class="btn-danger delete-btn" data-id="${product.id}">Delete Product</button>
+    `;
+    
+    // Add delete functionality
+    const deleteBtn = card.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', () => deleteProduct(product.id));
+    
+    return card;
+}
+// Populate category dropdown
+function populateCategoryFilters() {
+    const categoryFilterSelect = document.getElementById('categoryFilter');
+    const productCategorySelect = document.getElementById('productCategory');
+    
+    const categories = getCategories();
+    
+    categories.forEach(category => {
+        // Add to filter dropdown
+        const option1 = document.createElement('option');
+        option1.value = category;
+        option1.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        categoryFilterSelect.appendChild(option1);
+        
+        // Add to add-product form dropdown
+        const option2 = document.createElement('option');
+        option2.value = category;
+        option2.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        productCategorySelect.appendChild(option2);
+    });
+}
