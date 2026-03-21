@@ -257,3 +257,67 @@ function clearAllFilters() {
     document.getElementById('sortDropdown').value = '';
     applyFilters();
 }
+
+// Add new product
+function addProduct(event) {
+    event.preventDefault();
+    
+    // Get form values
+    const name = document.getElementById('productName').value.trim();
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const stock = parseInt(document.getElementById('productStock').value);
+    const category = document.getElementById('productCategory').value;
+    
+    // Validation
+    if (!name) {
+        alert('Product name cannot be empty');
+        return;
+    }
+    
+    if (price <= 0) {
+        alert('Price must be greater than 0');
+        return;
+    }
+    
+    if (stock < 0) {
+        alert('Stock cannot be negative');
+        return;
+    }
+    
+    if (!category) {
+        alert('Please select a category');
+        return;
+    }
+    
+    // Create new product
+    const newProduct = {
+        id: nextId++,
+        name: name,
+        price: price,
+        stock: stock,
+        category: category
+    };
+    
+    // Add to products array
+    allProducts.push(newProduct);
+    
+    // Save to storage
+    saveProductsToStorage();
+    
+    // Clear form
+    document.getElementById('addProductForm').reset();
+    
+    // Update UI
+    applyFilters();
+    
+    console.log('Product added successfully:', newProduct);
+}
+
+// Delete product
+function deleteProduct(id) {
+    if (confirm('Are you sure you want to delete this product?')) {
+        allProducts = allProducts.filter(p => p.id !== id);
+        saveProductsToStorage();
+        applyFilters();
+    }
+}
