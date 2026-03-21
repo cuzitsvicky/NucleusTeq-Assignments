@@ -276,6 +276,8 @@ M_Raja_Rao_Reddy_frontend/mini_app/
 ├── README.md                 
 └── screenshots/
     ├── 01_dashboard_overview.png
+    ├── 01_dashboard_overview(2).png
+    ├── 01_dashboard_overview(3).png
     ├── 02_search_functionality.png
     ├── 03_category_filter.png
     ├── 04_low_stock_filter.png
