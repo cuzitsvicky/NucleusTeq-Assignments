@@ -321,3 +321,24 @@ function deleteProduct(id) {
         applyFilters();
     }
 }
+
+// Attach event listeners
+function attachEventListeners() {
+    // Search input - real-time filtering
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    
+    // Category filter
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+    
+    // Low stock filter
+    document.getElementById('lowStockFilter').addEventListener('change', applyFilters);
+    
+    // Sort dropdown
+    document.getElementById('sortDropdown').addEventListener('change', applyFilters);
+    
+    // Clear filters button
+    document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);
+    
+    // Add product form
+    document.getElementById('addProductForm').addEventListener('submit', addProduct);
+}
