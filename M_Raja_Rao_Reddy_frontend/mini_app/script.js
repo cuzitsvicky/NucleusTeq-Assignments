@@ -430,3 +430,119 @@ function renderPaginationControls(totalPages) {
     });
     paginationDiv.appendChild(nextBtn);
 }
+
+function createProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    
+    let stockClass = 'stock-high';
+    if (product.stock === 0) {
+        stockClass = 'stock-out';
+    } else if (product.stock < 5) {
+        stockClass = 'stock-low';
+    }
+    
+    card.innerHTML = `
+        <h3>${product.name}</h3>
+        <div class="product-info">
+            <div class="product-detail">
+                <strong>Category:</strong>
+                <span>${product.category}</span>
+            </div>
+            <div class="product-detail">
+                <strong>Price:</strong>
+                <span>Rs. ${product.price.toFixed(2)}</span>
+            </div>
+            <div class="product-detail">
+                <strong>Stock:</strong>
+                <span>${product.stock} units</span>
+            </div>
+        </div>
+        <div class="product-stock ${stockClass}">
+            ${product.stock === 0 ? 'Out of Stock' : 
+              product.stock < 5 ? 'Low Stock' : 
+              'In Stock'}
+        </div>
+        <div class="product-actions">
+            <button class="btn-primary edit-btn" data-id="${product.id}">Edit</button>
+            <button class="btn-danger delete-btn" data-id="${product.id}">Delete</button>
+        </div>
+    `;
+    
+    // Add event listeners
+    const editBtn = card.querySelector('.edit-btn');
+    editBtn.addEventListener('click', () => editProduct(product.id));
+    
+    const deleteBtn = card.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', () => deleteProduct(product.id));
+    
+    return card;
+}
+
+// Edit product function
+function editProduct(id) {
+    const product = allProducts.find(p => p.id === id);
+    if (!product) return;
+    
+    // Populate form with product data
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productStock').value = product.stock;
+    document.getElementById('productCategory').value = product.category;
+    
+    // Change button text to "Update Product"
+    const submitBtn = document.querySelector('#addProductForm button[type="submit"]');
+    submitBtn.textContent = 'Update Product';
+    submitBtn.dataset.editId = id;
+    
+    // Scroll to form
+    document.querySelector('.add-product-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Modify addProduct to handle updates
+function addProduct(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('productName').value.trim();
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const stock = parseInt(document.getElementById('productStock').value);
+    const category = document.getElementById('productCategory').value;
+    
+    // Validation
+    if (!name || price <= 0 || stock < 0 || !category) {
+        alert('Please fill all fields correctly');
+        return;
+    }
+    
+    const submitBtn = document.querySelector('#addProductForm button[type="submit"]');
+    const editId = submitBtn.dataset.editId;
+    
+    if (editId) {
+        // Update existing product
+        const product = allProducts.find(p => p.id === parseInt(editId));
+        if (product) {
+            product.name = name;
+            product.price = price;
+            product.stock = stock;
+            product.category = category;
+        }
+        
+        // Reset edit mode
+        submitBtn.textContent = 'Add Product';
+        delete submitBtn.dataset.editId;
+    } else {
+        // Create new product
+        const newProduct = {
+            id: nextId++,
+            name: name,
+            price: price,
+            stock: stock,
+            category: category
+        };
+        allProducts.push(newProduct);
+    }
+    
+    saveProductsToStorage();
+    document.getElementById('addProductForm').reset();
+    applyFilters();
+}
