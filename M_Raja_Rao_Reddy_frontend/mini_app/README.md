@@ -259,7 +259,7 @@
 ### **Screenshot 15: Data Persistence Proof**
 ![Local Storage Data](screenshots/15_localstorage_data.png)
 
-**What it shows**
+**What it shows:**
 - Displays product data stored in the browser as JSON format using Local Storage.
 
 ---
