@@ -256,6 +256,14 @@
 
 ---
 
+## **Screenshot 15: Data Persistence Proof**
+![Local Storage Data](screenshots/15_localstorage_data.png)
+
+**What it shows**
+- Displays product data stored in the browser as JSON format using Local Storage.
+
+---
+
 ## 🛠️ Technologies Used
 
 ### **Languages:**
@@ -289,7 +297,9 @@ M_Raja_Rao_Reddy_frontend/mini_app/
     ├── 11_loading_state.png
     ├── 12_no_products_found.png
     ├── 13_multiple_filters.png
-    └── 14_stock_statuses.png
+    ├── 14_stock_statuses.png
+    └── 15_localstorage_data.png
+    
 ```
 
 ---
