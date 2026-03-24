@@ -40,7 +40,7 @@ console.log(students);
 // Function to calculate total marks for a student
 function calculatetotalmarks(student) {
   let total = 0;
-  
+  // Loop through each subject and keep adding scores
   for (let i = 0; i < student.marks.length; i++) {
     total += student.marks[i].score;
   }
@@ -71,12 +71,16 @@ for (let i = 0; i < students.length; i++) {
 function findhighestinsubject(subjectName) {
   let highest = {
     name: "",
-    score: -1
+    score: -1 // start with lowest possible value
   };
 
+  // Loop through all students
   for (let i = 0; i < students.length; i++) {
+    // Loop through each subject of a student
     for (let j = 0; j < students[i].marks.length; j++) {
+      // Check if subject matches
       if (students[i].marks[j].subject === subjectName) {
+        // Update if current score is higher
         if (students[i].marks[j].score > highest.score) {
           highest.name = students[i].name;
           highest.score = students[i].marks[j].score;
@@ -189,6 +193,7 @@ console.log("\nGrades:");
 for (let i = 0; i < students.length; i++) {
   const gradeInfo = assignGrade(students[i]);
   
+  // Show reason only if there is one
   if (gradeInfo.reason) {
     console.log(`${students[i].name} Grade: ${gradeInfo.grade} (${gradeInfo.reason})`);
   } else {
