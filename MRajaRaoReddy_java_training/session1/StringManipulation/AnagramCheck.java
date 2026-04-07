@@ -3,6 +3,8 @@ package MRajaRaoReddy_java_training.session1.StringManipulation;
 import java.util.Arrays;
 import java.util.Scanner;
 
+// Create a program to check if two strings are anagrams.
+
 public class AnagramCheck {
     // Method to check if two strings are anagrams
     public static boolean areAnagrams(String str1, String str2) {
