@@ -1,0 +1,91 @@
+Q1. Explain the concept of interfaces and abstract classes with examples.
+
+Ans. In Java, both interfaces and abstract classes are used to achieve abstraction, but they serve different purposes.
+
+1. Interface-> An interface is a blueprint of a class that defines methods but does not provide implementations. 
+               It is used to achieve 100% abstraction (before Java 8).
+
+Key Features of Interfaces:
+
+- All methods are implicitly public and abstract (before Java 8).
+- Supports multiple inheritance (a class can implement multiple interfaces).
+- Variables declared inside an interface are public, static, and final by default.
+- Can have default and static methods (Java 8+).
+- Can have private methods (Java 9+).
+
+Example:-
+
+interface Vehicle {
+    void start();  // Abstract method (no implementation)
+}
+
+class Car implements Vehicle {
+    @Override
+    public void start() {
+        System.out.println("Car is starting with a key.");
+    }
+}
+
+class Bike implements Vehicle {
+    @Override
+    public void start() {
+        System.out.println("Bike is starting with a self-start button.");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Vehicle car = new Car();
+        car.start();  // Output: Car is starting with a key.
+
+        Vehicle bike = new Bike();
+        bike.start(); // Output: Bike is starting with a self-start button.
+    }
+}
+
+2. Abstract Class-> An abstract class is a class that can have both abstract (unimplemented) and concrete (implemented) methods.
+                    It is used when we want to provide partial abstraction and share common functionality among related classes.
+
+Key Features of Abstract Classes:
+
+- Can have abstract methods (without implementation) and concrete methods (with implementation).
+- Cannot be instantiated directly.
+- Can have constructors.
+- Can have instance variables.
+- A class can extend only one abstract class (single inheritance).
+
+Example of an Abstract Class:
+
+abstract class Animal {
+    abstract void makeSound();  // Abstract method
+
+    void sleep() {  // Concrete method
+        System.out.println("Sleeping...");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    void makeSound() {
+        System.out.println("Dog barks: Woof woof!");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    void makeSound() {
+        System.out.println("Cat meows: Meow meow!");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Animal dog = new Dog();
+        dog.makeSound(); // Output: Dog barks: Woof woof!
+        dog.sleep();     // Output: Sleeping...
+
+        Animal cat = new Cat();
+        cat.makeSound(); // Output: Cat meows: Meow meow!
+        cat.sleep();     // Output: Sleeping...
+    }
+}
