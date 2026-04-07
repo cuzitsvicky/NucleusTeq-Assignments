@@ -2,6 +2,8 @@ package MRajaRaoReddy_java_training.session1.Basics;
 
 import java.util.Scanner;
 
+// 1)  Write a program to calculate the area of a circle, rectangle, or triangle based on user input.
+
 public class AreaCalculator {
      public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
