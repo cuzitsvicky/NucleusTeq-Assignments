@@ -2,7 +2,7 @@ package MRajaRaoReddy_java_training.session1.DataTypesAndOperators;
 
 import java.util.Scanner;
 
-//2) Write a program to demonstrate the use of arithmetic, logical, and relational operators.
+// 2) Write a program to demonstrate the use of arithmetic, logical, and relational operators.
 
 public class Operators {
      public static void main(String args[]) {
