@@ -1,0 +1,84 @@
+Q. Explain the concept of encapsulation with a suitable example.
+
+A. Encapsulation is one of the four fundamental principles of Object-Oriented Programming (OOP). It is the process of wrapping data (variables) and methods (functions) into a single unit (class) and restricting direct access to some of the object's components.
+
+# Key Features of Encapsulation
+  - Data Hiding: Variables are declared private to restrict direct access.
+  - Controlled Access: Public getter and setter methods provide controlled access to private data.
+  - Improves Maintainability: Changes in implementation do not affect other parts of the program.
+
+
+Example: Encapsulation in Java
+
+
+// Class with encapsulated data (private variables)
+class BankAccount {
+    private String accountHolder;
+    private double balance;
+
+    // Constructor
+    public BankAccount(String accountHolder, double balance) {
+        this.accountHolder = accountHolder;
+        this.balance = balance;
+    }
+
+    // Getter method to access account holder name
+    public String getAccountHolder() {
+        return accountHolder;
+    }
+
+    // Setter method to modify account holder name
+    public void setAccountHolder(String accountHolder) {
+        this.accountHolder = accountHolder;
+    }
+
+    // Getter method to check balance
+    public double getBalance() {
+        return balance;
+    }
+
+    // Method to deposit money
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("Deposited: " + amount);
+        } else {
+            System.out.println("Invalid deposit amount.");
+        }
+    }
+
+    // Method to withdraw money with validation
+    public void withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            System.out.println("Withdrawn: " + amount);
+        } else {
+            System.out.println("Insufficient balance or invalid amount.");
+        }
+    }
+}
+
+// Main class to demonstrate Encapsulation
+public class EncapsulationExample {
+    public static void main(String[] args) {
+        // Creating an object of BankAccount
+        BankAccount account = new BankAccount("John Doe", 5000);
+
+        // Accessing balance using getter method
+        System.out.println("Account Holder: " + account.getAccountHolder());
+        System.out.println("Initial Balance: " + account.getBalance());
+
+        // Depositing money
+        account.deposit(2000);
+        System.out.println("Updated Balance: " + account.getBalance());
+
+        // Withdrawing money
+        account.withdraw(3000);
+        System.out.println("Final Balance: " + account.getBalance());
+
+        // Trying to access private data directly (This will cause an error)
+        // account.balance = 10000;  (ERROR: balance has private access)
+    }
+}
+
+
