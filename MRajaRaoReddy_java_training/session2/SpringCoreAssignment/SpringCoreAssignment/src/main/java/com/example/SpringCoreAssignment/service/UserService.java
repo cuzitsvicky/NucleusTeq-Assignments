@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.SpringCoreAssignment.exception.UserNotFoundException;
 import com.example.SpringCoreAssignment.model.User;
 import com.example.SpringCoreAssignment.repository.UserRepository;
 
@@ -23,7 +24,13 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        return userRepository.findById(id);
+        User user = userRepository.findById(id);
+
+        if (user == null) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
+
+        return user;
     }
 
     public void createUser(User user) {
