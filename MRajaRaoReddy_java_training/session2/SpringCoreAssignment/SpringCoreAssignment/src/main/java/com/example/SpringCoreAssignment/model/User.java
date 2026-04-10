@@ -1,10 +1,20 @@
 package com.example.SpringCoreAssignment.model;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class User {
 
     // fields for User class
     private int id;
+
+    // validation annotations for name field
+    @NotBlank(message = "Name is required")
     private String name;
+
+    // validation annotations for email field
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
     private String email;
 
     // constructor to initialize User object

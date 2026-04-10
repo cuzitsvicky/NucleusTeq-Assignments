@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.SpringCoreAssignment.model.User;
 import com.example.SpringCoreAssignment.service.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -35,7 +37,7 @@ public class UserController {
 
     // Create a new user
     @PostMapping
-    public String createUser(@RequestBody User user) {
+    public String createUser(@Valid @RequestBody User user) {
         userService.createUser(user);
         return "User created successfully";
     }
