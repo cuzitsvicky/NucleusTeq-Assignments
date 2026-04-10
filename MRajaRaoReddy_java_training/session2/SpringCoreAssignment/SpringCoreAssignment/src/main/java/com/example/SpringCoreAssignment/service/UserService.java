@@ -1,6 +1,7 @@
 package com.example.SpringCoreAssignment.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -68,5 +69,25 @@ public class UserService {
         }
 
         return "User deleted successfully";
+    }
+
+    // method to patch update user by ID
+    public User patchUpdateUser(int id, Map<String, Object> updates) {
+
+        User existingUser = userRepository.findById(id);
+
+        if (existingUser == null) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
+
+        if (updates.containsKey("name")) {
+            existingUser.setName((String) updates.get("name"));
+        }
+
+        if (updates.containsKey("email")) {
+            existingUser.setEmail((String) updates.get("email"));
+        }
+
+        return existingUser;
     }
 }

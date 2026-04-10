@@ -1,9 +1,11 @@
 package com.example.SpringCoreAssignment.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,6 +52,14 @@ public class UserController {
                                 @RequestBody User user) {
 
         return userService.updateUser(id, user);
+    }
+
+    // Patch update user by ID
+    @PatchMapping("/{id}")
+    public User patchUpdateUser(@PathVariable int id,
+            @RequestBody Map<String, Object> updates) {
+
+        return userService.patchUpdateUser(id, updates);
     }
 
     // Delete user by ID
