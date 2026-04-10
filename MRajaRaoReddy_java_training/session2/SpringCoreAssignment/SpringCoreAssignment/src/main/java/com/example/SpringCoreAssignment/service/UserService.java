@@ -20,10 +20,12 @@ public class UserService {
     }
 
 
+    // method to get all users
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    // method to get user by ID
     public User getUserById(int id) {
         User user = userRepository.findById(id);
 
@@ -34,6 +36,7 @@ public class UserService {
         return user;
     }
 
+    // method to create a new user
     public void createUser(User user) {
         User existingUser = userRepository.findById(user.getId());
 
@@ -44,6 +47,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    // method to update user by ID
     public User updateUser(int id, User user) {
         User existingUser = userRepository.findById(id);
 
@@ -54,6 +58,7 @@ public class UserService {
         return userRepository.update(id, user);
     }
 
+    // method to delete user by ID
     public String deleteUser(int id) {
 
         boolean deleted = userRepository.deleteUser(id);

@@ -12,6 +12,7 @@ public class UserRepository {
 
     private final List<User> users = new ArrayList<>();
 
+    //dummy data for testing
     public UserRepository() {
 
         users.add(new User(1, "M Raja Rao Reddy", "vicky@email.com"));
@@ -20,6 +21,7 @@ public class UserRepository {
 
     }
 
+    
     public List<User> findAll() {
         return users;
     }

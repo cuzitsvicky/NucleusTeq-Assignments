@@ -14,6 +14,7 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    // Trigger notification
     @GetMapping("/notify")
     public String notifyUser() {
         return notificationService.triggerNotification();

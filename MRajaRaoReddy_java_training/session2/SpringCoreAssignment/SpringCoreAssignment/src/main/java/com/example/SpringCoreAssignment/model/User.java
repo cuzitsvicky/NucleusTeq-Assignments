@@ -2,10 +2,12 @@ package com.example.SpringCoreAssignment.model;
 
 public class User {
 
+    // fields for User class
     private int id;
     private String name;
     private String email;
 
+    // constructor to initialize User object
     public User(int id, String name, String email) {
         this.id = id;
         this.name = name;

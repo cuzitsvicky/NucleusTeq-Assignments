@@ -15,6 +15,7 @@ public class MessageController {
         this.messageService = messageService;
     }
 
+    // get message based on type (SHORT or LONG)
     @GetMapping("/message")
     public String getMessage(@RequestParam String type) {
         return messageService.getMessage(type);

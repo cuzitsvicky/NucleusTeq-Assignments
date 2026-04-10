@@ -25,22 +25,26 @@ public class UserController {
         this.userService = userService;
     }
 
+    // Get all users
     @GetMapping
     public List<User> getUsers() {
         return userService.getAllUsers();
     }
 
+    // Create a new user
     @PostMapping
     public String createUser(@RequestBody User user) {
         userService.createUser(user);
         return "User created successfully";
     }
 
+    // Get user by ID
     @GetMapping("/{id}")
     public User getUserById(@PathVariable int id) {
         return userService.getUserById(id);
     }
 
+    // Update user by ID
     @PutMapping("/{id}")
     public User updateStudent(@PathVariable int id,
                                 @RequestBody User user) {
@@ -48,6 +52,7 @@ public class UserController {
         return userService.updateUser(id, user);
     }
 
+    // Delete user by ID
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable int id) {
         return userService.deleteUser(id);
