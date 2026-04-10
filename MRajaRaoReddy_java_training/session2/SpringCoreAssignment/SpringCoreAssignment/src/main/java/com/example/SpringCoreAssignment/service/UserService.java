@@ -59,7 +59,7 @@ public class UserService {
         boolean deleted = userRepository.deleteUser(id);
 
         if (!deleted) {
-            throw new RuntimeException("User not found with id: " + id);
+          throw new UserNotFoundException("User not found with id: " + id);
         }
 
         return "User deleted successfully";
