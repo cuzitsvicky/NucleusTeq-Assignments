@@ -10,4 +10,14 @@ public class GlobalExceptionHandler {
     public String handleUserNotFound(UserNotFoundException ex) {
         return ex.getMessage();
     }
+
+    @ExceptionHandler(DuplicateUserException.class)
+    public String handleDuplicateUser(DuplicateUserException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(Exception.class)
+    public String handleGeneralException(Exception ex) {
+        return "Something went wrong: " + ex.getMessage();
+    }
 }

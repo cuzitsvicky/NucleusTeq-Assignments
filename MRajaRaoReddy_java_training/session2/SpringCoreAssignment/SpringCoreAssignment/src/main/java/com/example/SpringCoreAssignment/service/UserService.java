@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.SpringCoreAssignment.exception.DuplicateUserException;
 import com.example.SpringCoreAssignment.exception.UserNotFoundException;
 import com.example.SpringCoreAssignment.model.User;
 import com.example.SpringCoreAssignment.repository.UserRepository;
@@ -34,6 +35,12 @@ public class UserService {
     }
 
     public void createUser(User user) {
+        User existingUser = userRepository.findById(user.getId());
+
+        if (existingUser != null) {
+            throw new DuplicateUserException("User already exists with id: " + user.getId());
+        }
+
         userRepository.save(user);
     }
 
