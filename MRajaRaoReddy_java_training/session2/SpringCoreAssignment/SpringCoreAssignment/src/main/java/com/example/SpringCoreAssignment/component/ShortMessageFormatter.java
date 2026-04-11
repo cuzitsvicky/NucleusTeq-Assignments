@@ -2,11 +2,17 @@ package com.example.SpringCoreAssignment.component;
 
 import org.springframework.stereotype.Component;
 
+// Implementation of MessageFormatter for short messages
 @Component
 public class ShortMessageFormatter implements MessageFormatter {
 
-    // implementation of format method to return a short message
-    public String format() {
+    @Override
+    public String formatMessage() {
         return "Short Message";
+    }
+
+    @Override
+    public String getType() {
+        return "SHORT";
     }
 }

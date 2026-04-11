@@ -1,30 +1,30 @@
 package com.example.SpringCoreAssignment.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import com.example.SpringCoreAssignment.component.LongMessageFormatter;
-import com.example.SpringCoreAssignment.component.ShortMessageFormatter;
+import com.example.SpringCoreAssignment.component.MessageFormatter;
 
+// Service to manage messages using different formatters
 @Service
 public class MessageService {
 
-    private final ShortMessageFormatter shortFormatter;
-    private final LongMessageFormatter longFormatter;
+    private final List<MessageFormatter> formatters;
 
-    // constructor-based dependency injection for both formatters
-    public MessageService(ShortMessageFormatter shortFormatter,
-                          LongMessageFormatter longFormatter) {
-        this.shortFormatter = shortFormatter;
-        this.longFormatter = longFormatter;
+    public MessageService(List<MessageFormatter> formatters) {
+        this.formatters = formatters;
     }
 
-    // method to get formatted message based on type (SHORT or LONG)
     public String getMessage(String type) {
 
-        if ("SHORT".equalsIgnoreCase(type)) {
-            return shortFormatter.format();
+        for (MessageFormatter formatter : formatters) {
+
+            if (formatter.getType().equalsIgnoreCase(type)) {
+                return formatter.formatMessage();
+            }
         }
 
-        return longFormatter.format();
+        throw new RuntimeException("Invalid message type: " + type);
     }
 }
