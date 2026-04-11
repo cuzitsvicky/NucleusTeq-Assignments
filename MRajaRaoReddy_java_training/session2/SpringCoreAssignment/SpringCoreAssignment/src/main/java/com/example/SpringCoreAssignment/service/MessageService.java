@@ -10,14 +10,17 @@ import com.example.SpringCoreAssignment.component.MessageFormatter;
 @Service
 public class MessageService {
 
+    // List of all MessageFormatter implementations injected by Spring
     private final List<MessageFormatter> formatters;
 
+    // constructor-based dependency injection for all MessageFormatter implementations
     public MessageService(List<MessageFormatter> formatters) {
         this.formatters = formatters;
     }
 
     public String getMessage(String type) {
 
+        // find the appropriate formatter based on type and return the formatted message
         for (MessageFormatter formatter : formatters) {
 
             if (formatter.getType().equalsIgnoreCase(type)) {
@@ -25,6 +28,7 @@ public class MessageService {
             }
         }
 
+        // if no formatter found for the given type, throw an exception
         throw new RuntimeException("Invalid message type: " + type);
     }
 }
