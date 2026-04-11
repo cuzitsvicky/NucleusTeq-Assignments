@@ -1,5 +1,6 @@
 package com.example.SpringCoreAssignment.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,20 +11,22 @@ public class GlobalExceptionHandler {
 
     // Handle UserNotFoundException
     @ExceptionHandler(UserNotFoundException.class)
-    public String handleUserNotFound(UserNotFoundException ex) {
-        return ex.getMessage();
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     // Handle DuplicateUserException
     @ExceptionHandler(DuplicateUserException.class)
-    public String handleDuplicateUser(DuplicateUserException ex) {
-        return ex.getMessage();
+    public ResponseEntity<String> handleDuplicateUser(DuplicateUserException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     // Handle any other exceptions
     @ExceptionHandler(Exception.class)
-    public String handleGeneralException(Exception ex) {
-        return "Something went wrong: " + ex.getMessage();
+    public ResponseEntity<String> handleGeneralException(Exception ex) {
+        return new ResponseEntity<>(
+                "Something went wrong: " + ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Handle validation exceptions
