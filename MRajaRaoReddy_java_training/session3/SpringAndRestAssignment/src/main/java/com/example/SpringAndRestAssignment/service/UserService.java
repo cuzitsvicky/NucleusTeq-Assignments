@@ -3,7 +3,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.example.SpringAndRestAssignment.dto.UserRequest;
-import com.example.SpringAndRestAssignment.exception.BadRequestException;
 import com.example.SpringAndRestAssignment.exception.ConfirmationRequiredException;
 import com.example.SpringAndRestAssignment.exception.UserNotFoundException;
 import com.example.SpringAndRestAssignment.exception.ValidationException;
@@ -37,6 +36,7 @@ public class UserService {
     // Method to submit a new user based on the data received in the UserRequest DTO
     public void submitUser(UserRequest request) {
 
+        // Validate the incoming user data and throw appropriate exceptions if validation fails
         if (request.getName() == null || request.getName().isEmpty()) {
             throw new ValidationException("Name cannot be empty");
         }
@@ -63,9 +63,11 @@ public class UserService {
 
         if (confirm == null || !confirm) {
 
+            // If confirmation is not provided or is false, throw a ConfirmationRequiredException to indicate that confirmation is required before proceeding with deletion
             throw new ConfirmationRequiredException("Confirmation required");
         }
 
+        // Attempt to find the user by ID in the repository, and if not found, throw a UserNotFoundException
         User user = repository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
