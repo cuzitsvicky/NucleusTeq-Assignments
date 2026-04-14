@@ -18,8 +18,8 @@
 ## 🧱 Project Structure
 
 ```
-java/session3/
-└── user-management/
+MRajaRaoReddy_java_training/session3/
+└── SpringAndRestAssignment/
     ├── controller/
     │   └── UserController.java
     ├── service/
@@ -35,7 +35,8 @@ java/session3/
     │   ├── UserNotFoundException.java
     │   ├── ConfirmationRequiredException.java
     │   └── GlobalExceptionHandler.java
-    └── UserManagementApplication.java
+    |   └── BadRequestException.java
+    └── SpringAndRestAssignmentApplication.java
 ```
 
 ---
