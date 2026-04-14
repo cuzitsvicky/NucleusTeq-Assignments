@@ -1,4 +1,4 @@
-# 🚀 User Management System — Spring Boot
+# SpringBoot Assignment — Session 3
 
 > A Spring Boot REST API for managing users using an in-memory data store, demonstrating IoC, Dependency Injection, layered architecture, and RESTful API design.
 
@@ -31,7 +31,9 @@ java/session3/
     ├── dto/
     │   └── UserRequest.java
     ├── exception/
-    │   ├── BadRequestException.java
+    │   ├── ValidationException.java
+    │   ├── UserNotFoundException.java
+    │   ├── ConfirmationRequiredException.java
     │   └── GlobalExceptionHandler.java
     └── UserManagementApplication.java
 ```
@@ -84,7 +86,7 @@ GET /users/search?age=30&role=USER
 | Status | Meaning |
 |--------|---------|
 | `201 Created` | User created successfully |
-| `400 Bad Request` | Invalid input provided |
+| `400 Bad Request` | Validation errors |
 
 ---
 
@@ -103,10 +105,11 @@ DELETE /users/1?confirm=true
 
 **Behavior:**
 
-| Condition | Response |
-|-----------|----------|
-| `confirm` missing or `false` | `"Confirmation required"` |
-| `confirm=true` | User is deleted successfully |
+| Condition | Status | Exception |
+|-----------|--------|-----------|
+| `confirm` missing or `false` | `400 Bad Request` | `ConfirmationRequiredException` |
+| User not found | `404 Not Found` | `UserNotFoundException` |
+| `confirm=true` | `200 OK` | User deleted successfully |
 
 ---
 
@@ -128,8 +131,14 @@ Repository  →  Handles in-memory data storage
 ```
 
 ### 🔹 Exception Handling
-- Custom exception: `BadRequestException`
-- Global handler using `@RestControllerAdvice`
+
+Custom exceptions are used for better clarity and control, handled globally via `@RestControllerAdvice`:
+
+| Exception | HTTP Status | Trigger |
+|-----------|-------------|---------|
+| `ValidationException` | `400 Bad Request` | Invalid input data |
+| `UserNotFoundException` | `404 Not Found` | User ID does not exist |
+| `ConfirmationRequiredException` | `400 Bad Request` | Missing or false confirm param |
 
 ---
 
@@ -170,10 +179,10 @@ The application initializes with **6 dummy users** stored in memory on startup. 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/YourName_java_training.git
+git clone https://github.com/your-username/MRajaRaoReddy_java_training.git
 
 # Navigate to the project
-cd java/session3/user-management
+cd java/session3/SpringAndRestAssignment
 
 # Run the application
 mvn spring-boot:run
@@ -190,6 +199,7 @@ Access APIs at: `http://localhost:8080`
 - ✅ Separation of concerns
 - ✅ RESTful API design principles
 - ✅ Constructor-based dependency injection throughout
+- ✅ Structured and meaningful exception handling
 
 ---
 
