@@ -4,6 +4,9 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.example.SpringAndRestAssignment.dto.UserRequest;
 import com.example.SpringAndRestAssignment.exception.BadRequestException;
+import com.example.SpringAndRestAssignment.exception.ConfirmationRequiredException;
+import com.example.SpringAndRestAssignment.exception.UserNotFoundException;
+import com.example.SpringAndRestAssignment.exception.ValidationException;
 import com.example.SpringAndRestAssignment.model.User;
 import com.example.SpringAndRestAssignment.repository.UserRepository;
 
@@ -35,15 +38,15 @@ public class UserService {
     public void submitUser(UserRequest request) {
 
         if (request.getName() == null || request.getName().isEmpty()) {
-            throw new BadRequestException("Name cannot be empty");
+            throw new ValidationException("Name cannot be empty");
         }
 
         if (request.getAge() == null) {
-            throw new BadRequestException("Age is required");
+            throw new ValidationException("Age is required");
         }
 
         if (request.getRole() == null || request.getRole().isEmpty()) {
-            throw new BadRequestException("Role cannot be empty");
+            throw new ValidationException("Role cannot be empty");
         }
 
         User user = new User(
@@ -60,11 +63,11 @@ public class UserService {
 
         if (confirm == null || !confirm) {
 
-            throw new BadRequestException("Confirmation required");
+            throw new ConfirmationRequiredException("Confirmation required");
         }
 
         User user = repository.findById(id)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         repository.delete(user);
 
