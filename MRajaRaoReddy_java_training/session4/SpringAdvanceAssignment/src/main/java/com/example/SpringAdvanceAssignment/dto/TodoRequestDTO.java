@@ -13,7 +13,7 @@ public class TodoRequestDTO {
     @NotNull(message = "Description cannot be null")
     private String description;
 
-    @NotNull(message = "Status cannot be null")
+    
     private String status;
 
     // Getters and Setters
