@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import com.example.SpringAdvanceAssignment.enums.Status;
 
+// Entity class for Todo
 @Entity
 @Table(name = "todos")
 public class Todo {
 
+    // Primary key with auto-generated value
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
