@@ -3,6 +3,7 @@ package com.example.SpringAdvanceAssignment.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+// DTO class for creating/updating Todo
 public class TodoRequestDTO {
 
     @NotNull(message = "Title cannot be null")

@@ -1,6 +1,7 @@
 package com.example.SpringAdvanceAssignment.dto;
 import java.time.LocalDateTime;
 
+// DTO class for sending Todo data in responses
 public class TodoResponseDTO {
 
     private Long id;
