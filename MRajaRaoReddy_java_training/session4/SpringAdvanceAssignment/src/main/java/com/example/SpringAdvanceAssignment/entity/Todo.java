@@ -1,10 +1,8 @@
 package com.example.SpringAdvanceAssignment.entity;
+
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import com.example.SpringAdvanceAssignment.enums.Status;
-
-
-
 
 @Entity
 @Table(name = "todos")
