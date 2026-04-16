@@ -159,8 +159,7 @@ public class TodoServiceImpl implements TodoService {
         logger.debug("Validating status transition: {} -> {}", oldStatus, newStatus);
 
         return (oldStatus == Status.PENDING && newStatus == Status.COMPLETED) ||
-               (oldStatus == Status.COMPLETED && newStatus == Status.PENDING) ||
-               (oldStatus == newStatus);
+               (oldStatus == Status.COMPLETED && newStatus == Status.PENDING);
     }
 
    // The mapToResponse method is a helper method that converts a Todo entity to a TodoResponseDTO. 
