@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 // DTO class for creating/updating Todo
 public class TodoRequestDTO {
 
+    // Validation annotations to ensure that the title is not null and has a minimum length of 3 characters, and that description and status are not null.
     @NotNull(message = "Title cannot be null")
     @Size(min = 3, message = "Title must be at least 3 characters")
     private String title;
