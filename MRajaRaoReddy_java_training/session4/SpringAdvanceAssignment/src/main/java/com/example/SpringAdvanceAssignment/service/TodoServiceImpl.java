@@ -20,9 +20,11 @@ import com.example.SpringAdvanceAssignment.repository.TodoRepository;
 public class TodoServiceImpl implements TodoService {
 
     private final TodoRepository repository;
+    private final NotificationServiceClient notificationClient;
 
-    public TodoServiceImpl(TodoRepository repository) {
+    public TodoServiceImpl(TodoRepository repository, NotificationServiceClient notificationClient) {
         this.repository = repository;
+        this.notificationClient = notificationClient;
     }
 
     // The createTodo method creates a new Todo item based on the provided request DTO, sets default values, and saves it to the repository. 
@@ -43,9 +45,11 @@ public class TodoServiceImpl implements TodoService {
         }
 
         
-        todo.setCreatedAt(LocalDateTime.now());
+        Todo saved = repository.save(todo);
 
-        return mapToResponse(repository.save(todo));
+        notificationClient.sendNotification("New TODO created: " + saved.getTitle());
+
+        return mapToResponse(saved);
     }
 
     // The getAllTodos method retrieves all Todo items from the repository, maps them to response DTOs, and returns the list of DTOs.\
