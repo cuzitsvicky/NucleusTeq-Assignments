@@ -1,11 +1,10 @@
 package com.example.SpringAdvanceAssignment.service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import com.example.SpringAdvanceAssignment.dto.TodoRequestDTO;
 import com.example.SpringAdvanceAssignment.dto.TodoResponseDTO;
 import com.example.SpringAdvanceAssignment.entity.Todo;
@@ -13,11 +12,16 @@ import com.example.SpringAdvanceAssignment.enums.Status;
 import com.example.SpringAdvanceAssignment.exception.InvalidStatusTransitionException;
 import com.example.SpringAdvanceAssignment.exception.ResourceNotFoundException;
 import com.example.SpringAdvanceAssignment.repository.TodoRepository;
+import lombok.extern.slf4j.Slf4j;
+
 
 // This service implementation provides the business logic for managing Todo items, including creating, retrieving, updating, and deleting todos. 
 // It also handles status transitions and maps between entity and DTO objects.
 @Service
+@Slf4j
 public class TodoServiceImpl implements TodoService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TodoServiceImpl.class);
 
     private final TodoRepository repository;
     private final NotificationServiceClient notificationClient;
@@ -32,6 +36,8 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public TodoResponseDTO createTodo(TodoRequestDTO dto) {
 
+        logger.info("Creating TODO: {}", dto.getTitle());
+
         Todo todo = new Todo();
 
         todo.setTitle(dto.getTitle());
@@ -44,10 +50,13 @@ public class TodoServiceImpl implements TodoService {
             todo.setStatus(Status.valueOf(dto.getStatus()));
         }
 
-        
+        todo.setCreatedAt(LocalDateTime.now());
+
         Todo saved = repository.save(todo);
 
         notificationClient.sendNotification("New TODO created: " + saved.getTitle());
+
+        logger.info("TODO created with id: {}", saved.getId());
 
         return mapToResponse(saved);
     }
@@ -56,8 +65,14 @@ public class TodoServiceImpl implements TodoService {
     // It uses Java Streams to perform the mapping and collection of results.
     @Override
     public List<TodoResponseDTO> getAllTodos() {
-        return repository.findAll()
-                .stream()
+
+        logger.info("START: Fetching all TODOs");
+
+        List<Todo> todos = repository.findAll();
+
+        logger.info("SUCCESS: Total TODOs fetched: {}", todos.size());
+
+        return todos.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -66,8 +81,16 @@ public class TodoServiceImpl implements TodoService {
     // If found, it maps the entity to a response DTO and returns it.
     @Override
     public TodoResponseDTO getTodoById(Long id) {
+
+        logger.info("START: Fetching TODO with id: {}", id);
+
         Todo todo = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + id));
+                .orElseThrow(() -> {
+                    logger.error("ERROR: TODO not found with id: {}", id);
+                    return new ResourceNotFoundException("Todo not found with id: " + id);
+                });
+
+        logger.info("SUCCESS: TODO found with id: {}", id);
 
         return mapToResponse(todo);
     }
@@ -78,9 +101,18 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public TodoResponseDTO updateTodo(Long id, TodoRequestDTO dto) {
 
-        Todo todo = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + id));
+        logger.info("START: Updating TODO with id: {}", id);
 
+        Todo todo = repository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("ERROR: Cannot update. TODO not found with id: {}", id);
+                    return new ResourceNotFoundException("Todo not found with id: " + id);
+                });
+
+         logger.debug("Old values -> Title: {}, Status: {}", 
+                todo.getTitle(), todo.getStatus());
+                
+                
         todo.setTitle(dto.getTitle());
         todo.setDescription(dto.getDescription());
 
@@ -89,11 +121,15 @@ public class TodoServiceImpl implements TodoService {
 
            
             if (!isValidTransition(todo.getStatus(), newStatus)) {
+                logger.error("ERROR: Invalid status transition from {} to {}", 
+                        todo.getStatus(), newStatus);
                 throw new InvalidStatusTransitionException("Invalid status transition");
             }
 
             todo.setStatus(newStatus);
         }
+
+        logger.info("SUCCESS: TODO updated with id: {}", id);
 
         return mapToResponse(repository.save(todo));
     }
@@ -103,15 +139,25 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public void deleteTodo(Long id) {
 
-        Todo todo = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + id));
+        logger.info("START: Deleting TODO with id: {}", id);
+
+       Todo todo = repository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("ERROR: Cannot delete. TODO not found with id: {}", id);
+                    return new ResourceNotFoundException("Todo not found with id: " + id);
+                });
 
         repository.delete(todo);
+
+        logger.info("SUCCESS: TODO deleted with id: {}", id);
     }
 
    // The isValidTransition method checks if the transition from the old status to the new status is valid according to the defined rules.
    // It allows transitions between PENDING and COMPLETED, as well as keeping the same status. Any other transition is considered invalid.
     private boolean isValidTransition(Status oldStatus, Status newStatus) {
+
+        logger.debug("Validating status transition: {} -> {}", oldStatus, newStatus);
+
         return (oldStatus == Status.PENDING && newStatus == Status.COMPLETED) ||
                (oldStatus == Status.COMPLETED && newStatus == Status.PENDING) ||
                (oldStatus == newStatus);
@@ -120,6 +166,8 @@ public class TodoServiceImpl implements TodoService {
    // The mapToResponse method is a helper method that converts a Todo entity to a TodoResponseDTO. 
    // It maps the fields from the entity to the DTO, including converting the status enum to its string representation.
     private TodoResponseDTO mapToResponse(Todo todo) {
+
+        logger.debug("Mapping Todo entity to Response DTO for id: {}", todo.getId());
         TodoResponseDTO dto = new TodoResponseDTO();
 
         dto.setId(todo.getId());
