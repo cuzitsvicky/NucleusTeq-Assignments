@@ -1,14 +1,17 @@
 package com.example.SpringAdvanceAssignment.dto;
 import java.time.LocalDateTime;
 
+// DTO class for error responses, containing details about the error such as timestamp, status code, error message, and request path.
 public class ErrorResponseDTO {
 
+    // Fields to capture error details
     private LocalDateTime timestamp;
     private int status;
     private String error;
     private String message;
     private String path;
 
+    // Default constructor and parameterized constructor for initializing the error response DTO
     public ErrorResponseDTO() {}
 
     public ErrorResponseDTO(LocalDateTime timestamp, int status, String error,
@@ -20,6 +23,7 @@ public class ErrorResponseDTO {
         this.path = path;
     }
 
+    // Getters and setters for the fields
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
