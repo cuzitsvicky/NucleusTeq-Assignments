@@ -17,26 +17,36 @@ import com.example.SpringAdvanceAssignment.service.TodoServiceImpl;
 import java.util.*;
 
 
-
 class TodoServiceTest {
 
+    // We use Mockito to mock dependencies and isolate the service layer for unit testing.
+    // This allows us to verify the service's behavior without relying on actual database or external services, ensuring our tests are fast and focused on business logic validation.
     @Mock
     private TodoRepository repository;
 
+    // We mock the notification client to verify that notifications are sent when expected without making real HTTP calls, allowing us to test side effects of service methods in isolation.
     @Mock
     private NotificationServiceClient notificationClient;
 
+    // We inject the mocks into the service implementation to test the service logic with controlled dependencies, enabling us to simulate various scenarios and verify interactions with the repository and notification client.
     @InjectMocks
     private TodoServiceImpl service;
 
+    // We initialize the mocks before each test to ensure a clean state and proper injection of dependencies, allowing us to write independent and reliable unit tests for the service methods.
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
     }
 
-    // ✅ CREATE TODO
+   
     @Test
     void createTodo_shouldSaveAndReturnResponse() {
+        /*
+           We verify the complete creation flow works end-to-end:
+           - Ensure the todo is persisted with a generated ID
+           - Ensure the response DTO correctly maps the saved entity
+           - Ensure users are notified when a new todo is created (business requirement)
+        */ 
 
         TodoRequestDTO dto = new TodoRequestDTO();
         dto.setTitle("Task");
@@ -54,9 +64,14 @@ class TodoServiceTest {
         verify(notificationClient).sendNotification(anyString());
     }
 
-    // ✅ GET ALL
+    
     @Test
     void getAllTodos_shouldReturnList() {
+        /*
+           We need to ensure the service correctly aggregates all todos from the database
+           and properly transforms them to response DTOs. This validates bulk retrieval operations
+           that the UI/API relies on to display the dashboard.
+        */ 
 
         Todo t1 = new Todo();
 		t1.setId(1L);
@@ -75,9 +90,14 @@ class TodoServiceTest {
 		assertEquals(2, list.size());
     }
 
-    // ✅ GET BY ID SUCCESS
+
     @Test
     void getTodoById_shouldReturnTodo() {
+        /*
+           We validate the happy path for retrieving a single todo by ID.
+           This ensures the service correctly queries the repository and transforms
+           the entity to a DTO for API responses.
+        */
 
         Todo todo = new Todo();
         todo.setId(1L);
@@ -90,9 +110,14 @@ class TodoServiceTest {
         assertNotNull(result);
     }
 
-    // ❌ GET BY ID NOT FOUND
+
     @Test
     void getTodoById_shouldThrowException() {
+        /*
+           We test the error handling for invalid requests: when a user tries to access
+           a todo that doesn't exist, we must throw ResourceNotFoundException to prevent
+           returning null or causing downstream errors in the API layer.
+        */
 
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -100,9 +125,14 @@ class TodoServiceTest {
                 () -> service.getTodoById(1L));
     }
 
-    // ✅ UPDATE SUCCESS
+    
     @Test
     void updateTodo_shouldUpdateSuccessfully() {
+        /*
+           We verify that state transitions work correctly: a PENDING todo can move to COMPLETED.
+           We also ensure the service loads the existing entity before applying changes,
+           preventing data loss from partial updates.
+        */
 
         Todo existing = new Todo();
         existing.setId(1L);
@@ -120,9 +150,14 @@ class TodoServiceTest {
         assertEquals("COMPLETED", result.getStatus());
     }
 
-    // ❌ INVALID STATUS
+    
     @Test
     void updateTodo_shouldThrowInvalidTransition() {
+        /*
+           We test business rule validation: the application must reject invalid status values
+           that aren't part of the Status enum. This prevents data corruption from unexpected
+           or malformed API requests.
+        */ 
 
         Todo existing = new Todo();
         existing.setStatus(Status.PENDING);
@@ -137,9 +172,14 @@ class TodoServiceTest {
                 () -> service.updateTodo(1L, dto));
     }
 
-    // ❌ UPDATE NOT FOUND
+  
     @Test
     void updateTodo_shouldThrowNotFound() {
+        /*
+           We ensure defensive programming: attempting to update a non-existent todo
+           must fail fast with ResourceNotFoundException rather than silently creating
+           a new record, which would violate the expected "update" semantics.
+        */ 
 
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -147,9 +187,15 @@ class TodoServiceTest {
                 () -> service.updateTodo(1L, new TodoRequestDTO()));
     }
 
-    // ✅ DELETE
+    
     @Test
     void deleteTodo_shouldDelete() {
+        /*
+           We verify the happy path for deletion: the service must successfully locate
+           the todo entity and pass it to the repository for removal. This validates
+           that the delete operation correctly loads the entity before removal to avoid
+           orphaned references or cascading delete issues.
+        */ 
 
         Todo todo = new Todo();
         when(repository.findById(1L)).thenReturn(Optional.of(todo));
@@ -159,9 +205,14 @@ class TodoServiceTest {
         verify(repository).delete(todo);
     }
 
-    // ❌ DELETE NOT FOUND
+    
     @Test
     void deleteTodo_shouldThrowException() {
+        /*
+            We test defensive error handling on delete: attempting to remove a non-existent
+            todo must fail with ResourceNotFoundException to prevent silent failures and
+            ensure the user knows their delete request couldn't be fulfilled.
+        */ 
 
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
