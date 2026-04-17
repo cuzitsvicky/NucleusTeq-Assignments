@@ -25,14 +25,13 @@ A Spring Boot REST API for managing Todo items, built with Spring Data JPA, Post
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 4.0.5 |
-| Language | Java 21 |
+| Language | Java 17 |
 | Persistence | Spring Data JPA + Hibernate |
 | Database | PostgreSQL |
 | Validation | Jakarta Bean Validation |
-| Build Tool | Maven (via Maven Wrapper) |
+| Build Tool | Maven  |
 | Logging | SLF4J + Logback |
 | Testing | JUnit 5 + Mockito |
-| Utilities | Lombok |
 
 ---
 
@@ -99,7 +98,48 @@ COMPLETED
 | `PUT` | `/todos/{id}` | Update a Todo by ID | `200 OK` |
 | `DELETE` | `/todos/{id}` | Delete a Todo by ID | `200 OK` |
 
+### 🔹 1. Create TODO
+
+```
+POST /todos
+```
+![alt text](<screenshots/Screenshot 2026-04-18 024735.png>)
+
 ---
+
+### 🔹 2. Get All TODOs
+
+```
+GET /todos
+```
+![alt text](<screenshots/Screenshot 2026-04-18 024811.png>)
+---
+
+### 🔹 3. Get TODO by ID
+
+```
+GET /todos/{id}
+```
+![alt text](<screenshots/Screenshot 2026-04-18 024834.png>)
+---
+
+### 🔹 4. Update TODO
+
+```
+PUT /todos/{id}
+```
+![alt text](<screenshots/Screenshot 2026-04-18 024916.png>)
+---
+
+### 🔹 5. Delete TODO
+
+```
+DELETE /todos/{id}
+```
+![alt text](<screenshots/Screenshot 2026-04-18 024946.png>)
+---
+
+
 
 ## Request & Response Formats
 
