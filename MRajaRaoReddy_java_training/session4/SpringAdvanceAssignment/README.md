@@ -241,6 +241,26 @@ All errors are handled centrally by `GlobalExceptionHandler` (`@RestControllerAd
 | `MethodArgumentNotValidException` | `400 Bad Request` | Bean Validation failure |
 | `Exception` (catch-all) | `500 Internal Server Error` | Unexpected server error |
 
+### 🔹 1. ResourceNotFoundException
+
+![alt text](<screenshots/Screenshot 2026-04-18 031115.png>)
+
+---
+
+### 🔹 2. InvalidStatusTransitionException
+
+![alt text](<screenshots/Screenshot 2026-04-18 030934.png>)
+---
+
+### 🔹 3. MethodArgumentNotValidException
+
+![alt text](<screenshots/Screenshot 2026-04-18 031238.png>)
+---
+
+### 🔹 4. Exception (catch-all)
+
+![alt text](<screenshots/Screenshot 2026-04-18 031403.png>)
+
 ---
 
 ## Database Configuration
