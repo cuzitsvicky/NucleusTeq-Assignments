@@ -62,7 +62,8 @@ src/main/java/com/example/SpringAdvanceAssignment/
     └── InvalidStatusTransitionException.java # 400 trigger
 
 src/test/java/com/example/SpringAdvanceAssignment/
-└── TodoServiceTest.java                      # Unit tests (8 test cases)
+|── TodoServiceTest.java                      
+|── TodoControllerTest.java 
 ```
 
 ---
@@ -327,16 +328,45 @@ The application starts on `http://localhost:8080` by default.
 
 ### Test Coverage
 
-`TodoServiceTest` contains 8 unit tests covering the service layer in isolation using Mockito mocks for the repository and notification client:
+`TodoServiceTest` contains  unit tests covering the service layer in isolation using Mockito mocks for the repository and notification client:
 
 | Test | Scenario |
 |---|---|
+| `createTodo_nullStatusInDto_defaultsToPending` | Ensures null status defaults to PENDING instead of failing |
 | `createTodo_shouldSaveAndReturnResponse` | Happy path — todo is saved and notification is sent |
 | `getAllTodos_shouldReturnList` | Returns all todos as a list of DTOs |
+| `getAllTodos_emptyRepository_returnsEmptyList` |Ensures empty repository returns an empty list (not null) |
 | `getTodoById_shouldReturnTodo` | Retrieves a single todo by ID |
 | `getTodoById_shouldThrowException` | Throws `ResourceNotFoundException` for unknown ID |
+| `updateTodo_completedToPending_shouldUpdateSuccessfully` | Validates reverse transition COMPLETED → PENDING |
 | `updateTodo_shouldUpdateSuccessfully` | `PENDING → COMPLETED` transition succeeds |
 | `updateTodo_shouldThrowInvalidTransition` | Invalid status string throws exception |
+| `updateTodo_pendingToPending_shouldThrowInvalidTransition` | Prevents invalid same-status transition |
 | `updateTodo_shouldThrowNotFound` | Update of non-existent ID throws `ResourceNotFoundException` |
 | `deleteTodo_shouldDelete` | Existing todo is deleted via repository |
 | `deleteTodo_shouldThrowException` | Delete of non-existent ID throws `ResourceNotFoundException` |
+
+---
+###
+`TodoControllerTest` Uses `@WebMvcTest(TodoController.class)` to slice the Spring context to only the web layer (controllers, filters, advice). `GlobalExceptionHandler` is imported via `@Import`. `TodoService` is mocked with `@MockitoBean` so Spring injects it into the controller automatically. Uses `MockMvc` to execute HTTP requests and assert response status, headers, and JSON body shape.
+
+
+**Total: 14 test cases** covering all endpoints and error scenarios:
+ 
+| # | Test Method | What It Verifies |
+|---|---|---|
+| 1 | `createTodo_validRequest_returns201AndBody` | Happy path — POST returns 201 Created with response body |
+| 2 | `createTodo_nullTitle_returns400WithValidationError` | `@NotNull` on title triggers Bean Validation → 400 |
+| 3 | `createTodo_shortTitle_returns400WithValidationError` | `@Size(min=3)` violation → 400 with "Title must be at least 3 characters" |
+| 4 | `createTodo_nullDescription_returns400WithValidationError` | `@NotNull` on description → 400 |
+| 5 | `createTodo_nullStatus_returns400WithValidationError` | `@NotNull` on status → 400 |
+| 6 | `getAllTodos_returnsListAnd200` | GET /todos returns 200 OK with JSON array of all DTOs |
+| 7 | `getAllTodos_emptyList_returns200WithEmptyArray` | Empty database → 200 OK with `[]` (not null/404) |
+| 8 | `getTodoById_existingId_returns200AndBody` | GET /todos/1 returns 200 OK with matching DTO |
+| 9 | `getTodoById_nonExistingId_returns404` | Service throws `ResourceNotFoundException` → 404 with error body |
+| 10 | `updateTodo_validRequest_returns200AndUpdatedBody` | PUT /todos/1 with valid transition → 200 OK |
+| 11 | `updateTodo_nonExistingId_returns404` | Updating non-existent ID → 404 |
+| 12 | `updateTodo_invalidStatusTransition_returns400` | `InvalidStatusTransitionException` from service → 400 |
+| 13 | `updateTodo_invalidRequestBody_returns400` | Bean Validation fails on PUT → 400 with field errors |
+| 14 | `deleteTodo_existingId_returns200WithMessage` | DELETE /todos/1 → 200 OK with "Todo deleted successfully" |
+| 15 | `deleteTodo_nonExistingId_returns404` | Service throws `ResourceNotFoundException` → 404 |
