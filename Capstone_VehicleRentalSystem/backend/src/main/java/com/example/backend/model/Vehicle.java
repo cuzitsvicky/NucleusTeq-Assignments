@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 @Table(name = "vehicles")
 public class Vehicle {
 
+    // Vehicle types for categorization
     public enum VehicleType {
         CAR,
         BIKE
@@ -27,7 +28,9 @@ public class Vehicle {
 
     @Column(nullable = false)
     private boolean availabilityStatus = true;
-
+    
+    // Shows who added the vehicle to the system
+    // Many-to-one relationship with User entity to track which admin added the vehicle
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "added_by", nullable = false)
     private User addedBy;

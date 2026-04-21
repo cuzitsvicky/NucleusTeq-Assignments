@@ -12,19 +12,27 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookingId;
+
+    // Many-to-one relationship with User and Vehicle to track which user made the booking and which vehicle is booked
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
+
+    // Booking dates and status
     @Column(nullable = false)
     private LocalDateTime startDate;
+
     @Column(nullable = false)
     private LocalDateTime endDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.CONFIRMED;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
