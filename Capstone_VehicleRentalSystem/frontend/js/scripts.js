@@ -1,33 +1,25 @@
 const BASE_URL = "http://localhost:8080";
 
-/**
- * Toggle mobile menu visibility
- */
+// Toggle mobile menu visibility
 function toggleMenu() {
   const menu = document.querySelector(".navbar-menu");
   if (menu) menu.classList.toggle("open");
 }
 
-/**
- * Close mobile menu
- */
+// Close mobile menu
 function closeMenu() {
   const menu = document.querySelector(".navbar-menu");
   if (menu) menu.classList.remove("open");
 }
 
-/**
- * Set active admin navigation link
- */
+// Set active admin navigation link
 function setActiveAdminNav(key) {
   document.querySelectorAll("[data-admin-nav]").forEach((link) => {
     link.classList.toggle("active", link.dataset.adminNav === key);
   });
 }
 
-/**
- * Display error message in a container
- */
+// Display error message in a container
 function showError(message, elementId = "pageError") {
   const errorBox = document.getElementById(elementId);
   if (!errorBox) {
@@ -38,9 +30,7 @@ function showError(message, elementId = "pageError") {
   errorBox.style.display = "block";
 }
 
-/**
- * Clear error message display
- */
+// Clear error message display/
 function clearError(elementId = "pageError") {
   const errorBox = document.getElementById(elementId);
   if (!errorBox) return;
@@ -48,73 +38,55 @@ function clearError(elementId = "pageError") {
   errorBox.style.display = "none";
 }
 
-/**
- * Show login overlay
- */
+// Show login overlay
 function showLogin() {
   const overlay = document.getElementById("loginOverlay");
   if (overlay) overlay.style.display = "flex";
   closeMenu();
 }
 
-/**
- * Hide login overlay
- */
+//Hide login overlay
 function hideLogin() {
   const overlay = document.getElementById("loginOverlay");
   if (overlay) overlay.style.display = "none";
 }
 
-/**
- * Logout user and redirect to home
- */
+//Logout user and redirect to home
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("currentUser");
   window.location.href = "index.html";
 }
 
-/**
- * Get JWT token from localStorage
- */
+// Get JWT token from localStorage
 function getToken() {
   return localStorage.getItem("token");
 }
 
-/**
- * Get current user data from localStorage
- */
+// Get current user data from localStorage
 function getCurrentUser() {
   const raw = localStorage.getItem("currentUser");
   return raw ? JSON.parse(raw) : null;
 }
 
-/**
- * Save login data to localStorage
- */
+// Save login data to localStorage
 function saveLoginData(data) {
   localStorage.setItem("token", data.token);
   localStorage.setItem("currentUser", JSON.stringify(data));
 }
 
-/**
- * Require user to be logged in (redirect to index.html if not)
- */
+//Require user to be logged in (redirect to index.html if not)
 function requireLogin() {
   if (!getToken()) window.location.href = "index.html";
 }
 
-/**
- * Require user to be admin (redirect if not admin)
- */
+//Require user to be admin (redirect if not admin)
 function requireAdminPage() {
   const user = getCurrentUser();
   if (!user || user.role !== "ADMIN") window.location.href = "vehicles.html";
 }
 
-/**
- * Show admin navigation link if current user is admin
- */
+// Show admin navigation link if current user is admin
 function showAdminNavIfNeeded() {
   const link = document.getElementById("adminNavLink");
   const user = getCurrentUser();
@@ -163,23 +135,17 @@ async function apiRequest(
   }
 }
 
-/**
- * Convert datetime-local format to backend format (adds :00 for seconds)
- */
+// Convert datetime-local format to backend format (adds :00 for seconds)
 function formatDateTimeLocalToBackend(value) {
   return value ? `${value}:00` : "";
 }
 
-/**
- * Format ISO datetime string to readable locale string
- */
+// Format ISO datetime string to readable locale string
 function formatDateTime(value) {
   return value ? new Date(value).toLocaleString() : "-";
 }
 
-/**
- * Escape HTML special characters to prevent XSS
- */
+// Escape HTML special characters to prevent XSS
 function escapeHtml(text) {
   if (text === null || text === undefined) return "";
   return String(text)
@@ -190,9 +156,7 @@ function escapeHtml(text) {
     .replaceAll("'", "&#039;");
 }
 
-/**
- * Get vehicle image based on type
- */
+// Get vehicle image based on type
 function getVehicleImage(type) {
   if (!type) return "img/car.png";
 
