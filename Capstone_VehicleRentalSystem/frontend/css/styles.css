@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-/* ── Reset & Base ── */
+/* Reset & Base */
 *,
 *::before,
 *::after {
@@ -64,7 +64,7 @@ a:hover {
   color: var(--amber-l);
 }
 
-/* ── Scrollbar ── */
+/* Scrollbar*/
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -82,9 +82,7 @@ a:hover {
   background: var(--amber);
 }
 
-/* ============================================================
-   NAVBAR
-   ============================================================ */
+/* NAVBAR */
 .navbar {
   position: sticky;
   top: 0;
@@ -186,9 +184,7 @@ a:hover {
   padding: 6px;
 }
 
-/* ============================================================
-   HERO / FRONT PAGE
-   ============================================================ */
+/* HERO / FRONT PAGE*/
 .front-page {
   flex: 1;
   display: flex;
@@ -304,9 +300,7 @@ a:hover {
   z-index: 1;
 }
 
-/* ============================================================
-   LOGIN/REGISTER OVERLAY
-   ============================================================ */
+/* LOGIN/REGISTER OVERLAY */
 .login-overlay {
   position: fixed;
   inset: 0;
@@ -373,9 +367,7 @@ a:hover {
   font-weight: 600;
 }
 
-/* ============================================================
-   FORMS
-   ============================================================ */
+/* FORMS */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -416,62 +408,113 @@ a:hover {
   color: var(--text-d);
 }
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
+/* BUTTONS */
 .btn {
-  padding: 12px 24px;
   font-family: 'DM Sans', sans-serif;
   font-weight: 600;
   font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 13px 28px;
   border-radius: var(--radius);
   border: none;
   cursor: pointer;
   transition: all var(--transition);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: var(--amber);
   color: #000;
-  box-shadow: 0 4px 12px rgba(240, 165, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(240, 165, 0, 0.25);
 }
 
-.btn:hover:not(:disabled) {
+.btn:hover {
   background: var(--amber-l);
-  box-shadow: 0 6px 20px rgba(240, 165, 0, 0.4);
+  box-shadow: 0 6px 24px rgba(240, 165, 0, 0.4);
   transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: var(--text-d);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn:disabled:hover {
+  background: var(--text-d);
+  box-shadow: none;
+  transform: none;
 }
 
 .btn-secondary {
   background: transparent;
-  color: var(--amber);
-  border: 1px solid var(--amber);
+  color: var(--text-m);
+  border: 1px solid var(--border);
   box-shadow: none;
 }
 
-.btn-secondary:hover:not(:disabled) {
-  background: rgba(240, 165, 0, 0.1);
+.btn-secondary:hover {
+  background: var(--bg4);
+  color: var(--text);
+  border-color: var(--text-m);
   box-shadow: none;
+  transform: none;
+}
+button.btn.btn-secondary {
+      display: inline-flex; 
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+.back-btn {
+  position: fixed;
+  top: 90px;
+  left: 20px;
+  z-index: 900;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+}
+
+.back-btn:hover {
+  background: var(--bg4);
 }
 
 .btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  box-shadow: none;
+}
+
+.btn-danger:hover {
   background: var(--danger);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(224, 82, 82, 0.25);
+  box-shadow: 0 4px 16px rgba(224, 82, 82, 0.3);
+  transform: none;
 }
 
-.btn-danger:hover:not(:disabled) {
-  background: #ff5252;
-  box-shadow: 0 6px 20px rgba(224, 82, 82, 0.4);
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--text-d);
+  border-color: var(--text-d);
 }
 
-/* ============================================================
-   CONTAINER & SECTIONS
-   ============================================================ */
+.btn-danger:disabled:hover {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+
+/* CONTAINER & SECTIONS */
 .container {
   flex: 1;
   max-width: 1400px;
@@ -511,9 +554,7 @@ a:hover {
   box-shadow: var(--shadow-sm);
 }
 
-/* ============================================================
-   VEHICLE CARDS & LISTINGS
-   ============================================================ */
+/* VEHICLE CARDS & LISTING */
 .vehicle-list,
 .booking-list {
   display: grid;
@@ -615,9 +656,7 @@ a:hover {
   text-align: center;
 }
 
-/* ============================================================
-   STATUS PILLS
-   ============================================================ */
+/* STATUS PILLS */
 .status-pill {
   display: inline-block;
   font-size: 0.75rem;
@@ -649,9 +688,7 @@ a:hover {
   border-color: rgba(240, 165, 0, 0.3);
 }
 
-/* ============================================================
-   FILTER BAR
-   ============================================================ */
+/* FILTER BAR */
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -762,9 +799,7 @@ a:hover {
   letter-spacing: 0.02em;
 }
 
-/* ============================================================
-   MESSAGES
-   ============================================================ */
+/* MESSAGES */
 .message {
   text-align: center;
   padding: 60px 20px;
@@ -775,9 +810,7 @@ a:hover {
   border-radius: var(--radius-lg);
 }
 
-/* ============================================================
-   ERROR MESSAGE
-   ============================================================ */
+/* ERROR MESSAGE */
 .error {
   background: rgba(224, 82, 82, 0.1);
   border: 1px solid rgba(224, 82, 82, 0.3);
@@ -790,9 +823,7 @@ a:hover {
   margin-bottom: 16px;
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
+/* FOOTER */
 .footer {
   background: var(--bg2);
   border-top: 1px solid var(--border);
@@ -816,9 +847,7 @@ a:hover {
   color: var(--amber);
 }
 
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
+/* ANIMATIONS */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -850,9 +879,7 @@ a:hover {
   }
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* RESPONSIVE */
 @media (max-width: 900px) {
   .navbar {
     padding: 0 20px;
