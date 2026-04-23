@@ -26,9 +26,7 @@ public class AuthService {
     }
 
     public SignUpResponseDto signup(SignupRequestDto dto) {
-        if (userRepository.existsByUsername(dto.getUsername())) {
-            throw new DuplicateResourceException("Username already exists");
-        }
+        
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new DuplicateResourceException("Email already exists");
         }
@@ -44,13 +42,25 @@ public class AuthService {
     }
 
     public LoginResponseDto login(LoginRequestDto dto) {
-        User user = userRepository.findByUsername(dto.getUsername())
-                .orElseThrow(() -> new UnauthorizedException("Invalid username or password"));
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+ 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid username or password");
+          
+            throw new UnauthorizedException("Invalid email or password");
         }
-        String token = authUtil.generateToken(user.getUsername(), user.getRole().name());
-        return new LoginResponseDto(token, user.getUserId(), user.getUsername(), user.getEmail(),
+ 
+        
+        String token = authUtil.generateToken(user.getEmail(), user.getRole().name());
+ 
+     
+ 
+        return new LoginResponseDto(
+                token,
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail(),
                 user.getRole().name());
     }
 }
+

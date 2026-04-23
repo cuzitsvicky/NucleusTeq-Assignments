@@ -14,6 +14,11 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+    
+     public User findEntityByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    }
 
     public User findEntityByUsername(String username) {
         return userRepository.findByUsername(username)
@@ -25,8 +30,8 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
-    public SignUpResponseDto getCurrentUser(String username) {
-        User user = findEntityByUsername(username);
+    public SignUpResponseDto getCurrentUser(String email) {
+        User user = findEntityByEmail(email);
         return new SignUpResponseDto(user.getUserId(), user.getUsername(), user.getEmail(), user.getRole().name(),
                 user.getCreatedAt());
     }

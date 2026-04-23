@@ -8,7 +8,7 @@ if (existingUser && getToken()) {
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   
-  const username = document.getElementById("username").value.trim();
+  const email    = document.getElementById("email").value.trim();   
   const password = document.getElementById("password").value.trim();
   const errorDiv = document.getElementById("error");
   
@@ -16,15 +16,15 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   errorDiv.style.display = "none";
 
   // Validate inputs
-  if (!username || !password) {
-    errorDiv.textContent = "Please enter both username and password";
+  if (!email || !password) {
+    errorDiv.textContent = "Please enter both email and password";
     errorDiv.style.display = "block";
     return;
   }
 
   try {
     // Call login API
-    const data = await apiRequest("/api/auth/login", "POST", { username, password });
+    const data = await apiRequest("/api/auth/login", "POST", { email, password });
     
     // Save login data
     saveLoginData(data);
@@ -32,7 +32,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     // Redirect based on role
     window.location.href = data.role === "ADMIN" ? "admin.html" : "vehicles.html";
   } catch (error) {
-    errorDiv.textContent = error.message || "Invalid username or password";
+    errorDiv.textContent = error.message || "Invalid email or password";
     errorDiv.style.display = "block";
   }
 });

@@ -25,6 +25,12 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     return;
   }
 
+  if (username.length < 3) {
+    errorDiv.textContent = "Username must be at least 3 characters";
+    errorDiv.style.display = "block";
+    return;
+  }
+
   // Basic email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
