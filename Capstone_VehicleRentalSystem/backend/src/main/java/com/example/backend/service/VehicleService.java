@@ -5,10 +5,13 @@ import com.example.backend.dto.request.VehicleRequestDto;
 import com.example.backend.dto.response.VehicleResponseDto;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.model.Booking;
 import com.example.backend.model.User;
 import com.example.backend.model.Vehicle;
 import com.example.backend.model.Vehicle.VehicleType;
+import com.example.backend.repository.BookingRepository;
 import com.example.backend.repository.VehicleRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -16,12 +19,14 @@ public class VehicleService {
 
 
     private final VehicleRepository vehicleRepository;
-  
+    private final BookingRepository bookingRepository;
     private final UserService userService;
 
     public VehicleService(VehicleRepository vehicleRepository,
+                          BookingRepository bookingRepository,
                           UserService userService) {
         this.vehicleRepository = vehicleRepository;
+        this.bookingRepository = bookingRepository;
         this.userService = userService;
     }
 
@@ -45,8 +50,6 @@ public class VehicleService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public VehicleResponseDto addVehicle(String email, VehicleRequestDto dto) {
-
-        
         User admin = userService.findEntityByEmail(email);
 
         Vehicle vehicle = new Vehicle();
@@ -69,10 +72,20 @@ public class VehicleService {
         vehicle.setName(dto.getName());
         vehicle.setType(parseVehicleType(dto.getType()));
         vehicle.setDescription(dto.getDescription());
-        vehicle.setAvailabilityStatus(dto.getAvailabilityStatus());
-    
-        Vehicle updated = vehicleRepository.save(vehicle);
 
+        if (dto.getAvailabilityStatus() != null) {
+            boolean hasActiveOrUpcomingBooking = hasActiveOrUpcomingBooking(vehicle);
+
+            if (hasActiveOrUpcomingBooking && dto.getAvailabilityStatus() != vehicle.isAvailabilityStatus()) {
+                throw new BadRequestException("Cannot change availability status of a booked vehicle");
+            }
+
+            if (!hasActiveOrUpcomingBooking) {
+                vehicle.setAvailabilityStatus(dto.getAvailabilityStatus());
+            }
+        }
+
+        Vehicle updated = vehicleRepository.save(vehicle);
         return mapToDto(updated);
     }
 
@@ -82,8 +95,19 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + vehicleId));
 
+        if (hasActiveOrUpcomingBooking(vehicle)) {
+            throw new BadRequestException("Cannot delete vehicle with active or upcoming bookings");
+        }
 
         vehicleRepository.delete(vehicle);
+    }
+
+    private boolean hasActiveOrUpcomingBooking(Vehicle vehicle) {
+        List<Booking> bookings = bookingRepository.findByVehicle(vehicle);
+        LocalDateTime now = LocalDateTime.now();
+        return bookings.stream().anyMatch(b ->
+                (b.getStatus() == Booking.Status.CONFIRMED || b.getStatus() == Booking.Status.PENDING)
+                        && b.getEndDate().isAfter(now));
     }
 
     private VehicleType parseVehicleType(String type) {
