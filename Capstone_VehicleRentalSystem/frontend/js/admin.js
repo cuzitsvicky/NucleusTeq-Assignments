@@ -134,8 +134,12 @@ async function loadVehicles() {
 function showUpdateForm(vehicleId, name, type, description, availabilityStatus) {
   clearError();
   hideAllSections();
+
   document.getElementById("updateVehicleSection").style.display = "block";
-  if (typeof setActiveAdminNav === "function") setActiveAdminNav("vehicles");
+
+  if (typeof setActiveAdminNav === "function") {
+    setActiveAdminNav("vehicles");
+  }
 
   document.getElementById("updateVehicleId").value = vehicleId;
   document.getElementById("updateName").value = name;
@@ -145,13 +149,9 @@ function showUpdateForm(vehicleId, name, type, description, availabilityStatus) 
   const checkbox = document.getElementById("updateAvailabilityStatus");
   checkbox.checked = availabilityStatus;
 
-  if (!availabilityStatus) {
-    checkbox.disabled = true;
-    checkbox.title = "Booked vehicles cannot have availability changed manually";
-  } else {
-    checkbox.disabled = false;
-    checkbox.title = "";
-  }
+  
+  checkbox.disabled = false;
+  checkbox.title = "";
 }
 
 async function deleteVehicle(vehicleId) {
