@@ -28,6 +28,22 @@ function showManageVehicles() {
   if (typeof setActiveAdminNav === "function") setActiveAdminNav("vehicles");
 }
 
+function showAllBookings() {
+  clearError();
+  hideAllSections();
+  document.getElementById("allBookingsSection").style.display = "block";
+  if (typeof setActiveAdminNav === "function") setActiveAdminNav("bookings");
+}
+
+function showVehicleBookings(vehicleId, vehicleName) {
+  clearError();
+  hideAllSections();
+  document.getElementById("vehicleBookingsSection").style.display = "block";
+  document.getElementById("vehicleBookingsTitle").textContent = vehicleName;
+  if (typeof setActiveAdminNav === "function") setActiveAdminNav("vehicles");
+  loadVehicleBookings(vehicleId);
+}
+
 function cancelAdd() {
   document.getElementById("addVehicleForm").reset();
   showManageVehicles();
@@ -131,15 +147,90 @@ async function loadVehicles() {
   }
 }
 
+async function loadBookings() {
+  bookingList.innerHTML = "";
+
+  try {
+    const bookings = await apiRequest("/api/bookings/all", "GET", null, true);
+
+    if (!bookings.length) {
+      noBookingsMessage.style.display = "block";
+      return;
+    }
+
+    noBookingsMessage.style.display = "none";
+
+    bookings.forEach((booking) => {
+      const card = document.createElement("div");
+      card.className = "booking-card";
+
+      card.innerHTML = `
+        <img src="${getVehicleImage(booking.type || "car")}" alt="${escapeHtml(booking.vehicleName)}" class="vehicle-image">
+        <div class="booking-main">
+          <h3>${escapeHtml(booking.vehicleName)}</h3>
+          <p><strong>User:</strong> ${escapeHtml(booking.username)}</p>
+          <p><strong>Vehicle ID:</strong> ${booking.vehicleId}</p>
+          <p><strong>Start Date:</strong> ${formatDateTime(booking.startDate)}</p>
+          <p><strong>End Date:</strong> ${formatDateTime(booking.endDate)}</p>
+        </div>
+        <div class="booking-actions">
+          <span class="status-pill ${booking.status.toLowerCase()}">${escapeHtml(booking.status)}</span>
+        </div>
+      `;
+
+      bookingList.appendChild(card);
+    });
+  } catch (error) {
+    showError(error.message);
+  }
+}
+
+async function loadVehicleBookings(vehicleId) {
+  const vehicleBookingList = document.getElementById("vehicleBookingList");
+  const noVehicleBookingsMessage = document.getElementById("noVehicleBookingsMessage");
+
+  vehicleBookingList.innerHTML = "";
+
+  try {
+    const bookings = await apiRequest(`/api/bookings/vehicle/${vehicleId}`, "GET", null, true);
+
+    if (!bookings.length) {
+      noVehicleBookingsMessage.style.display = "block";
+      return;
+    }
+
+    noVehicleBookingsMessage.style.display = "none";
+
+    bookings.forEach((booking) => {
+      const card = document.createElement("div");
+      card.className = "booking-card";
+
+      card.innerHTML = `
+        <img src="${getVehicleImage(booking.type || "car")}" alt="${escapeHtml(booking.vehicleName)}" class="vehicle-image">
+        <div class="booking-main">
+          <h3>${escapeHtml(booking.vehicleName)}</h3>
+          <p><strong>User:</strong> ${escapeHtml(booking.username)}</p>
+          <p><strong>Booking ID:</strong> ${booking.bookingId}</p>
+          <p><strong>Start Date:</strong> ${formatDateTime(booking.startDate)}</p>
+          <p><strong>End Date:</strong> ${formatDateTime(booking.endDate)}</p>
+        </div>
+        <div class="booking-actions">
+          <span class="status-pill ${booking.status.toLowerCase()}">${escapeHtml(booking.status)}</span>
+        </div>
+      `;
+
+      vehicleBookingList.appendChild(card);
+    });
+  } catch (error) {
+    showError(error.message);
+  }
+}
+
 function showUpdateForm(vehicleId, name, type, description, availabilityStatus) {
   clearError();
   hideAllSections();
-
   document.getElementById("updateVehicleSection").style.display = "block";
-
-  if (typeof setActiveAdminNav === "function") {
-    setActiveAdminNav("vehicles");
-  }
+  if (typeof setActiveAdminNav === "function") setActiveAdminNav("vehicles");
 
   document.getElementById("updateVehicleId").value = vehicleId;
   document.getElementById("updateName").value = name;
@@ -149,9 +240,13 @@ function showUpdateForm(vehicleId, name, type, description, availabilityStatus) 
   const checkbox = document.getElementById("updateAvailabilityStatus");
   checkbox.checked = availabilityStatus;
 
-  
-  checkbox.disabled = false;
-  checkbox.title = "";
+  if (!availabilityStatus) {
+    checkbox.disabled = true;
+    checkbox.title = "Booked vehicles cannot have availability changed manually";
+  } else {
+    checkbox.disabled = false;
+    checkbox.title = "";
+  }
 }
 
 async function deleteVehicle(vehicleId) {
@@ -228,4 +323,5 @@ document.getElementById("updateVehicleForm").addEventListener("submit", async (e
 document.addEventListener("DOMContentLoaded", async () => {
   showManageVehicles();
   await loadVehicles();
+  await loadBookings();
 });
