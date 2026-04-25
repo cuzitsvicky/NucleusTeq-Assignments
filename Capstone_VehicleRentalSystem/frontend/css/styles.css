@@ -579,8 +579,6 @@ button.btn.btn-secondary {
    MAIN CONTAINER
    ============================================================ */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 48px 40px;
   flex: 1;
 }
@@ -700,6 +698,78 @@ button.btn.btn-secondary {
 }
 
 /* ============================================================
+   BOOKING LIST
+   ============================================================ */
+.booking-list {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.booking-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  transition: border-color var(--transition);
+}
+
+.booking-card:hover {
+  border-color: var(--border-h);
+}
+
+.booking-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.booking-card p {
+  font-size: 0.875rem;
+  color: var(--text-m);
+  margin-bottom: 4px;
+}
+
+.booking-card .booking-meta {
+  font-size: 0.8rem;
+  color: var(--text-d);
+  margin-top: 4px;
+}
+
+.booking-status {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.booking-status.confirmed {
+  background: rgba(76, 175, 125, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(76, 175, 125, 0.3);
+}
+
+.booking-status.pending {
+  background: rgba(240, 165, 0, 0.1);
+  color: var(--amber);
+  border: 1px solid rgba(240, 165, 0, 0.3);
+}
+
+.booking-status.cancelled {
+  background: rgba(224, 82, 82, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(224, 82, 82, 0.3);
+}
+
+/* ============================================================
    BOOKING FORM (vehicles.html inline form)
    ============================================================ */
 .booking-form {
@@ -800,6 +870,7 @@ button.btn.btn-secondary {
   text-align: center;
   padding: 60px 20px;
   color: var(--text-d);
+  margin-top: 50px;
   font-size: 1rem;
   letter-spacing: 0.02em;
   border: 1px dashed var(--border);
@@ -1067,6 +1138,9 @@ button.btn.btn-secondary {
   object-fit: cover;
   border-radius: var(--radius-lg);
   flex-shrink: 0;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .booking-actions {

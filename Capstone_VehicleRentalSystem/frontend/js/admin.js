@@ -240,13 +240,9 @@ function showUpdateForm(vehicleId, name, type, description, availabilityStatus) 
   const checkbox = document.getElementById("updateAvailabilityStatus");
   checkbox.checked = availabilityStatus;
 
-  if (!availabilityStatus) {
-    checkbox.disabled = true;
-    checkbox.title = "Booked vehicles cannot have availability changed manually";
-  } else {
+  
     checkbox.disabled = false;
     checkbox.title = "";
-  }
 }
 
 async function deleteVehicle(vehicleId) {

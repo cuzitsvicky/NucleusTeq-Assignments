@@ -74,9 +74,6 @@ public class BookingService {
         booking.setEndDate(endDate);
         booking.setStatus(Booking.Status.CONFIRMED);
 
-        vehicle.setAvailabilityStatus(false);
-        vehicleRepository.save(vehicle);
-
         Booking saved = bookingRepository.save(booking);
         return mapToDto(saved);
     }
@@ -121,11 +118,6 @@ public class BookingService {
 
         booking.setStatus(Booking.Status.CANCELLED);
         bookingRepository.save(booking);
-
-        Vehicle vehicle = booking.getVehicle();
-        vehicle.setAvailabilityStatus(true);
-        vehicleRepository.save(vehicle);
-
     }
     
     @PreAuthorize("hasRole('ADMIN')")
