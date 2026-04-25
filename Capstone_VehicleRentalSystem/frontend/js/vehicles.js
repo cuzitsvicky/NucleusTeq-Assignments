@@ -104,7 +104,9 @@ function renderVehicles(vehicles) {
                 <p><strong>Description:</strong> ${escapeHtml(vehicle.description || "No description")}</p>
                 <span class="status-pill ${statusClass}">${statusText}</span>
                 <div class="card-actions">
-                    <button class="btn" onclick="showBookingForm(${vehicle.vehicleId})">Book Now</button>
+                    ${vehicle.availabilityStatus
+                        ? `<button class="btn" onclick="showBookingForm(${vehicle.vehicleId})">Book Now</button>`
+                        : `<button class="btn" disabled>Currently Unavailable</button>`}
                 </div>
             </div>`;
 

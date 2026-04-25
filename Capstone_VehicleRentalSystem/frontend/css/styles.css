@@ -881,6 +881,7 @@ button.btn.btn-secondary {
    ERROR MESSAGE
    ============================================================ */
 .error {
+  margin-bottom: 20px;
   background: rgba(224, 82, 82, 0.1);
   border: 1px solid rgba(224, 82, 82, 0.3);
   border-left: 3px solid var(--danger);

@@ -74,15 +74,7 @@ public class VehicleService {
         vehicle.setDescription(dto.getDescription());
 
         if (dto.getAvailabilityStatus() != null) {
-            boolean hasActiveOrUpcomingBooking = hasActiveOrUpcomingBooking(vehicle);
-
-            if (hasActiveOrUpcomingBooking && dto.getAvailabilityStatus() != vehicle.isAvailabilityStatus()) {
-                throw new BadRequestException("Cannot change availability status of a booked vehicle");
-            }
-
-            if (!hasActiveOrUpcomingBooking) {
-                vehicle.setAvailabilityStatus(dto.getAvailabilityStatus());
-            }
+            vehicle.setAvailabilityStatus(dto.getAvailabilityStatus());
         }
 
         Vehicle updated = vehicleRepository.save(vehicle);
