@@ -127,7 +127,8 @@ public class BookingService {
         vehicleRepository.save(vehicle);
 
     }
-
+    
+    @PreAuthorize("hasRole('ADMIN')")
     public List<BookingResponseDto> getVehicleBookings(Long vehicleId) {
 
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
