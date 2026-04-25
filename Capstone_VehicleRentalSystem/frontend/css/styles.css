@@ -533,6 +533,7 @@ button.btn.btn-secondary {
       justify-content: center;
       align-items: center;
       margin-top: 20px;
+      margin-bottom: 20px;
     }
 .back-btn {
   position: fixed;
@@ -701,22 +702,20 @@ button.btn.btn-secondary {
    BOOKING LIST
    ============================================================ */
 .booking-list {
-  margin-top: 26px;
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* 3 cards per row */
+  gap: 24px;
 }
 
 .booking-card {
-  background: var(--bg3);
+    background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 24px 28px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  transition: border-color var(--transition);
+  padding: 24px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
 .booking-card:hover {
