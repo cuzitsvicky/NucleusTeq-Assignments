@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Sensitive config — never commit ###
+src/main/resources/application.properties
+
 ### STS ###
 .apt_generated
 .classpath
@@ -31,5 +34,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-backend/src/main/resources/application.properties
