@@ -532,8 +532,8 @@ button.btn.btn-secondary {
       display: inline-flex; /* or flex */
       justify-content: center;
       align-items: center;
-      margin-top: 20px;
-      margin-bottom: 20px;
+      margin-top: 0px;
+      margin-bottom: 0px;
     }
 .back-btn {
   position: fixed;
