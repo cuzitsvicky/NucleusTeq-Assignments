@@ -81,17 +81,16 @@ public class BookingService {
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public List<BookingResponseDto> getMyBookings(String email) {
         User user = userService.findEntityByEmail(email);
-
-        return bookingRepository.findByUser(user).stream()
-                .map(this::mapToDto)
-                .toList();
+        List<Booking> bookings = bookingRepository.findByUser(user);
+        autoCompleteExpired(bookings);
+        return bookings.stream().map(this::mapToDto).toList();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<BookingResponseDto> getAllBookings() {
-        return bookingRepository.findAll().stream()
-                .map(this::mapToDto)
-                .toList();
+        List<Booking> bookings = bookingRepository.findAll();
+        autoCompleteExpired(bookings);
+        return bookings.stream().map(this::mapToDto).toList();
     }
 
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
@@ -126,9 +125,23 @@ public class BookingService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + vehicleId));
 
-        return bookingRepository.findByVehicle(vehicle).stream()
-                .map(this::mapToDto)
+        List<Booking> bookings = bookingRepository.findByVehicle(vehicle);
+        autoCompleteExpired(bookings);
+        return bookings.stream().map(this::mapToDto).toList();
+    }
+
+    private void autoCompleteExpired(List<Booking> bookings) {
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> toSave = bookings.stream()
+                .filter(b ->
+                        (b.getStatus() == Booking.Status.CONFIRMED || b.getStatus() == Booking.Status.PENDING)
+                        && b.getEndDate().isBefore(now))
                 .toList();
+ 
+        if (!toSave.isEmpty()) {
+            toSave.forEach(b -> b.setStatus(Booking.Status.COMPLETED));
+            bookingRepository.saveAll(toSave);
+        }
     }
 
     private BookingResponseDto mapToDto(Booking booking) {
