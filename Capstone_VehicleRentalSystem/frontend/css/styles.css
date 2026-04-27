@@ -1122,6 +1122,13 @@ button.btn.btn-secondary {
   border: 1px solid rgba(240, 165, 0, .3);
 }
 
+.status-pill.completed,
+.booking-status.completed {
+  background: rgba(100, 160, 255, 0.1);
+  color: #64a0ff;
+  border: 1px solid rgba(100, 160, 255, 0.3);
+}
+
 .booking-main {
   flex: 1;
   min-width: 0;
