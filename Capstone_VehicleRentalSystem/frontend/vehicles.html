@@ -26,6 +26,38 @@
     <div class="container">
         <h1>Vehicles</h1>
 
+        <!-- ── Date Range Filter ── -->
+        <div class="date-filter-bar">
+            <div class="date-filter-title">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="flex-shrink:0">
+                    <rect x="3" y="4" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                    <path d="M3 8h14M7 2v4M13 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                <span>Check availability for dates</span>
+            </div>
+            <div class="date-filter-inputs">
+                <div class="date-filter-field">
+                    <label for="filterStart">From</label>
+                    <input type="datetime-local" id="filterStart">
+                </div>
+                <div class="date-filter-sep">→</div>
+                <div class="date-filter-field">
+                    <label for="filterEnd">To</label>
+                    <input type="datetime-local" id="filterEnd">
+                </div>
+                <button class="btn date-filter-btn" id="checkAvailabilityBtn" onclick="applyDateFilter()">
+                    Check
+                </button>
+                <button class="btn btn-secondary date-filter-clear" id="clearDateFilterBtn" onclick="clearDateFilter()" style="display:none;">
+                    Clear
+                </button>
+            </div>
+            <div id="dateFilterError" class="date-filter-error" style="display:none;"></div>
+            <div id="dateFilterBadge" class="date-filter-badge" style="display:none;">
+                📅 Showing vehicles available for your selected dates
+            </div>
+        </div>
+        
         <!-- ── Filter Bar ── -->
         <div class="filter-bar">
             <div class="filter-search">
