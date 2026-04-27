@@ -42,6 +42,25 @@ public class VehicleService {
                 .toList();
     }
 
+    public List<VehicleResponseDto> getAvailableVehiclesForRange(LocalDateTime start, LocalDateTime end) {
+        if (!end.isAfter(start)) {
+            throw new BadRequestException("End date must be after start date");
+        }
+
+        return vehicleRepository.findByAvailabilityStatusTrue().stream()
+                .filter(vehicle -> {
+                    List<Booking> conflicts = bookingRepository
+                            .findByVehicleAndStatusInAndStartDateLessThanAndEndDateGreaterThan(
+                                    vehicle,
+                                    List.of(Booking.Status.CONFIRMED, Booking.Status.PENDING),
+                                    end,
+                                    start);
+                    return conflicts.isEmpty();
+                })
+                .map(this::mapToDto)
+                .toList();
+    }
+
     public VehicleResponseDto getVehicleById(Long vehicleId) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + vehicleId));
