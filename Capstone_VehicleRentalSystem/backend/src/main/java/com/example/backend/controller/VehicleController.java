@@ -1,8 +1,11 @@
 package com.example.backend.controller;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.backend.dto.response.VehicleResponseDto;
 import com.example.backend.service.VehicleService;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -19,8 +22,16 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.getAllVehicles());
     }
 
+    // Returns vehicles that are marked available AND have no booking conflicts
+    // in the requested time range. Used by the date-range filter on the frontend.
     @GetMapping("/available")
-    public ResponseEntity<List<VehicleResponseDto>> getAvailableVehicles() {
+    public ResponseEntity<List<VehicleResponseDto>> getAvailableVehicles(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+ 
+        if (start != null && end != null) {
+            return ResponseEntity.ok(vehicleService.getAvailableVehiclesForRange(start, end));
+        }
         return ResponseEntity.ok(vehicleService.getAvailableVehicles());
     }
 
