@@ -1289,11 +1289,9 @@ button.btn.btn-secondary {
 }
 .date-filter-bar {
     background: var(--bg3);
-    border: 1px solid var(--border-h);
     border-radius: var(--radius-lg);
     padding: 20px 24px;
     margin-bottom: 16px;
-    box-shadow: var(--glow);
     display: flex;
     flex-direction: column;
     gap: 14px;
