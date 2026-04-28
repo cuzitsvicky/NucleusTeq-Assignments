@@ -1,5 +1,9 @@
 package com.example.backend.dto.response;
 
+/**
+ * Data Transfer Object for login responses. Contains the authentication token and user details such as user ID,
+ * username, email, and role. This DTO is used to return the necessary information to the client upon successful login.
+ */
 public class LoginResponseDto {
     
     private String token;

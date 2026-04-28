@@ -3,6 +3,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Data Transfer Object for signup requests. Contains the user's username, email, password, and role,
+ * which are required for user registration. The email field is validated to ensure it is in a proper email format,
+ * the password must be at least 6 characters long, and all fields are required to be non-blank.
+ */
 public class SignupRequestDto {
 
 

@@ -1,6 +1,10 @@
 package com.example.backend.dto.response;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for signup responses. Contains the user's ID, username, email, role, and account creation timestamp.
+ * This DTO is used to return the necessary information to the client upon successful user registration.
+ */
 public class SignUpResponseDto {
     private Long userId;
     private String username;

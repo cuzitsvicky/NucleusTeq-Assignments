@@ -1,6 +1,11 @@
 package com.example.backend.dto.response;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for vehicle responses. Contains the details of a vehicle, including its ID, name, type,
+ * description, availability status, information about the user who added the vehicle, and the creation timestamp.
+ * This DTO is used to return vehicle details in API responses.
+ */
 public class VehicleResponseDto {
 
     private Long vehicleId;

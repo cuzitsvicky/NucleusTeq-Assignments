@@ -1,6 +1,10 @@
 package com.example.backend.dto.request;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Data Transfer Object for booking requests. Contains the necessary information to create a new booking,
+ * including the vehicle ID, start date, and end date of the booking.
+ */
 public class BookingRequestDto {
     @NotNull(message = "Vehicle id is required")
     private Long vehicleId;

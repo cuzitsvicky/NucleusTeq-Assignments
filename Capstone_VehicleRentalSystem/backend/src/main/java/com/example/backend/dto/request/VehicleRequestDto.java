@@ -2,6 +2,11 @@ package com.example.backend.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * Data Transfer Object for vehicle requests. Contains the necessary information to create or update a vehicle,
+ * including the vehicle name, type, description, and availability status. The name and type fields are required,
+ * with the type field restricted to either "Car" or "Bike". The description and availability status are optional.
+ */
 public class VehicleRequestDto {
 
     @NotBlank(message = "Vehicle name is required")

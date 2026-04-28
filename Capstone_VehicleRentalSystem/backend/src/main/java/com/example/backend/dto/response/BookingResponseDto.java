@@ -1,6 +1,11 @@
 package com.example.backend.dto.response;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for booking responses. Contains the details of a booking, including the booking ID,
+ * user information, vehicle information, booking dates, status, and creation timestamp. This DTO is used
+ * to return booking details in API responses.
+ */
 public class BookingResponseDto {
     private Long bookingId;
     private Long userId;

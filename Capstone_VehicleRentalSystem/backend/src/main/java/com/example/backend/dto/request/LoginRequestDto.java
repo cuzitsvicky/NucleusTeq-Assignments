@@ -3,6 +3,10 @@ package com.example.backend.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Data Transfer Object for login requests. Contains the user's email and password, which are required for authentication.
+ * The email field is validated to ensure it is in a proper email format, and both fields are required to be non-blank.
+ */
 public class LoginRequestDto {
 
    @Email(message = "Email format is invalid")
