@@ -2,6 +2,10 @@ package com.example.backend.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a booking in the vehicle rental system. Contains information about the user who made the booking,
+ * the vehicle being booked, the start and end dates of the booking, its status, and the creation timestamp.
+ */
 @Entity
 @Table(name = "bookings")
 public class Booking {
@@ -13,7 +17,10 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookingId;
 
-    // Many-to-one relationship with User and Vehicle to track which user made the booking and which vehicle is booked
+    /**
+     * Many-to-one relationship with User and Vehicle to track which user made the booking and which vehicle is booked
+     * FetchType.LAZY is used to optimize performance by loading related entities only when needed
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -22,7 +29,9 @@ public class Booking {
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
-    // Booking dates and status
+    /**
+     * Booking dates and status
+     */
     @Column(nullable = false)
     private LocalDateTime startDate;
 

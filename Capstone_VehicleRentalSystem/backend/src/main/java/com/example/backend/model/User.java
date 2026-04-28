@@ -5,11 +5,18 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a user in the vehicle rental system. Contains information about the user's username, password,
+ * email, role (USER or ADMIN), and the creation timestamp. This entity is used for authentication, authorization,
+ * and tracking who added vehicles to the system.
+ */
 @Entity
 @Table(name = "users")
 public class User {
 
-    // User roles for access control
+    /**
+     * User roles for access control
+     */
     public enum Role {
         USER, ADMIN
     }

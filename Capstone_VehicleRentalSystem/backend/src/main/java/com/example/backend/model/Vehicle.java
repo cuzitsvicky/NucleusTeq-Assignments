@@ -2,6 +2,11 @@ package com.example.backend.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/****
+ * Entity representing a vehicle in the rental system. Contains information about the vehicle's name, type (CAR or BIKE),
+ * description, availability status, the user who added it to the system, and the creation timestamp. This entity is
+ * used to manage the inventory of vehicles available for booking.
+ */
 @Entity
 @Table(name = "vehicles")
 public class Vehicle {
@@ -29,8 +34,10 @@ public class Vehicle {
     @Column(nullable = false)
     private boolean availabilityStatus = true;
     
-    // Shows who added the vehicle to the system
-    // Many-to-one relationship with User entity to track which admin added the vehicle
+    /**
+     * Many-to-one relationship with User entity to track which admin added the vehicle
+     * Shows who added the vehicle to the system
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "added_by", nullable = false)
     private User addedBy;
