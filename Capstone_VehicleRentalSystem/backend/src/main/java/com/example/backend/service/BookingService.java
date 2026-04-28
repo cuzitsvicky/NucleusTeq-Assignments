@@ -13,6 +13,11 @@ import com.example.backend.repository.VehicleRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Service for handling booking-related operations, such as creating a new booking, retrieving bookings for a user,
+ * retrieving all bookings for admins, and cancelling bookings. Contains business logic to ensure that bookings
+ * are valid, vehicles are available, and users have the necessary permissions to perform actions on bookings.
+ */
 @Service
 public class BookingService {
 
@@ -28,6 +33,10 @@ public class BookingService {
         this.userService = userService;
     }
 
+    /**
+     * Creates a new booking for a vehicle. Validates that the vehicle exists, the requested time range is valid,
+     * and that there are no conflicting bookings for the same vehicle. Only authenticated users can create bookings.
+     */
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BookingResponseDto bookVehicle(String email, BookingRequestDto dto) {
 
@@ -78,6 +87,9 @@ public class BookingService {
         return mapToDto(saved);
     }
 
+    /* Method to retrieve bookings for the currently authenticated user. Validates that the user is authenticated and
+     * automatically marks any expired bookings as COMPLETED before returning the list of bookings for the user.
+     */
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public List<BookingResponseDto> getMyBookings(String email) {
         User user = userService.findEntityByEmail(email);
@@ -86,6 +98,9 @@ public class BookingService {
         return bookings.stream().map(this::mapToDto).toList();
     }
 
+    /* Admin method to retrieve all bookings in the system. Validates that the requesting user has admin privileges and
+     * automatically marks any expired bookings as COMPLETED before returning the list of all bookings.
+     */
     @PreAuthorize("hasRole('ADMIN')")
     public List<BookingResponseDto> getAllBookings() {
         List<Booking> bookings = bookingRepository.findAll();
@@ -93,6 +108,10 @@ public class BookingService {
         return bookings.stream().map(this::mapToDto).toList();
     }
 
+    /* Method to cancel a booking. Validates that the booking exists, that the requesting user is either the owner of the
+    * booking or an admin, that the booking is not already cancelled, and that the start date has not passed. If all
+    * checks pass, the booking status is updated to CANCELLED.
+    */
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public void cancelBooking(String email, Long bookingId) {
         User user = userService.findEntityByEmail(email);
@@ -119,6 +138,10 @@ public class BookingService {
         bookingRepository.save(booking);
     }
     
+    /* Admin method to retrieve all bookings for a specific vehicle. Validates that the vehicle exists and that the
+     * requesting user has admin privileges. Automatically marks any expired bookings as COMPLETED before returning
+     * the list of bookings for the vehicle.
+     */
     @PreAuthorize("hasRole('ADMIN')")
     public List<BookingResponseDto> getVehicleBookings(Long vehicleId) {
 
@@ -129,7 +152,8 @@ public class BookingService {
         autoCompleteExpired(bookings);
         return bookings.stream().map(this::mapToDto).toList();
     }
-
+    
+    /* Helper method to automatically mark bookings as COMPLETED if their end date has passed and they are still in PENDING or CONFIRMED status */
     private void autoCompleteExpired(List<Booking> bookings) {
         LocalDateTime now = LocalDateTime.now();
         List<Booking> toSave = bookings.stream()
@@ -143,7 +167,8 @@ public class BookingService {
             bookingRepository.saveAll(toSave);
         }
     }
-
+    
+    /* Helper method to convert Booking entity to BookingResponseDto for API responses */
     private BookingResponseDto mapToDto(Booking booking) {
         return new BookingResponseDto(
                 booking.getBookingId(),
@@ -158,6 +183,7 @@ public class BookingService {
                 booking.getCreatedAt());
     }
 
+    /* Helper method to convert VehicleType enum to a user-friendly string for the response DTO */
     private String formatVehicleType(VehicleType type) {
         return switch (type) {
             case CAR -> "Car";

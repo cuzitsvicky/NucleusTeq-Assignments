@@ -14,22 +14,26 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    
-     public User findEntityByEmail(String email) {
+  
+    /* Retrieves a user by their email. Validates that the user exists and returns the User entity.
+     * This method is used internally for various operations that require fetching a user by email.
+     */
+    public User findEntityByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 
-    public User findEntityByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
-    }
-
+    /* Retrieves a user by their ID. Validates that the user exists and returns the User entity.
+     * This method is used internally for various operations that require fetching a user by ID.
+     */
     public User findEntityById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
+    /* Retrieves the current authenticated user's profile information. Validates that the user exists and returns their details as a DTO.
+     * This method is used for displaying the user's profile information on the frontend.
+     */
     public SignUpResponseDto getCurrentUser(String email) {
         User user = findEntityByEmail(email);
         return new SignUpResponseDto(user.getUserId(), user.getUsername(), user.getEmail(), user.getRole().name(),
