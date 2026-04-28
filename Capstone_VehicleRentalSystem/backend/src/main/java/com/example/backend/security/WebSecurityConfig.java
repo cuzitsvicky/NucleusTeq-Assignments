@@ -17,6 +17,11 @@ public class WebSecurityConfig {
     public WebSecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
+
+    /* Configures the security filter chain for the application. Disables CSRF and CORS, sets session management to stateless,
+     * and defines authorization rules for different endpoints. Permits all requests to authentication endpoints and GET requests to vehicle endpoints,
+     * while requiring authentication for all other requests. Adds the JWT authentication filter to validate tokens on incoming requests.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
