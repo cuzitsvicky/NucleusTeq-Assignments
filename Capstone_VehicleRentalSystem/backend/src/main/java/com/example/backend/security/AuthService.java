@@ -12,6 +12,10 @@ import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 
+/* AuthService is a service class responsible
+ * for handling authentication-related operations such as user registration and login.
+ * It interacts with the UserRepository to manage user data, uses BCryptPasswordEncoder for password hashing, and AuthUtil for JWT token generation and validation.
+ */
 @Service
 public class AuthService {
     
@@ -25,6 +29,10 @@ public class AuthService {
         this.authUtil = authUtil;
     }
 
+    /* Handles user registration by validating the provided details and creating a new user in the database.
+        * It checks for duplicate email addresses, hashes the password, assigns a role, and returns a SignUpResponseDto with the created user's details.
+        * This method is used to allow new users to sign up for the application and create their accounts.
+        */
     public SignUpResponseDto signup(SignupRequestDto dto) {
         
         if (userRepository.existsByEmail(dto.getEmail())) {
@@ -41,6 +49,9 @@ public class AuthService {
                 saved.getCreatedAt());
     }
 
+    /* Handles user login by validating the provided credentials. If the email and password are correct, it generates a JWT token and returns a LoginResponseDto containing the token and user details.
+     * This method is used to authenticate users and provide them with a token for subsequent authenticated requests in the application.
+     */
     public LoginResponseDto login(LoginRequestDto dto) {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
