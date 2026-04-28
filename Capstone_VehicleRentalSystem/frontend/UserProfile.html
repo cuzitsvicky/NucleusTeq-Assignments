@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,6 @@
     <link rel="stylesheet" href="css/userprofile.css">
     <link rel="icon" type="image/png" href="img/logo.png">
 </head>
-
 <body>
     <nav class="navbar">
         <div class="navbar-brand">
@@ -18,14 +16,184 @@
         </div>
         <div class="navbar-menu">
             <a href="vehicles.html" class="nav-link">Vehicles</a>
-            <a href="bookings.html" class="nav-link">My Bookings</a>
+            <a href="my-bookings.html" class="nav-link">My Bookings</a>
             <a href="Userprofile.html" class="nav-link active">Profile</a>
             <a href="#" class="nav-link" onclick="logout()">Logout</a>
         </div>
         <div class="navbar-toggle" onclick="toggleMenu()">☰</div>
     </nav>
 
-    <div class="container">
+    <div class="profile-page">
+
+        <!-- ── LEFT PANEL ── -->
+        <div class="left-panel">
+            <div class="avatar-circle" id="avatarCircle">
+                —
+                <div class="online-dot"></div>
+            </div>
+
+            <div class="left-name" id="displayName">—</div>
+            <div class="left-email" id="displayEmail">—</div>
+
+            <span class="role-badge user" id="roleBadge">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="8" cy="6" r="3"/>
+                    <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+                </svg>
+                <span id="roleBadgeText">User</span>
+            </span>
+
+            <div class="divider"></div>
+
+            <div class="left-stat-list">
+                <div class="left-stat-row">
+                    <div class="left-stat-icon">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M8 1l1.5 3 3.5.5-2.5 2.5.6 3.5L8 9l-3.1 1.5.6-3.5L3 4.5 6.5 4z"/>
+                        </svg>
+                    </div>
+                    <div class="left-stat-info">
+                        <div class="left-stat-label">Status</div>
+                        <div class="left-stat-value status-dot">● Active</div>
+                    </div>
+                </div>
+    
+            </div>
+        </div>
+
+        <!-- ── RIGHT PANEL ── -->
+        <div class="right-panel">
+
+            <!-- Stats bar across top -->
+            <div class="stats-bar">
+                <div class="stat-cell">
+                    <span class="stat-num" id="statUserId">—</span>
+                    <span class="stat-lbl">User ID</span>
+                </div>
+                <div class="stat-cell">
+                    <span class="stat-num" id="statRole">—</span>
+                    <span class="stat-lbl">Role</span>
+                </div>
+                <div class="stat-cell">
+                    <span class="stat-num" id="statMemberSince">—</span>
+                    <span class="stat-lbl">Member Since</span>
+                </div>
+            </div>
+
+            <!-- Bottom two columns -->
+            <div class="bottom-grid">
+
+                <!-- Account details -->
+                <div class="info-col">
+                    <div class="section-title">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="8" cy="6" r="3"/>
+                            <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+                        </svg>
+                        Account details
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-block">
+                            <div class="ib-icon">
+                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="8" cy="6" r="3"/>
+                                    <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+                                </svg>
+                            </div>
+                            <div class="ib-label">Username</div>
+                            <div class="ib-value" id="infoUsername">—</div>
+                        </div>
+
+                        <div class="info-block">
+                            <div class="ib-icon">
+                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="1" y="3" width="14" height="10" rx="2"/>
+                                    <path d="M1 6l7 4 7-4"/>
+                                </svg>
+                            </div>
+                            <div class="ib-label">Email</div>
+                            <div class="ib-value" id="infoEmail">—</div>
+                        </div>
+
+                        <div class="info-block">
+                            <div class="ib-icon">
+                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="2" y="2" width="12" height="12" rx="2"/>
+                                    <path d="M5 2v3M11 2v3M2 7h12"/>
+                                </svg>
+                            </div>
+                            <div class="ib-label">Account created</div>
+                            <div class="ib-value" id="infoCreated">—</div>
+                        </div>
+
+                        <div class="info-block">
+                            <div class="ib-icon">
+                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M8 1l2 4 5 .7-3.5 3.4.8 5L8 12l-4.3 2.1.8-5L1 5.7 6 5z"/>
+                                </svg>
+                            </div>
+                            <div class="ib-label">Account status</div>
+                            <div class="ib-value" style="color:var(--success);">● Active</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity timeline -->
+                <div class="timeline-col">
+                    <div class="section-title">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="8" cy="8" r="6"/>
+                            <path d="M8 5v3.5l2 1.5"/>
+                        </svg>
+                        Recent activity
+                    </div>
+
+                    <div class="timeline">
+                        <div class="tl-item">
+                            <div class="tl-dot green">
+                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M2 8l4 4 8-8"/>
+                                </svg>
+                            </div>
+                            <div class="tl-text">
+                                <strong>Logged in successfully</strong>
+                                <span>Session started on this device</span>
+                            </div>
+                            <div class="tl-time">Just now</div>
+                        </div>
+
+                        <div class="tl-item">
+                            <div class="tl-dot amber">
+                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="8" cy="8" r="6"/>
+                                    <path d="M8 5v3.5l2 1.5"/>
+                                </svg>
+                            </div>
+                            <div class="tl-text">
+                                <strong>Profile viewed</strong>
+                                <span>You visited your profile page</span>
+                            </div>
+                            <div class="tl-time">Just now</div>
+                        </div>
+
+                        <div class="tl-item">
+                            <div class="tl-dot amber">
+                                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M8 2v12M2 8h12"/>
+                                </svg>
+                            </div>
+                            <div class="tl-text">
+                                <strong>Account registered</strong>
+                                <span>Welcome to NexRide</span>
+                            </div>
+                            <div class="tl-time" id="tlJoinTime">—</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <footer class="footer">
@@ -35,5 +203,4 @@
     <script src="js/scripts.js"></script>
     <script src="js/profile.js"></script>
 </body>
-
 </html>
