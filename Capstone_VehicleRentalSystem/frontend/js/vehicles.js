@@ -6,15 +6,15 @@ const noVehiclesMessage = document.getElementById("noVehiclesMessage");
 const bookingForm       = document.getElementById("bookingForm");
 
 // State
-let allVehicles      = [];   // full list from API (all vehicles)
+let allVehicles          = [];   // full list from API (all vehicles)
 let dateFilteredVehicles = null; // null = no date filter active
-let activeType       = "all";
-let activeStatus     = "all";
-let dateFilterActive = false;
+let activeType           = "all";
+let activeStatus         = "all";
+let dateFilterActive     = false;
 
 // ── Set min datetime on filter inputs to now ──
 (function initDateFilterMinimums() {
-    const now = new Date();
+    const now   = new Date();
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
                     .toISOString().slice(0, 16);
     document.getElementById("filterStart").min = local;
@@ -71,12 +71,13 @@ async function applyDateFilter() {
         return;
     }
 
-    // Format as ISO for backend query param
-    const startIso = new Date(startVal).toISOString().slice(0, 19);
-    const endIso   = new Date(endVal).toISOString().slice(0, 19);
+    // FIX 1: Keep local datetime — just append :00 for seconds.
+    // DO NOT use new Date().toISOString() — that converts to UTC and shifts the time.
+    const startIso = startVal + ":00";  // "2025-05-01T10:00" → "2025-05-01T10:00:00"
+    const endIso   = endVal   + ":00";
 
     try {
-        document.getElementById("checkAvailabilityBtn").disabled = true;
+        document.getElementById("checkAvailabilityBtn").disabled    = true;
         document.getElementById("checkAvailabilityBtn").textContent = "Checking…";
 
         dateFilteredVehicles = await apiRequest(
@@ -85,19 +86,37 @@ async function applyDateFilter() {
         );
 
         dateFilterActive = true;
-        document.getElementById("dateFilterBadge").style.display = "flex";
+        document.getElementById("dateFilterBadge").style.display    = "flex";
         document.getElementById("clearDateFilterBtn").style.display = "inline-flex";
 
         // Pre-fill booking form dates when user clicks Book Now
         sessionStorage.setItem("prefillStart", startVal);
-        sessionStorage.setItem("prefillEnd", endVal);
+        sessionStorage.setItem("prefillEnd",   endVal);
+
+        // FIX 2: Disable the "Unavailable" status chip — meaningless when date filter
+        // is active, because all returned vehicles are confirmed available for the range.
+        document.querySelectorAll('.chip[data-filter="status"]').forEach(chip => {
+            if (chip.dataset.value === "unavailable") {
+                chip.disabled          = true;
+                chip.style.opacity     = "0.4";
+                chip.style.cursor      = "not-allowed";
+            }
+        });
+
+        // If user had "Unavailable" selected, reset to "All" so nothing is hidden
+        if (activeStatus === "unavailable") {
+            activeStatus = "all";
+            document.querySelectorAll('.chip[data-filter="status"]').forEach(c => {
+                c.classList.toggle("active", c.dataset.value === "all");
+            });
+        }
 
         applyFilters();
     } catch (error) {
         errEl.textContent = error.message || "Failed to check availability.";
         errEl.style.display = "block";
     } finally {
-        document.getElementById("checkAvailabilityBtn").disabled = false;
+        document.getElementById("checkAvailabilityBtn").disabled    = false;
         document.getElementById("checkAvailabilityBtn").textContent = "Check";
     }
 }
@@ -106,13 +125,23 @@ async function applyDateFilter() {
 function clearDateFilter() {
     dateFilteredVehicles = null;
     dateFilterActive     = false;
-    document.getElementById("filterStart").value       = "";
-    document.getElementById("filterEnd").value         = "";
-    document.getElementById("dateFilterBadge").style.display = "none";
+
+    document.getElementById("filterStart").value              = "";
+    document.getElementById("filterEnd").value                = "";
+    document.getElementById("dateFilterBadge").style.display  = "none";
     document.getElementById("clearDateFilterBtn").style.display = "none";
-    document.getElementById("dateFilterError").style.display   = "none";
+    document.getElementById("dateFilterError").style.display  = "none";
+
     sessionStorage.removeItem("prefillStart");
     sessionStorage.removeItem("prefillEnd");
+
+    // Re-enable the "Unavailable" status chip
+    document.querySelectorAll('.chip[data-filter="status"]').forEach(chip => {
+        chip.disabled      = false;
+        chip.style.opacity = "";
+        chip.style.cursor  = "";
+    });
+
     applyFilters();
 }
 
@@ -145,34 +174,39 @@ function applyFilters() {
     const baseList = dateFilterActive ? dateFilteredVehicles : allVehicles;
 
     const filtered = baseList.filter(v => {
-        const matchType   = activeType === "all" || v.type === activeType;
+        const matchType = activeType === "all" || v.type === activeType;
 
-        // When date filter is active, all returned vehicles are already confirmed
-        // available — so status filter only applies to the unavailable chip
-        // (date-filtered results are always availabilityStatus=true from backend)
+        // FIX 3: When date filter is active, skip the availabilityStatus check entirely.
+        // The backend already verified these vehicles have no booking conflicts for the
+        // requested range. availabilityStatus is a persistent flag — not date-aware —
+        // so filtering on it here would incorrectly hide vehicles that are free for
+        // your dates but booked on other dates (status = false).
         const matchStatus =
-            activeStatus === "all"         ? true :
-            activeStatus === "available"   ? v.availabilityStatus === true :
-                                             v.availabilityStatus === false;
+            dateFilterActive       ? true :
+            activeStatus === "all" ? true :
+            activeStatus === "available"
+                ? v.availabilityStatus === true
+                : v.availabilityStatus === false;
 
-        const matchName   = !query || v.name.toLowerCase().includes(query);
+        const matchName = !query || v.name.toLowerCase().includes(query);
+
         return matchType && matchStatus && matchName;
     });
 
     renderVehicles(filtered);
 
-    const countEl       = document.getElementById("filterCount");
-    const totalBase     = dateFilterActive ? dateFilteredVehicles.length : allVehicles.length;
-    const isFiltering   = activeType !== "all" || activeStatus !== "all" || query || dateFilterActive;
+    const countEl     = document.getElementById("filterCount");
+    const totalBase   = dateFilterActive ? dateFilteredVehicles.length : allVehicles.length;
+    const isFiltering = activeType !== "all" || activeStatus !== "all" || query || dateFilterActive;
 
     if (isFiltering) {
         const label = dateFilterActive
             ? `${filtered.length} vehicle${filtered.length !== 1 ? "s" : ""} available for your dates`
             : `Showing ${filtered.length} of ${totalBase} vehicle${totalBase !== 1 ? "s" : ""}`;
-        countEl.textContent    = label;
-        countEl.style.display  = "block";
+        countEl.textContent   = label;
+        countEl.style.display = "block";
     } else {
-        countEl.style.display  = "none";
+        countEl.style.display = "none";
     }
 }
 
@@ -193,7 +227,9 @@ function renderVehicles(vehicles) {
         const card = document.createElement("div");
         card.className = "vehicle-card";
 
-        const isAvailable     = vehicle.availabilityStatus;
+        // When date filter is active every returned vehicle is confirmed available,
+        // so we always enable the Book Now button in that case.
+        const isAvailable     = dateFilterActive ? true : vehicle.availabilityStatus;
         const statusClass     = isAvailable ? "available"  : "unavailable";
         const statusText      = isAvailable ? "Available"  : "Unavailable";
         const bookBtnDisabled = isAvailable ? "" : `disabled title="This vehicle is currently unavailable"`;
@@ -265,7 +301,10 @@ document.getElementById("bookVehicleForm").addEventListener("submit", async (e) 
     const startDate = formatDateTimeLocalToBackend(document.getElementById("startDate").value);
     const endDate   = formatDateTimeLocalToBackend(document.getElementById("endDate").value);
 
-    if (!startDate || !endDate) { showBookingError("Please select both start date and end date."); return; }
+    if (!startDate || !endDate) {
+        showBookingError("Please select both start date and end date.");
+        return;
+    }
 
     const now   = new Date();
     const start = new Date(startDate);
@@ -276,7 +315,7 @@ document.getElementById("bookVehicleForm").addEventListener("submit", async (e) 
 
     try {
         await apiRequest("/api/bookings", "POST", { vehicleId, startDate, endDate }, true);
-        alert("Booking confirmed successfully!", "success");
+        alert("Booking confirmed successfully!");
         cancelBookingForm();
         sessionStorage.removeItem("prefillStart");
         sessionStorage.removeItem("prefillEnd");

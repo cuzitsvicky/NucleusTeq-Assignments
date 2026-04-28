@@ -4,14 +4,15 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 @Component
 public class AuthUtil {
-    private static final String SECRET_KEY = "mySuperSecureJwtSecretKeyForVehicleRental12345";
+    @Value("${jwt.secretKey}")
+    private String SECRET_KEY;
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10;
 
     private Key getKey() {
