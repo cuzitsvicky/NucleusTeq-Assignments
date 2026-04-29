@@ -1,5 +1,8 @@
 package com.example.backend.controller;
+
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,35 +12,36 @@ import com.example.backend.dto.response.LoginResponseDto;
 import com.example.backend.dto.response.SignUpResponseDto;
 import com.example.backend.security.AuthService;
 
-
 /**
- * Controller for handling authentication-related endpoints, such as user registration and login.
- * Provides endpoints for signing up new users and logging in existing users, returning appropriate response DTOs.
+ * Controller for authentication endpoints: signup and login.
  */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
-    /**
-     * Endpoint for user registration. Accepts a SignupRequestDto containing the user's details,
-     * and returns a SignUpResponseDto with the details of the created user.
-     */
+    /** POST /api/auth/signup — register a new user. */
     @PostMapping("/signup")
     public ResponseEntity<SignUpResponseDto> signup(@Valid @RequestBody SignupRequestDto dto) {
-        return ResponseEntity.ok(authService.signup(dto));
+        log.info("POST /api/auth/signup — email: {}", dto.getEmail());
+        SignUpResponseDto response = authService.signup(dto);
+        log.info("Signup successful — userId: {}", response.getUserId());
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Endpoint for user login. Accepts a LoginRequestDto containing the user's credentials,
-     * and returns a LoginResponseDto with the authentication token.
-     */
+    /** POST /api/auth/login — authenticate and return a JWT. */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto dto) {
-        return ResponseEntity.ok(authService.login(dto));
+        log.info("POST /api/auth/login — email: {}", dto.getEmail());
+        LoginResponseDto response = authService.login(dto);
+        log.info("Login successful — userId: {}, role: {}", response.getUserId(), response.getRole());
+        return ResponseEntity.ok(response);
     }
 }

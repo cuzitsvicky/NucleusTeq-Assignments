@@ -1,66 +1,76 @@
 package com.example.backend.controller;
+
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import com.example.backend.dto.request.BookingRequestDto;
 import com.example.backend.dto.response.BookingResponseDto;
 import com.example.backend.service.BookingService;
+
 import java.util.List;
 
 /**
- * Controller for handling booking-related endpoints, such as creating a new booking, viewing user bookings,
- * and canceling bookings. Provides endpoints for users to manage their vehicle rentals and for admins to view all bookings.
+ * Controller for booking-related endpoints.
  */
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
+
+    private static final Logger log = LoggerFactory.getLogger(BookingController.class);
+
     private final BookingService bookingService;
 
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
 
-    /**
-     * Endpoint for booking a vehicle. Accepts a BookingRequestDto containing the vehicle ID and rental period,
-     * and returns a BookingResponseDto with the details of the created booking.
-     */
+    /** POST /api/bookings — book a vehicle. */
     @PostMapping
     public ResponseEntity<BookingResponseDto> bookVehicle(@Valid @RequestBody BookingRequestDto dto,
             Authentication authentication) {
-        return ResponseEntity.ok(bookingService.bookVehicle(authentication.getName(), dto));
+        log.info("POST /api/bookings — user: {}, vehicleId: {}", authentication.getName(), dto.getVehicleId());
+        BookingResponseDto response = bookingService.bookVehicle(authentication.getName(), dto);
+        log.info("Booking confirmed — bookingId: {}", response.getBookingId());
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Returns a list of bookings associated with the authenticated user.
-     */
+    /** GET /api/bookings/my-bookings — list bookings for the authenticated user. */
     @GetMapping("/my-bookings")
     public ResponseEntity<List<BookingResponseDto>> getMyBookings(Authentication authentication) {
-        return ResponseEntity.ok(bookingService.getMyBookings(authentication.getName()));
+        log.info("GET /api/bookings/my-bookings — user: {}", authentication.getName());
+        List<BookingResponseDto> bookings = bookingService.getMyBookings(authentication.getName());
+        log.debug("Returning {} booking(s) for user: {}", bookings.size(), authentication.getName());
+        return ResponseEntity.ok(bookings);
     }
 
-    /**
-     * Returns a list of bookings for a specific vehicle.
-     */
+    /** GET /api/bookings/vehicle/{vehicleId} — list bookings for a vehicle (admin). */
     @GetMapping("/vehicle/{vehicleId}")
     public ResponseEntity<List<BookingResponseDto>> getVehicleBookings(@PathVariable Long vehicleId) {
-        return ResponseEntity.ok(bookingService.getVehicleBookings(vehicleId));
+        log.info("GET /api/bookings/vehicle/{}", vehicleId);
+        List<BookingResponseDto> bookings = bookingService.getVehicleBookings(vehicleId);
+        log.debug("Returning {} booking(s) for vehicleId: {}", bookings.size(), vehicleId);
+        return ResponseEntity.ok(bookings);
     }
 
-    /**
-     * Returns a list of all bookings in the system.
-     */
+    /** GET /api/bookings/all — list all bookings (admin). */
     @GetMapping("/all")
     public ResponseEntity<List<BookingResponseDto>> getAllBookings() {
-        return ResponseEntity.ok(bookingService.getAllBookings());
+        log.info("GET /api/bookings/all");
+        List<BookingResponseDto> bookings = bookingService.getAllBookings();
+        log.debug("Returning {} total booking(s)", bookings.size());
+        return ResponseEntity.ok(bookings);
     }
 
-    /**
-     * Cancels a booking by its ID.
-     */
+    /** DELETE /api/bookings/{bookingId} — cancel a booking. */
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<String> cancelBooking(@PathVariable Long bookingId, Authentication authentication) {
+        log.info("DELETE /api/bookings/{} — user: {}", bookingId, authentication.getName());
         bookingService.cancelBooking(authentication.getName(), bookingId);
+        log.info("Booking cancelled — bookingId: {}", bookingId);
         return ResponseEntity.ok("Booking cancelled successfully");
     }
 }
