@@ -28,6 +28,8 @@ function showError(message, elementId = "pageError") {
   }
   errorBox.textContent = message;
   errorBox.style.display = "block";
+  errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+
 }
 
 // Clear error message display/
