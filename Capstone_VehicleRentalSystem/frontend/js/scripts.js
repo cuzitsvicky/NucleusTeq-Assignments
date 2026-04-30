@@ -19,6 +19,8 @@ function setActiveAdminNav(key) {
   });
 }
 
+let errorTimeout;
+
 // Display error message in a container
 function showError(message, elementId = "pageError") {
   const errorBox = document.getElementById(elementId);
@@ -26,10 +28,17 @@ function showError(message, elementId = "pageError") {
     alert(message);
     return;
   }
+
+  // Clear previous timer
+  if (errorTimeout) clearTimeout(errorTimeout);
+
   errorBox.textContent = message;
   errorBox.style.display = "block";
   errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
 
+  errorTimeout = setTimeout(() => {
+    clearError(elementId);
+  }, 3000);
 }
 
 // Clear error message display/
