@@ -1,7 +1,11 @@
+/* Bookings page script: handles loading and displaying the current user's bookings, and allows cancellation of eligible bookings. */
+
 requireLogin();
 showAdminNavIfNeeded();
 const bookingList = document.getElementById("bookingList");
 const noBookingsMessage = document.getElementById("noBookingsMessage");
+
+/* Loads the current user's bookings from the API and displays them in the UI, showing a message if there are none. */
 async function loadBookings() {
 
   clearError();
@@ -88,6 +92,7 @@ async function loadBookings() {
   }
 }
 
+/* Sends a request to cancel the booking with the given ID, then reloads the bookings list. */
 async function cancelBooking(bookingId) {
   if (!confirm("Are you sure you want to cancel this booking?")) return;
   try {
@@ -101,6 +106,7 @@ async function cancelBooking(bookingId) {
 
 loadBookings();
 
+/** Utility function to get the appropriate vehicle image based on type, with a fallback. */
 function getVehicleImage(type) {
   if (!type) return "img/car.png";
 
