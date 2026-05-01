@@ -14,8 +14,7 @@ import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 
-/* AuthService is a service class responsible
- * for handling authentication-related operations such as user registration and login.
+/* AuthService is a service class responsible for handling authentication-related operations such as user registration and login.
  * It interacts with the UserRepository to manage user data, uses BCryptPasswordEncoder for password hashing, and AuthUtil for JWT token generation and validation.
  */
 @Service

@@ -1,5 +1,5 @@
 
-//Handle registration form submission
+/* Handle registration form submission */
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   
@@ -9,10 +9,10 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   const role = document.getElementById("role").value;
   const errorDiv = document.getElementById("error");
   
-  // Clear previous errors
+  /* Clear previous errors */
   errorDiv.style.display = "none";
 
-  // Validate inputs
+  /* Validate inputs */
   if (!username || !email || !password) {
     errorDiv.textContent = "Please fill in all fields";
     errorDiv.style.display = "block";
@@ -31,7 +31,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     return;
   }
 
-  // Basic email validation
+  /* Basic email validation */
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     errorDiv.textContent = "Please enter a valid email address";
@@ -40,7 +40,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 
   try {
-    // Call signup API
+    /* Call signup API */
     await apiRequest("/api/auth/signup", "POST", { 
       username, 
       email, 
@@ -48,7 +48,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
       role 
     });
     
-    // Show success message
+    /* Show success message */
     alert("Registration successful! Please login with your new account.");
     window.location.href = "index.html";
   } catch (error) {

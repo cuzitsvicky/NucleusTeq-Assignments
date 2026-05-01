@@ -5,14 +5,14 @@ const vehicleList       = document.getElementById("vehicleList");
 const noVehiclesMessage = document.getElementById("noVehiclesMessage");
 const bookingForm       = document.getElementById("bookingForm");
 
-// State
-let allVehicles          = [];   // full list from API (all vehicles)
-let dateFilteredVehicles = null; // null = no date filter active
+/* State */
+let allVehicles          = [];   /* full list from API (all vehicles) */
+let dateFilteredVehicles = null; /* null = no date filter active */
 let activeType           = "all";
 let activeStatus         = "all";
 let dateFilterActive     = false;
 
-// ── Set min datetime on filter inputs to now ──
+/* Set min datetime on filter inputs to now */
 (function initDateFilterMinimums() {
     const now   = new Date();
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -29,7 +29,7 @@ document.getElementById("filterStart").addEventListener("change", function () {
     }
 });
 
-// ── Load all vehicles from API once ──
+/* Load all vehicles from API once */
 async function loadVehicles() {
     clearError();
     vehicleList.innerHTML = "";
@@ -41,7 +41,7 @@ async function loadVehicles() {
     }
 }
 
-// ── Date range filter: call backend with start/end ──
+/* Date range filter: call backend with start/end */
 async function applyDateFilter() {
     const startVal = document.getElementById("filterStart").value;
     const endVal   = document.getElementById("filterEnd").value;
@@ -71,9 +71,8 @@ async function applyDateFilter() {
         return;
     }
 
-    // FIX 1: Keep local datetime — just append :00 for seconds.
-    // DO NOT use new Date().toISOString() — that converts to UTC and shifts the time.
-    const startIso = startVal + ":00";  // "2025-05-01T10:00" → "2025-05-01T10:00:00"
+    
+    const startIso = startVal + ":00";  /* "2025-05-01T10:00" → "2025-05-01T10:00:00" */
     const endIso   = endVal   + ":00";
 
     try {
@@ -89,12 +88,11 @@ async function applyDateFilter() {
         document.getElementById("dateFilterBadge").style.display    = "flex";
         document.getElementById("clearDateFilterBtn").style.display = "inline-flex";
 
-        // Pre-fill booking form dates when user clicks Book Now
+        /* Pre-fill booking form dates when user clicks Book Now */
         sessionStorage.setItem("prefillStart", startVal);
         sessionStorage.setItem("prefillEnd",   endVal);
 
-        // FIX 2: Disable the "Unavailable" status chip — meaningless when date filter
-        // is active, because all returned vehicles are confirmed available for the range.
+        
         document.querySelectorAll('.chip[data-filter="status"]').forEach(chip => {
             if (chip.dataset.value === "unavailable") {
                 chip.disabled          = true;
@@ -103,7 +101,7 @@ async function applyDateFilter() {
             }
         });
 
-        // If user had "Unavailable" selected, reset to "All" so nothing is hidden
+        /* If user had "Unavailable" selected, reset to "All" so nothing is hidden */
         if (activeStatus === "unavailable") {
             activeStatus = "all";
             document.querySelectorAll('.chip[data-filter="status"]').forEach(c => {
@@ -121,7 +119,7 @@ async function applyDateFilter() {
     }
 }
 
-// ── Clear date filter ──
+/* Clear date filter */
 function clearDateFilter() {
     dateFilteredVehicles = null;
     dateFilterActive     = false;
@@ -135,7 +133,7 @@ function clearDateFilter() {
     sessionStorage.removeItem("prefillStart");
     sessionStorage.removeItem("prefillEnd");
 
-    // Re-enable the "Unavailable" status chip
+    /* Re-enable the "Unavailable" status chip */
     document.querySelectorAll('.chip[data-filter="status"]').forEach(chip => {
         chip.disabled      = false;
         chip.style.opacity = "";
@@ -145,7 +143,7 @@ function clearDateFilter() {
     applyFilters();
 }
 
-// ── Chip selection ──
+/* Chip selection */
 function setChip(el, group) {
     document.querySelectorAll(`.chip[data-filter="${group}"]`)
             .forEach(c => c.classList.remove("active"));
@@ -155,7 +153,7 @@ function setChip(el, group) {
     applyFilters();
 }
 
-// ── Reset all filters ──
+/* Reset all filters ── */
 function resetFilters() {
     document.getElementById("searchInput").value = "";
     activeType   = "all";
@@ -166,21 +164,16 @@ function resetFilters() {
     clearDateFilter();
 }
 
-// ── Core filter + render ──
+/* Core filter + render */
 function applyFilters() {
     const query = document.getElementById("searchInput").value.trim().toLowerCase();
 
-    // Use date-filtered list if active, otherwise full list
+    /* Use date-filtered list if active, otherwise full list */
     const baseList = dateFilterActive ? dateFilteredVehicles : allVehicles;
 
     const filtered = baseList.filter(v => {
         const matchType = activeType === "all" || v.type === activeType;
 
-        // FIX 3: When date filter is active, skip the availabilityStatus check entirely.
-        // The backend already verified these vehicles have no booking conflicts for the
-        // requested range. availabilityStatus is a persistent flag — not date-aware —
-        // so filtering on it here would incorrectly hide vehicles that are free for
-        // your dates but booked on other dates (status = false).
         const matchStatus =
             dateFilterActive       ? true :
             activeStatus === "all" ? true :
@@ -210,7 +203,7 @@ function applyFilters() {
     }
 }
 
-// ── Render vehicle cards ──
+/* Render vehicle cards */
 function renderVehicles(vehicles) {
     vehicleList.innerHTML = "";
 
@@ -227,8 +220,9 @@ function renderVehicles(vehicles) {
         const card = document.createElement("div");
         card.className = "vehicle-card";
 
-        // When date filter is active every returned vehicle is confirmed available,
-        // so we always enable the Book Now button in that case.
+        /* When date filter is active every returned vehicle is confirmed available,
+         * so we always enable the Book Now button in that case.
+         */
         const isAvailable     = dateFilterActive ? true : vehicle.availabilityStatus;
         const statusClass     = isAvailable ? "available"  : "unavailable";
         const statusText      = isAvailable ? "Available"  : "Unavailable";
@@ -252,7 +246,7 @@ function renderVehicles(vehicles) {
     });
 }
 
-// ── Booking form ──
+/* Booking form */
 function showBookingForm(vehicleId) {
     document.getElementById("vehicleId").value = vehicleId;
 
@@ -263,7 +257,7 @@ function showBookingForm(vehicleId) {
     document.getElementById("startDate").min = localDateTime;
     document.getElementById("endDate").min   = localDateTime;
 
-    // Pre-fill from date filter if active
+    /* Pre-fill from date filter if active */
     const prefillStart = sessionStorage.getItem("prefillStart");
     const prefillEnd   = sessionStorage.getItem("prefillEnd");
     if (prefillStart) document.getElementById("startDate").value = prefillStart;
@@ -273,11 +267,13 @@ function showBookingForm(vehicleId) {
     bookingForm.scrollIntoView({ behavior: "smooth" });
 }
 
+/* Hide booking form and reset inputs */
 function cancelBookingForm() {
     document.getElementById("bookVehicleForm").reset();
     bookingForm.style.display = "none";
 }
 
+/* Show error message related to booking form */
 function showBookingError(message) {
     showError(message);
     const errorBox = document.getElementById("pageError");
@@ -286,6 +282,7 @@ function showBookingError(message) {
     }
 }
 
+/* When start date changes, set minimum end date and clear if invalid */
 document.getElementById("startDate").addEventListener("change", function () {
     const endDateInput = document.getElementById("endDate");
     endDateInput.min = this.value;
@@ -294,6 +291,7 @@ document.getElementById("startDate").addEventListener("change", function () {
     }
 });
 
+/* Handle booking form submission */
 document.getElementById("bookVehicleForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -325,4 +323,5 @@ document.getElementById("bookVehicleForm").addEventListener("submit", async (e) 
     }
 });
 
+/* Initial load */
 loadVehicles();

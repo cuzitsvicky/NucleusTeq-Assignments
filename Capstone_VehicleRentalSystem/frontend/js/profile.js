@@ -1,17 +1,21 @@
 requireLogin();
 showAdminNavIfNeeded();
 
+/* Utility function to format a date string into a more readable format (e.g. "15 August 2023"). */
 function formatDate(value) {
     if (!value) return "—";
     const d = new Date(value);
     return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 }
 
+/** Utility function to format a date string into a year-only format (e.g. "2023"). */
 function formatYear(value) {
     if (!value) return "—";
     return new Date(value).getFullYear().toString();
 }
 
+
+/** Utility function to display the time elapsed since a given date (e.g. "2 days ago"). */
 function timeAgo(value) {
     if (!value) return "—";
     const diff = Date.now() - new Date(value).getTime();
@@ -24,6 +28,7 @@ function timeAgo(value) {
     return "Today";
 }
 
+/* Loads the current user's profile information from the API and updates the UI elements accordingly. */
 async function loadProfile() {
     clearError();
     try {
@@ -58,4 +63,5 @@ async function loadProfile() {
     }
 }
 
+/* Initializes the profile page by loading the user's profile information. */
 loadProfile();

@@ -1,10 +1,10 @@
-// Check if user is already logged in and redirect accordingly
+/* Check if user is already logged in and redirect accordingly */
 const existingUser = getCurrentUser();
 if (existingUser && getToken()) {
   window.location.href = existingUser.role === "ADMIN" ? "admin.html" : "vehicles.html";
 }
 
-// Handle login form submission
+/* Handle login form submission */
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   
@@ -12,10 +12,10 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value.trim();
   const errorDiv = document.getElementById("error");
   
-  // Clear previous errors
+  /* Clear previous errors */
   errorDiv.style.display = "none";
 
-  // Validate inputs
+  /* Validate inputs */
   if (!email || !password) {
     errorDiv.textContent = "Please enter both email and password";
     errorDiv.style.display = "block";
@@ -23,13 +23,13 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   }
 
   try {
-    // Call login API
+    /* Call login API */
     const data = await apiRequest("/api/auth/login", "POST", { email, password });
     
-    // Save login data
+    /* Save login data */
     saveLoginData(data);
     
-    // Redirect based on role
+    /* Redirect based on role */
     window.location.href = data.role === "ADMIN" ? "admin.html" : "vehicles.html";
   } catch (error) {
     errorDiv.textContent = error.message || "Invalid email or password";
