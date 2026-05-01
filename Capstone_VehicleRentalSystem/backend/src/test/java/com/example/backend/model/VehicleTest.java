@@ -22,7 +22,7 @@ class VehicleTest {
         vehicle = new Vehicle();
     }
 
-    // ── getters and setters ─────────────────────────────────
+    /** getters and setters */
 
     @Test
     void vehicleId_canBeSet_andRetrieved() {
@@ -98,7 +98,7 @@ class VehicleTest {
         assertThat(v.getCreatedAt()).isBeforeOrEqualTo(after.plusSeconds(1));
     }
 
-    // ── vehicle type enum ───────────────────────────────────
+    /** vehicle type enum */
 
     @Test
     void vehicleType_hasCarValue() {
@@ -124,7 +124,7 @@ class VehicleTest {
         assertThat(vehicle.getType()).isEqualTo(Vehicle.VehicleType.BIKE);
     }
 
-    // ── complex scenarios ───────────────────────────────────
+    /** complex scenarios */
 
     @Test
     void vehicle_withAllFieldsSet() {

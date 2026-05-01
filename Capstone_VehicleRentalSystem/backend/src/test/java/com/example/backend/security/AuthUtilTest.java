@@ -23,7 +23,7 @@ class AuthUtilTest {
         ReflectionTestUtils.setField(authUtil, "SECRET_KEY", TEST_SECRET);
     }
 
-    // ── generateToken ───────────────────────────────────────
+    /** generateToken */
 
     @Test
     void generateToken_success() {
@@ -50,7 +50,7 @@ class AuthUtilTest {
         assertThat(authUtil.validateToken(adminToken)).isTrue();
     }
 
-    // ── extractUsername ─────────────────────────────────────
+    /** extractUsername */
 
     @Test
     void extractUsername_success() {
@@ -71,7 +71,7 @@ class AuthUtilTest {
         assertThat(extracted).isEqualTo(testEmail);
     }
 
-    // ── extractRole ─────────────────────────────────────────
+    /** extractRole */
 
     @Test
     void extractRole_success_userRole() {
@@ -91,7 +91,7 @@ class AuthUtilTest {
         assertThat(role).isEqualTo("ADMIN");
     }
 
-    // ── extractClaims ───────────────────────────────────────
+    /** extractClaims */
 
     @Test
     void extractClaims_returnsClaimsWithSubject() {
@@ -123,7 +123,7 @@ class AuthUtilTest {
         assertThat(claims.getSubject()).isNotNull();
     }
 
-    // ── validateToken ───────────────────────────────────────
+    /** validateToken */
 
     @Test
     void validateToken_success_validToken() {
@@ -166,7 +166,7 @@ class AuthUtilTest {
         assertThat(isValid).isFalse();
     }
 
-    // ── token consistency ───────────────────────────────────
+    /** token consistency */
 
     @Test
     void tokenConsistency_extractedValuesMatchOriginals() {

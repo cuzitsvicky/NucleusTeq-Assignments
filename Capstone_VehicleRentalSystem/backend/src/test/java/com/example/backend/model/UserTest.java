@@ -16,7 +16,7 @@ class UserTest {
         user = new User();
     }
 
-    // ── getters and setters ─────────────────────────────────
+    /** getters and setters */
 
     @Test
     void userId_canBeSet_andRetrieved() {
@@ -68,7 +68,7 @@ class UserTest {
         assertThat(newUser.getCreatedAt()).isBeforeOrEqualTo(after.plusSeconds(1));
     }
 
-    // ── user role enum ──────────────────────────────────────
+    /** user role enum */
 
     @Test
     void userRole_hasUserValue() {
@@ -94,7 +94,7 @@ class UserTest {
         assertThat(user.getRole()).isEqualTo(User.Role.ADMIN);
     }
 
-    // ── complex scenarios ───────────────────────────────────
+    /** complex scenarios */
 
     @Test
     void user_withAllFieldsSet() {

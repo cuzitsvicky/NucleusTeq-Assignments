@@ -28,7 +28,7 @@ class BookingTest {
         booking = new Booking();
     }
 
-    // ── getters and setters ─────────────────────────────────
+    /** getters and setters */
 
     @Test
     void bookingId_canBeSet_andRetrieved() {
@@ -90,7 +90,7 @@ void createdAt_isSetToCurrentTimeByDefault() {
     assertThat(b.getCreatedAt()).isAfterOrEqualTo(before);
     assertThat(b.getCreatedAt()).isBeforeOrEqualTo(after.plusSeconds(1));
 }
-    // ── status enum ─────────────────────────────────────────
+    /** status enum */
 
     @Test
     void status_hasPendingValue() {
@@ -122,7 +122,7 @@ void createdAt_isSetToCurrentTimeByDefault() {
         assertThat(booking.getStatus()).isEqualTo(Booking.Status.CONFIRMED);
     }
 
-    // ── complex scenarios ───────────────────────────────────
+    /** complex scenarios */
 
     @Test
     void booking_withAllFieldsSet() {

@@ -49,7 +49,7 @@ class AuthServiceTest {
         sampleUser.setRole(User.Role.USER);
     }
 
-    // ── signup ──────────────────────────────────────────────
+    /** signup */
 
     @Test
     void signup_success_withDefaultUserRole() {
@@ -130,7 +130,7 @@ class AuthServiceTest {
         assertThat(result).isNotNull();
     }
 
-    // ── login ───────────────────────────────────────────────
+    /** login */
 
     @Test
     void login_success_returnsTokenAndUserDetails() {
