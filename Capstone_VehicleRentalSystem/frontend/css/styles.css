@@ -305,16 +305,16 @@ a:hover {
 }
 
 .image-background {
- position: absolute;
-         width: 400px;
-         height: 400px;
-         background: radial-gradient(circle at center, rgba(69, 60, 41, 0.3), transparent);
-         border-radius: 50%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 0;
-  
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle at center, rgba(69, 60, 41, 0.3), transparent);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+
 }
 
 .front-image img {
@@ -528,13 +528,25 @@ a:hover {
   box-shadow: none;
   transform: none;
 }
+
 button.btn.btn-secondary {
-      display: inline-flex; /* or flex */
-      justify-content: center;
-      align-items: center;
-      margin-top: 0px;
-      margin-bottom: 0px;
-    }
+  display: inline-flex;
+  /* or flex */
+  justify-content: center;
+  align-items: center;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+button.btn.btn-secondary-back {
+  display: inline-flex;
+  /* or flex */
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 .back-btn {
   position: fixed;
   top: 90px;
@@ -709,7 +721,7 @@ button.btn.btn-secondary {
 }
 
 .booking-card {
-    background: var(--bg3);
+  background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -1175,256 +1187,258 @@ button.btn.btn-secondary {
     width: 100%;
   }
 }
+
 /* ============================================================
    FILTER BAR
    ============================================================ */
 .filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 28px;
-    padding: 18px 20px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 18px 20px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 }
 
 .filter-search {
-    position: relative;
-    flex: 1;
-    min-width: 180px;
-    max-width: 280px;
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
 }
 
 .search-icon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    color: var(--text-d);
-    pointer-events: none;
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-d);
+  pointer-events: none;
 }
 
 .filter-search input {
-    width: 100%;
-    padding: 9px 12px 9px 34px;
-    background: var(--bg4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.875rem;
-    color: var(--text);
-    transition: border-color var(--transition), box-shadow var(--transition);
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .filter-search input:focus {
-    outline: none;
-    border-color: var(--amber);
-    box-shadow: 0 0 0 3px rgba(240,165,0,0.12);
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(240, 165, 0, 0.12);
 }
 
 .filter-chips {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .filter-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-d);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-right: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-d);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 2px;
 }
 
 .chip {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 500;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-m);
-    cursor: pointer;
-    transition: all var(--transition);
-    white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-m);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
 }
 
 .chip:hover {
-    border-color: var(--amber);
-    color: var(--amber);
-    background: rgba(240,165,0,0.06);
+  border-color: var(--amber);
+  color: var(--amber);
+  background: rgba(240, 165, 0, 0.06);
 }
 
 .chip.active {
-    background: var(--amber);
-    color: #000;
-    border-color: var(--amber);
-    font-weight: 600;
+  background: var(--amber);
+  color: #000;
+  border-color: var(--amber);
+  font-weight: 600;
 }
 
 .reset-chip {
-    margin-left: auto;
-    border-color: var(--danger);
-    color: var(--danger);
+  margin-left: auto;
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .reset-chip:hover {
-    background: var(--danger);
-    color: #fff;
-    border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
 }
 
 .filter-count {
-    font-size: 0.85rem;
-    color: var(--text-d);
-    margin-bottom: 8px;
-    letter-spacing: 0.02em;
+  font-size: 0.85rem;
+  color: var(--text-d);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
 }
+
 .date-filter-bar {
-    background: var(--bg3);
-    border-radius: var(--radius-lg);
-    padding: 20px 24px;
-    margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  background: var(--bg3);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
- 
+
 .date-filter-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: var(--amber);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--amber);
 }
- 
+
 .date-filter-inputs {
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
 }
- 
+
 .date-filter-field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
- 
+
 .date-filter-field label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-d);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-d);
 }
- 
+
 .date-filter-field input {
-    background: var(--bg4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 10px 12px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.875rem;
-    color: var(--text);
-    transition: border-color var(--transition), box-shadow var(--transition);
-    min-width: 200px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  min-width: 200px;
 }
- 
+
 .date-filter-field input:focus {
-    outline: none;
-    border-color: var(--amber);
-    box-shadow: 0 0 0 3px rgba(240,165,0,0.12);
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(240, 165, 0, 0.12);
 }
- 
+
 .date-filter-sep {
-    font-size: 1rem;
-    color: var(--text-d);
-    padding-bottom: 10px;
-    flex-shrink: 0;
+  font-size: 1rem;
+  color: var(--text-d);
+  padding-bottom: 10px;
+  flex-shrink: 0;
 }
- 
+
 .date-filter-btn {
-    padding: 10px 22px;
-    font-size: 0.82rem;
-    flex-shrink: 0;
+  padding: 10px 22px;
+  font-size: 0.82rem;
+  flex-shrink: 0;
 }
- 
+
 .date-filter-clear {
-    padding: 10px 18px;
-    font-size: 0.82rem;
-    flex-shrink: 0;
+  padding: 10px 18px;
+  font-size: 0.82rem;
+  flex-shrink: 0;
 }
- 
+
 .date-filter-error {
-    font-size: 0.85rem;
-    color: var(--danger);
-    background: rgba(224, 82, 82, 0.08);
-    border: 1px solid rgba(224, 82, 82, 0.25);
-    border-radius: var(--radius);
-    padding: 8px 12px;
+  font-size: 0.85rem;
+  color: var(--danger);
+  background: rgba(224, 82, 82, 0.08);
+  border: 1px solid rgba(224, 82, 82, 0.25);
+  border-radius: var(--radius);
+  padding: 8px 12px;
 }
- 
+
 .date-filter-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--amber);
-    background: rgba(240, 165, 0, 0.07);
-    border: 1px solid rgba(240, 165, 0, 0.2);
-    border-radius: var(--radius);
-    padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--amber);
+  background: rgba(240, 165, 0, 0.07);
+  border: 1px solid rgba(240, 165, 0, 0.2);
+  border-radius: var(--radius);
+  padding: 8px 14px;
 }
- 
+
 @media (max-width: 700px) {
-    .date-filter-inputs {
-        flex-direction: column;
-        align-items: stretch;
-    }
- 
-    .date-filter-field input {
-        min-width: unset;
-        width: 100%;
-    }
- 
-    .date-filter-sep {
-        display: none;
-    }
- 
-    .date-filter-btn,
-    .date-filter-clear {
-        width: 100%;
-        justify-content: center;
-    }
+  .date-filter-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-filter-field input {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .date-filter-sep {
+    display: none;
+  }
+
+  .date-filter-btn,
+  .date-filter-clear {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 
 /* Responsive filter bar */
 @media (max-width: 700px) {
-    .filter-bar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .filter-search {
-        max-width: 100%;
-        width: 100%;
-    }
+  .filter-search {
+    max-width: 100%;
+    width: 100%;
+  }
 
-    .reset-chip {
-        margin-left: 0;
-    }
+  .reset-chip {
+    margin-left: 0;
+  }
 
 }
