@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexRide - Modern Vehicle Rental</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" sizes="92x92" href="img/logo.png">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="index.html" class="logo-link">
+                <img src="img/logo.png" alt="NexRide Logo" class="navbar-logo">
+                <h1>NexRide</h1>
+            </a>
+        </div>
+        <div class="navbar-menu">
+            <button class="btn sign-in-btn" onclick="showLogin()">Sign In</button>
+        </div>
+        <div class="navbar-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="front-page">
+        <div class="front-content">
+            <div class="front-text">
+                <h1>Move Smarter with NexRide.</h1>
+                <p>Drive Forward. We Handle the Rest.</p>
+                <button class="btn explore-btn" onclick="showLogin()">Explore Vehicles</button>
+            </div>
+            <div class="front-image">
+                <div class="image-background"></div>
+                <img src="img/car2.png" alt="Featured Car">
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay" style="display:none;">
+        <div class="login-card">
+            <div class="login-left">
+                <img src="img/logo.png" alt="Login Image">
+            </div>
+            <div class="login-right">
+                <h1>Login</h1>
+                <div id="error" class="error" style="display:none;"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+
+                <p>Don't have an account? <a href="register.html">Register here</a></p>
+                <button class="btn btn-secondary" onclick="hideLogin()">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2026 NexRide. All rights reserved.</p>
+    </footer>
+
+    <script src="js/scripts.js"></script>
+    <script src="js/index.js"></script>
+</body>
+
+</html>

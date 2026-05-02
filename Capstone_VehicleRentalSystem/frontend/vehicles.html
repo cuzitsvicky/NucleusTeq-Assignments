@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexRide</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="img/logo.png">
+</head>
+
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <div class="navbar-brand"><img src="img/logo.png" alt="Car Logo" class="navbar-logo">
+            <h1>NexRide</h1>
+        </div>
+        <div class="navbar-menu">
+            <a href="vehicles.html" class="nav-link active">Vehicles</a>
+            <a href="bookings.html" class="nav-link">My Bookings</a>
+            <a href="Userprofile.html" class="nav-link">Profile</a>
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+        </div>
+        <div class="navbar-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+
+    <div class="container">
+        <h1>Vehicles</h1>
+
+        <!-- ── Date Range Filter ── -->
+        <div class="date-filter-bar">
+            <div class="date-filter-title">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="flex-shrink:0">
+                    <rect x="3" y="4" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                    <path d="M3 8h14M7 2v4M13 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                <span>Check availability for dates</span>
+            </div>
+            <div class="date-filter-inputs">
+                <div class="date-filter-field">
+                    <label for="filterStart">From</label>
+                    <input type="datetime-local" id="filterStart">
+                </div>
+                <div class="date-filter-sep">→</div>
+                <div class="date-filter-field">
+                    <label for="filterEnd">To</label>
+                    <input type="datetime-local" id="filterEnd">
+                </div>
+                <button class="btn date-filter-btn" id="checkAvailabilityBtn" onclick="applyDateFilter()">
+                    Check
+                </button>
+                <button class="btn btn-secondary date-filter-clear" id="clearDateFilterBtn" onclick="clearDateFilter()" style="display:none;">
+                    Clear
+                </button>
+            </div>
+            <div id="dateFilterError" class="date-filter-error" style="display:none;"></div>
+            <div id="dateFilterBadge" class="date-filter-badge" style="display:none;">
+                📅 Showing vehicles available for your selected dates
+            </div>
+        </div>
+        
+        <!-- ── Filter Bar ── -->
+        <div class="filter-bar">
+            <div class="filter-search">
+                <svg class="search-icon" viewBox="0 0 20 20" fill="none">
+                    <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+                    <path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search by name…" oninput="applyFilters()">
+            </div>
+
+            <div class="filter-chips">
+                <span class="filter-label">Type</span>
+                <button class="chip active" data-filter="type" data-value="all" onclick="setChip(this,'type')">All</button>
+                <button class="chip" data-filter="type" data-value="Car"  onclick="setChip(this,'type')">🚗 Cars</button>
+                <button class="chip" data-filter="type" data-value="Bike" onclick="setChip(this,'type')">🏍 Bikes</button>
+            </div>
+
+            <div class="filter-chips">
+                <span class="filter-label">Status</span>
+                <button class="chip active" data-filter="status" data-value="all"       onclick="setChip(this,'status')">All</button>
+                <button class="chip" data-filter="status" data-value="available"   onclick="setChip(this,'status')">Available</button>
+                <button class="chip" data-filter="status" data-value="unavailable" onclick="setChip(this,'status')">Unavailable</button>
+            </div>
+
+            <button class="chip reset-chip" onclick="resetFilters()">✕ Reset</button>
+        </div>
+
+        <p id="filterCount" class="filter-count" style="display:none;"></p>
+
+        <div id="pageError" class="error" style="display:none;"></div>
+        <div id="vehicleList" class="vehicle-list"></div>
+        <div id="noVehiclesMessage" class="message">No vehicles match your filters.</div>
+
+        <!-- Booking form  -->
+        <div id="bookingForm" class="booking-form" style="display:none;">
+            <h2>Book Vehicle</h2>
+            <form id="bookVehicleForm">
+                <input type="hidden" id="vehicleId">
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="datetime-local" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="datetime-local" id="endDate" required>
+                </div>
+                <button type="submit" class="btn">Confirm Booking</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelBookingForm()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>© 2026 NexRide. All rights reserved.</p>
+    </footer>
+
+    <script src="js/scripts.js"></script>
+    <script src="js/vehicles.js"></script>
+</body>
+</html>
