@@ -48,8 +48,7 @@ public class AuthService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(
-                dto.getRole() != null && dto.getRole().equalsIgnoreCase("ADMIN") ? User.Role.ADMIN : User.Role.USER);
+        user.setRole(User.Role.USER);
 
         User saved = userRepository.save(user);
         log.info("User registered successfully — userId: {}, email: {}, role: {}",

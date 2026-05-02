@@ -166,6 +166,13 @@ public class VehicleService {
             throw new BadRequestException("Cannot delete vehicle with active or upcoming bookings");
         }
 
+        // Nullify the vehicle reference in all historical bookings before deleting
+        List<Booking> bookings = bookingRepository.findByVehicle(vehicle);
+        bookings.forEach(b -> b.setVehicle(null));
+        bookingRepository.saveAll(bookings);
+        log.info("Nullified vehicle reference in {} booking(s) for vehicleId: {}", bookings.size(), vehicleId);
+
+
         vehicleRepository.delete(vehicle);
         log.info("Vehicle deleted successfully — vehicleId: {}, name: {}", vehicleId, vehicle.getName());
     }

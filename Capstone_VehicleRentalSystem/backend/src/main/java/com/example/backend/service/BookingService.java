@@ -212,18 +212,22 @@ public class BookingService {
 
     /** Helper: convert Booking entity to response DTO. */
     private BookingResponseDto mapToDto(Booking booking) {
-        return new BookingResponseDto(
-                booking.getBookingId(),
-                booking.getUser().getUserId(),
-                booking.getUser().getUsername(),
-                booking.getVehicle().getVehicleId(),
-                booking.getVehicle().getName(),
-                formatVehicleType(booking.getVehicle().getType()),
-                booking.getStartDate(),
-                booking.getEndDate(),
-                booking.getStatus().name(),
-                booking.getCreatedAt());
-    }
+    Long vehicleId = booking.getVehicle() != null ? booking.getVehicle().getVehicleId() : null;
+    String vehicleName = booking.getVehicle() != null ? booking.getVehicle().getName() : "[Deleted Vehicle]";
+    String vehicleType = booking.getVehicle() != null ? formatVehicleType(booking.getVehicle().getType()) : "Unknown";
+
+    return new BookingResponseDto(
+            booking.getBookingId(),
+            booking.getUser().getUserId(),
+            booking.getUser().getUsername(),
+            vehicleId,
+            vehicleName,
+            vehicleType,
+            booking.getStartDate(),
+            booking.getEndDate(),
+            booking.getStatus().name(),
+            booking.getCreatedAt());
+}
 
     /** Helper: convert VehicleType enum to display string. */
     private String formatVehicleType(VehicleType type) {
