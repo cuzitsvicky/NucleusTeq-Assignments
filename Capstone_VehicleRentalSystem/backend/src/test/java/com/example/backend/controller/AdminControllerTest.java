@@ -22,54 +22,49 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * ============================================================
  *  AdminControllerTest — Pure Unit Tests (no Spring context)
- * ============================================================
  *
  *  Tests the AdminController in isolation by mocking VehicleService.
  *  Covers add, update, and delete vehicle operations including
  *  happy paths and exception propagation.
- * ============================================================
  */
 class AdminControllerTest {
 
-    // ── Mocks ─────────────────────────────────────────────────
+    /* Mocks */
     @Mock
     private VehicleService vehicleService;
 
     @Mock
     private Authentication authentication;
 
-    // ── The class we are actually testing ────────────────────
+    /* The class we are actually testing */
     @InjectMocks
     private AdminController adminController;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        // Admin email extracted from the JWT via Authentication
+        /* Admin email extracted from the JWT via Authentication */
         when(authentication.getName()).thenReturn("admin@example.com");
     }
 
-    // =========================================================
-    //  ADD VEHICLE TESTS
-    // =========================================================
+    /* ADD VEHICLE TESTS */
 
     @Test
     @DisplayName("Add Vehicle — success: returns 200 with VehicleResponseDto")
     void addVehicle_validRequest_returnsVehicleResponse() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         VehicleRequestDto dto = buildVehicleRequestDto("Honda City", "Car");
 
         VehicleResponseDto mockResponse = buildVehicleResponseDto(1L, "Honda City", "Car");
 
         when(vehicleService.addVehicle("admin@example.com", dto)).thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /* ACT */
         ResponseEntity<VehicleResponseDto> response =
                 adminController.addVehicle(dto, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /* ASSERT */
         assertNotNull(response, "Response should not be null");
         assertEquals(200, response.getStatusCode().value(), "HTTP status should be 200 OK");
         assertNotNull(response.getBody(), "Response body should not be null");
@@ -83,25 +78,25 @@ class AdminControllerTest {
     @Test
     @DisplayName("Add Vehicle — service called with correct admin email from Authentication")
     void addVehicle_usesEmailFromAuthentication() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         VehicleRequestDto dto = buildVehicleRequestDto("Royal Enfield", "Bike");
         VehicleResponseDto mockResponse = buildVehicleResponseDto(2L, "Royal Enfield", "Bike");
 
         when(vehicleService.addVehicle(anyString(), any(VehicleRequestDto.class)))
                 .thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /* ACT */
         adminController.addVehicle(dto, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
-        // Verify authentication.getName() was used as admin email
+        /* ASSERT */
+        /* Verify authentication.getName() was used as admin email */
         verify(vehicleService).addVehicle(eq("admin@example.com"), eq(dto));
     }
 
     @Test
     @DisplayName("Add Vehicle — Bike type: returns correct type in response")
     void addVehicle_bikeType_returnsCorrectType() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         VehicleRequestDto dto = buildVehicleRequestDto("Royal Enfield Classic 350", "Bike");
         dto.setDescription("Retro-style touring motorcycle");
 
@@ -110,11 +105,11 @@ class AdminControllerTest {
         when(vehicleService.addVehicle(anyString(), any(VehicleRequestDto.class)))
                 .thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /* ACT */
         ResponseEntity<VehicleResponseDto> response =
                 adminController.addVehicle(dto, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /* ASSERT */
         assertNotNull(response.getBody());
         assertEquals("Bike", response.getBody().getType());
     }
@@ -122,25 +117,24 @@ class AdminControllerTest {
     @Test
     @DisplayName("Add Vehicle — service throws ResourceNotFoundException: propagates")
     void addVehicle_serviceThrows_propagatesException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         VehicleRequestDto dto = buildVehicleRequestDto("Ghost Admin", "Car");
 
         when(vehicleService.addVehicle(anyString(), any(VehicleRequestDto.class)))
                 .thenThrow(new ResourceNotFoundException("Admin user not found"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /* ACT + ASSERT */
         assertThrows(ResourceNotFoundException.class,
                 () -> adminController.addVehicle(dto, authentication));
     }
 
-    // =========================================================
-    //  UPDATE VEHICLE TESTS
-    // =========================================================
+
+    /* UPDATE VEHICLE TESTS */
 
     @Test
     @DisplayName("Update Vehicle — success: returns 200 with updated VehicleResponseDto")
     void updateVehicle_validRequest_returnsUpdatedResponse() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         Long vehicleId = 5L;
         VehicleRequestDto dto = buildVehicleRequestDto("Honda City Updated", "Car");
 
@@ -149,11 +143,11 @@ class AdminControllerTest {
         when(vehicleService.updateVehicle("admin@example.com", vehicleId, dto))
                 .thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /* ACT */
         ResponseEntity<VehicleResponseDto> response =
                 adminController.updateVehicle(vehicleId, dto, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /* ASSERT */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(vehicleId, response.getBody().getVehicleId());
@@ -165,14 +159,14 @@ class AdminControllerTest {
     @Test
     @DisplayName("Update Vehicle — vehicle not found: throws ResourceNotFoundException")
     void updateVehicle_vehicleNotFound_throwsResourceNotFoundException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         Long vehicleId = 999L;
         VehicleRequestDto dto = buildVehicleRequestDto("Ghost Vehicle", "Car");
 
         when(vehicleService.updateVehicle(anyString(), eq(vehicleId), any(VehicleRequestDto.class)))
                 .thenThrow(new ResourceNotFoundException("Vehicle not found with id: 999"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /* ACT + ASSERT */
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
                 () -> adminController.updateVehicle(vehicleId, dto, authentication));
 
@@ -182,7 +176,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("Update Vehicle — service called with correct vehicleId, adminEmail, and dto")
     void updateVehicle_correctArgumentsPassedToService() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         Long vehicleId = 7L;
         VehicleRequestDto dto = buildVehicleRequestDto("Yamaha FZ", "Bike");
         dto.setAvailabilityStatus(false);
@@ -192,10 +186,10 @@ class AdminControllerTest {
         when(vehicleService.updateVehicle(anyString(), anyLong(), any(VehicleRequestDto.class)))
                 .thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /* ACT */
         adminController.updateVehicle(vehicleId, dto, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /* ASSERT */
         verify(vehicleService).updateVehicle(
                 eq("admin@example.com"),
                 eq(7L),
@@ -203,22 +197,20 @@ class AdminControllerTest {
         );
     }
 
-    // =========================================================
-    //  DELETE VEHICLE TESTS
-    // =========================================================
+    /**  DELETE VEHICLE TESTS */
 
     @Test
     @DisplayName("Delete Vehicle — success: returns 200 with success message")
     void deleteVehicle_validId_returnsSuccessMessage() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         Long vehicleId = 3L;
 
         doNothing().when(vehicleService).deleteVehicle(vehicleId);
 
-        // ── ACT ───────────────────────────────────────────────
+        /* ACT */
         ResponseEntity<String> response = adminController.deleteVehicle(vehicleId);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /* ASSERT */
         assertEquals(200, response.getStatusCode().value());
         assertEquals("Vehicle deleted successfully", response.getBody());
 
@@ -228,13 +220,13 @@ class AdminControllerTest {
     @Test
     @DisplayName("Delete Vehicle — vehicle not found: throws ResourceNotFoundException")
     void deleteVehicle_vehicleNotFound_throwsResourceNotFoundException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         Long vehicleId = 404L;
 
         doThrow(new ResourceNotFoundException("Vehicle not found with id: 404"))
                 .when(vehicleService).deleteVehicle(vehicleId);
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /* ACT + ASSERT */
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
                 () -> adminController.deleteVehicle(vehicleId));
 
@@ -244,13 +236,13 @@ class AdminControllerTest {
     @Test
     @DisplayName("Delete Vehicle — active bookings: throws BadRequestException")
     void deleteVehicle_hasActiveBookings_throwsBadRequestException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         Long vehicleId = 8L;
 
         doThrow(new BadRequestException("Cannot delete vehicle with active or upcoming bookings"))
                 .when(vehicleService).deleteVehicle(vehicleId);
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /* ACT + ASSERT */
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> adminController.deleteVehicle(vehicleId));
 
@@ -260,21 +252,19 @@ class AdminControllerTest {
     @Test
     @DisplayName("Delete Vehicle — deleteVehicle called exactly once with correct vehicleId")
     void deleteVehicle_serviceCalledOnce() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /* ARRANGE */
         Long vehicleId = 10L;
         doNothing().when(vehicleService).deleteVehicle(vehicleId);
 
-        // ── ACT ───────────────────────────────────────────────
+        /* ACT */
         adminController.deleteVehicle(vehicleId);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /* ASSERT */
         verify(vehicleService, times(1)).deleteVehicle(10L);
         verify(vehicleService, never()).deleteVehicle(99L); // Not called with wrong ID
     }
 
-    // =========================================================
-    //  HELPER METHODS
-    // =========================================================
+    /**  HELPER METHODS */
 
     private VehicleRequestDto buildVehicleRequestDto(String name, String type) {
         VehicleRequestDto dto = new VehicleRequestDto();

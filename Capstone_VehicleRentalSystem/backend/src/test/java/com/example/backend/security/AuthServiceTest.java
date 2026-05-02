@@ -22,9 +22,16 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ *  AuthServiceTest — Pure Unit Tests (no Spring context)
+ *
+ *  Tests the AuthService in isolation by mocking UserRepository, BCryptPasswordEncoder, and AuthUtil.
+ *  Covers both signup and login functionalities, including success scenarios and expected exceptions.
+ */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
+    /**  Mocks */
     @Mock
     private UserRepository userRepository;
 
@@ -34,11 +41,14 @@ class AuthServiceTest {
     @Mock
     private AuthUtil authUtil;
 
+    /**  The class we are actually testing — all dependencies are mocked. */
     @InjectMocks
     private AuthService authService;
 
+    /**  Sample user data for testing */
     private User sampleUser;
 
+    /**  Setup method to initialize common test data */
     @BeforeEach
     void setUp() {
         sampleUser = new User();
@@ -131,7 +141,6 @@ class AuthServiceTest {
     }
 
     /** login */
-
     @Test
     void login_success_returnsTokenAndUserDetails() {
         LoginRequestDto dto = new LoginRequestDto();
@@ -152,6 +161,8 @@ class AuthServiceTest {
         assertThat(result.getRole()).isEqualTo("USER");
     }
 
+    /* This test checks that if the email is not found in the database, an UnauthorizedException is thrown,
+       and that the password encoder's matches method is never called. */
     @Test
     void login_throwsUnauthorizedException_whenEmailNotFound() {
         LoginRequestDto dto = new LoginRequestDto();
@@ -167,6 +178,8 @@ class AuthServiceTest {
         verify(passwordEncoder, never()).matches(any(), any());
     }
 
+    /* This test checks that if the password is incorrect, an UnauthorizedException is thrown,
+       and that the token generation method is never called. */
     @Test
     void login_throwsUnauthorizedException_whenPasswordIncorrect() {
         LoginRequestDto dto = new LoginRequestDto();

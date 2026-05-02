@@ -16,17 +16,28 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ *  UserServiceTest — Pure Unit Tests (no Spring context)
+ *
+ *  Tests the UserService in isolation by mocking UserRepository.
+ *  Covers findEntityByEmail, findEntityById, and getCurrentUser methods,
+ *  including both success scenarios and expected exceptions.
+ */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+    /**  Mocks */
     @Mock
     private UserRepository userRepository;
 
+    /**  The class we are actually testing — all dependencies are mocked. */
     @InjectMocks
     private UserService userService;
 
+    /**  Sample user data for testing */
     private User sampleUser;
 
+    /**  Setup method to initialize common test data */
     @BeforeEach
     void setUp() {
         sampleUser = new User();
@@ -37,7 +48,7 @@ class UserServiceTest {
         sampleUser.setRole(User.Role.USER);
     }
 
-    // ── findEntityByEmail ───────────────────────────────────
+    /** findEntityByEmail */
 
     @Test
     void findEntityByEmail_success() {
@@ -60,7 +71,7 @@ class UserServiceTest {
                 .hasMessageContaining("unknown@example.com");
     }
 
-    // ── findEntityById ──────────────────────────────────────
+    /** findEntityById */
 
     @Test
     void findEntityById_success() {
@@ -83,7 +94,7 @@ class UserServiceTest {
                 .hasMessageContaining("999");
     }
 
-    // ── getCurrentUser ──────────────────────────────────────
+    /** getCurrentUser */
 
     @Test
     void getCurrentUser_success() {

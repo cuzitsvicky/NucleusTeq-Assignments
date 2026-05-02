@@ -21,22 +21,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * ============================================================
  *  VehicleControllerTest — Pure Unit Tests (no Spring context)
- * ============================================================
  *
  *  Tests the VehicleController in isolation by mocking VehicleService.
  *  Covers: get all vehicles, get available vehicles (with and without
  *  date range), and get vehicle by ID — including error cases.
- * ============================================================
  */
 class VehicleControllerTest {
 
-    // ── Mock ──────────────────────────────────────────────────
+    /**  Mocks */
     @Mock
     private VehicleService vehicleService;
 
-    // ── The class we are actually testing ────────────────────
+    /**  The class we are actually testing — all dependencies are mocked. */
     @InjectMocks
     private VehicleController vehicleController;
 
@@ -45,9 +42,7 @@ class VehicleControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    // =========================================================
-    //  GET ALL VEHICLES TESTS
-    // =========================================================
+    /**  GET ALL VEHICLES TESTS */
 
     @Test
     @DisplayName("Get All Vehicles — success: returns 200 with full vehicle list")
@@ -61,11 +56,11 @@ class VehicleControllerTest {
 
         when(vehicleService.getAllVehicles()).thenReturn(mockVehicles);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<VehicleResponseDto>> response =
                 vehicleController.getAllVehicles();
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertNotNull(response, "Response should not be null");
         assertEquals(200, response.getStatusCode().value(), "HTTP status should be 200 OK");
         assertNotNull(response.getBody());
@@ -79,14 +74,14 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get All Vehicles — no vehicles: returns 200 with empty list")
     void getAllVehicles_noVehiclesExist_returnsEmptyList() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         when(vehicleService.getAllVehicles()).thenReturn(List.of());
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<VehicleResponseDto>> response =
                 vehicleController.getAllVehicles();
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
@@ -95,7 +90,7 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get All Vehicles — includes both available and unavailable vehicles")
     void getAllVehicles_returnsBothAvailableAndUnavailable() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         List<VehicleResponseDto> mockVehicles = List.of(
                 buildVehicleResponseDto(1L, "Honda City", "Car", true),
                 buildVehicleResponseDto(2L, "Yamaha FZ", "Bike", false)
@@ -103,24 +98,22 @@ class VehicleControllerTest {
 
         when(vehicleService.getAllVehicles()).thenReturn(mockVehicles);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<VehicleResponseDto>> response =
                 vehicleController.getAllVehicles();
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertNotNull(response.getBody());
         assertTrue(response.getBody().get(0).isAvailabilityStatus(),  "First vehicle should be available");
         assertFalse(response.getBody().get(1).isAvailabilityStatus(), "Second vehicle should be unavailable");
     }
 
-    // =========================================================
-    //  GET AVAILABLE VEHICLES (no date range) TESTS
-    // =========================================================
+    /**  GET AVAILABLE VEHICLES (no date range) TESTS */
 
     @Test
     @DisplayName("Get Available Vehicles — no date params: returns availability-flag filtered list")
     void getAvailableVehicles_noDateRange_returnsAvailableVehicles() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         List<VehicleResponseDto> mockVehicles = List.of(
                 buildVehicleResponseDto(1L, "Honda City", "Car", true),
                 buildVehicleResponseDto(3L, "Toyota Fortuner", "Car", true)
@@ -128,12 +121,12 @@ class VehicleControllerTest {
 
         when(vehicleService.getAvailableVehicles()).thenReturn(mockVehicles);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         // Passing null for start/end triggers the simple availability flag path
         ResponseEntity<List<VehicleResponseDto>> response =
                 vehicleController.getAvailableVehicles(null, null);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
@@ -147,27 +140,25 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Available Vehicles — no date params: no vehicles available returns empty list")
     void getAvailableVehicles_noDateRange_noVehiclesAvailable_returnsEmptyList() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         when(vehicleService.getAvailableVehicles()).thenReturn(List.of());
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<VehicleResponseDto>> response =
                 vehicleController.getAvailableVehicles(null, null);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
     }
 
-    // =========================================================
-    //  GET AVAILABLE VEHICLES (with date range) TESTS
-    // =========================================================
+    /**  GET AVAILABLE VEHICLES (with date range) TESTS */
 
     @Test
     @DisplayName("Get Available Vehicles — with date range: delegates to getAvailableVehiclesForRange")
     void getAvailableVehicles_withDateRange_callsRangeMethod() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         LocalDateTime start = LocalDateTime.of(2025, 6, 1, 10, 0);
         LocalDateTime end   = LocalDateTime.of(2025, 6, 5, 10, 0);
 
@@ -177,17 +168,17 @@ class VehicleControllerTest {
 
         when(vehicleService.getAvailableVehiclesForRange(start, end)).thenReturn(mockVehicles);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<VehicleResponseDto>> response =
                 vehicleController.getAvailableVehicles(start, end);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
         assertEquals("Honda City", response.getBody().get(0).getName());
 
-        // Verify the range method was called — NOT the simple availability method
+        /**  Verify the range method was called — NOT the simple availability method */
         verify(vehicleService, times(1)).getAvailableVehiclesForRange(start, end);
         verify(vehicleService, never()).getAvailableVehicles();
     }
@@ -195,7 +186,7 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Available Vehicles — with date range: no conflicts returns all available vehicles")
     void getAvailableVehicles_withDateRange_noConflicts_returnsAllAvailable() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         LocalDateTime start = LocalDateTime.of(2025, 7, 1, 9, 0);
         LocalDateTime end   = LocalDateTime.of(2025, 7, 7, 9, 0);
 
@@ -207,11 +198,11 @@ class VehicleControllerTest {
 
         when(vehicleService.getAvailableVehiclesForRange(start, end)).thenReturn(mockVehicles);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<VehicleResponseDto>> response =
                 vehicleController.getAvailableVehicles(start, end);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertNotNull(response.getBody());
         assertEquals(3, response.getBody().size());
     }
@@ -219,14 +210,14 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Available Vehicles — with date range: end before start throws BadRequestException")
     void getAvailableVehicles_withDateRange_invalidRange_throwsBadRequestException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         LocalDateTime start = LocalDateTime.of(2025, 6, 10, 10, 0);
         LocalDateTime end   = LocalDateTime.of(2025, 6, 5, 10, 0); // end before start
 
         when(vehicleService.getAvailableVehiclesForRange(start, end))
                 .thenThrow(new BadRequestException("End date must be after start date"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> vehicleController.getAvailableVehicles(start, end));
 
@@ -236,7 +227,8 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Available Vehicles — only start provided: uses simple availability path")
     void getAvailableVehicles_onlyStartProvided_usesSimpleAvailability() {
-        // When only one of start/end is provided the controller falls back to simple availability.
+        /**  ARRANGE  */
+        /**  When only one of start/end is provided the controller falls back to simple availability.  */
         when(vehicleService.getAvailableVehicles()).thenReturn(List.of());
 
         ResponseEntity<List<VehicleResponseDto>> response =
@@ -247,24 +239,22 @@ class VehicleControllerTest {
         assertEquals(200, response.getStatusCode().value());
     }
 
-    // =========================================================
-    //  GET VEHICLE BY ID TESTS
-    // =========================================================
+    /**  GET VEHICLE BY ID TESTS  */
 
     @Test
     @DisplayName("Get Vehicle By ID — success: returns 200 with vehicle details")
     void getVehicleById_validId_returnsVehicleResponse() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long vehicleId = 3L;
         VehicleResponseDto mockResponse = buildVehicleResponseDto(vehicleId, "Honda City", "Car", true);
 
         when(vehicleService.getVehicleById(vehicleId)).thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<VehicleResponseDto> response =
                 vehicleController.getVehicleById(vehicleId);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertNotNull(response, "Response should not be null");
         assertEquals(200, response.getStatusCode().value(), "HTTP status should be 200 OK");
         assertNotNull(response.getBody());
@@ -279,13 +269,13 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Vehicle By ID — vehicle not found: throws ResourceNotFoundException")
     void getVehicleById_vehicleNotFound_throwsResourceNotFoundException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long vehicleId = 999L;
 
         when(vehicleService.getVehicleById(vehicleId))
                 .thenThrow(new ResourceNotFoundException("Vehicle not found with id: 999"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
                 () -> vehicleController.getVehicleById(vehicleId));
 
@@ -295,17 +285,17 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Vehicle By ID — Bike type: returns correct type in response")
     void getVehicleById_bikeVehicle_returnsCorrectType() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long vehicleId = 7L;
         VehicleResponseDto mockResponse = buildVehicleResponseDto(vehicleId, "Royal Enfield Classic 350", "Bike", true);
 
         when(vehicleService.getVehicleById(vehicleId)).thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<VehicleResponseDto> response =
                 vehicleController.getVehicleById(vehicleId);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertNotNull(response.getBody());
         assertEquals("Bike", response.getBody().getType());
     }
@@ -313,17 +303,17 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Vehicle By ID — unavailable vehicle: availabilityStatus is false")
     void getVehicleById_unavailableVehicle_returnsCorrectStatus() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long vehicleId = 5L;
         VehicleResponseDto mockResponse = buildVehicleResponseDto(vehicleId, "Maruti Swift", "Car", false);
 
         when(vehicleService.getVehicleById(vehicleId)).thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<VehicleResponseDto> response =
                 vehicleController.getVehicleById(vehicleId);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertNotNull(response.getBody());
         assertFalse(response.getBody().isAvailabilityStatus(),
                 "Unavailable vehicle should have availabilityStatus=false");
@@ -332,23 +322,21 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Get Vehicle By ID — service called exactly once with correct ID")
     void getVehicleById_serviceCalledOnce() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long vehicleId = 2L;
         VehicleResponseDto mockResponse = buildVehicleResponseDto(vehicleId, "Yamaha FZ", "Bike", true);
 
         when(vehicleService.getVehicleById(vehicleId)).thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         vehicleController.getVehicleById(vehicleId);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         verify(vehicleService, times(1)).getVehicleById(2L);
         verify(vehicleService, never()).getVehicleById(99L); // Not called with wrong ID
     }
 
-    // =========================================================
-    //  HELPER METHODS
-    // =========================================================
+    /**  HELPER METHODS */
 
     private VehicleResponseDto buildVehicleResponseDto(
             Long id, String name, String type, boolean available) {

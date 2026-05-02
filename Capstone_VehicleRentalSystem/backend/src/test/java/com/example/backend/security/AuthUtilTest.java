@@ -10,9 +10,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ *  AuthUtilTest — Pure Unit Tests (no Spring context)
+ *
+ *  Tests the AuthUtil class in isolation, without any dependencies to mock.
+ *  Covers all methods of AuthUtil, including token generation, extraction of username and role, claim extraction, and token validation.
+ */
 @ExtendWith(MockitoExtension.class)
 class AuthUtilTest {
 
+    /**  The class we are actually testing — no dependencies to mock since it's a utility class. */
     @InjectMocks
     private AuthUtil authUtil;
 

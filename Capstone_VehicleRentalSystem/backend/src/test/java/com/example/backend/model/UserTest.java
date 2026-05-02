@@ -7,6 +7,12 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ *  UserTest — Pure Unit Tests for the User model class
+ *
+ *  Tests the basic getters and setters of the User class,
+ *  as well as the default value of createdAt and the behavior of the Role enum.
+ */
 class UserTest {
 
     private User user;

@@ -7,6 +7,12 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ *  BookingTest — Pure Unit Tests for the Booking model class
+ *
+ *  Tests the basic getters and setters of the Booking class,
+ *  as well as the default value of createdAt and the behavior of the Status enum.
+ */
 class BookingTest {
 
     private Booking booking;

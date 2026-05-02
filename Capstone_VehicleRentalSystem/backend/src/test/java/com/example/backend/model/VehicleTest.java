@@ -7,6 +7,12 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ *  VehicleTest — Pure Unit Tests for the Vehicle model class
+ *
+ *  Tests the basic getters and setters of the Vehicle class,
+ *  as well as the default value of createdAt and the behavior of the Type enum.
+ */
 class VehicleTest {
 
     private Vehicle vehicle;

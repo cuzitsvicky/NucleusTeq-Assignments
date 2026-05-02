@@ -25,9 +25,17 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ *  BookingServiceTest — Pure Unit Tests (no Spring context)
+ *
+ *  Tests the BookingService in isolation by mocking BookingRepository, VehicleRepository, and UserService.
+ *  Covers all public methods of BookingService, including bookVehicle, getMyBookings, getAllBookings, cancelBooking, and getVehicleBookings.
+ *  Each method is tested for both successful execution and expected exceptions in various edge cases.
+ */
 @ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
 
+    /**  Mocks */    
     @Mock
     private BookingRepository bookingRepository;
 
@@ -37,12 +45,14 @@ class BookingServiceTest {
     @Mock
     private UserService userService;
 
+    /**  The class we are actually testing — all dependencies are mocked. */
     @InjectMocks
     private BookingService bookingService;
 
     private User user;
     private Vehicle vehicle;
 
+    /**  Setup method to initialize common test data */
     @BeforeEach
     void setUp() {
         user = new User();
@@ -59,7 +69,7 @@ class BookingServiceTest {
         vehicle.setAddedBy(user);
     }
 
-    // ── bookVehicle ─────────────────────────────────────────
+    /** bookVehicle */
 
     @Test
     void bookVehicle_success() {
@@ -174,7 +184,7 @@ class BookingServiceTest {
                 .hasMessageContaining("Date format");
     }
 
-    // ── getMyBookings ────────────────────────────────────────
+    /** getMyBookings */
 
     @Test
     void getMyBookings_returnsBookingsForUser() {
@@ -225,7 +235,7 @@ class BookingServiceTest {
         assertThat(result).isEmpty();
     }
 
-    // ── getAllBookings ────────────────────────────────────────
+    /** getAllBookings */
 
     @Test
     void getAllBookings_returnsAllBookings() {
@@ -241,7 +251,7 @@ class BookingServiceTest {
         assertThat(result).hasSize(2);
     }
 
-    // ── cancelBooking ────────────────────────────────────────
+    /** cancelBooking */
 
     @Test
     void cancelBooking_success_byOwner() {
@@ -331,7 +341,7 @@ class BookingServiceTest {
                 .hasMessageContaining("Booking not found");
     }
 
-    // ── getVehicleBookings ───────────────────────────────────
+    /** getVehicleBookings */
 
     @Test
     void getVehicleBookings_returnsBookingsForVehicle() {
@@ -355,7 +365,7 @@ class BookingServiceTest {
                 .hasMessageContaining("Vehicle not found");
     }
 
-    // ── helpers ──────────────────────────────────────────────
+    /** helpers */
 
     private Booking makeBooking(Long id, User u, Vehicle v, Booking.Status status,
                                  LocalDateTime start, LocalDateTime end) {

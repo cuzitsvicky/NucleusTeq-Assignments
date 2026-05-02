@@ -24,14 +24,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * ============================================================
  *  BookingControllerTest — Pure Unit Tests (no Spring context)
- * ============================================================
  *
  *  Tests the BookingController in isolation by mocking BookingService.
  *  Covers: booking creation, my-bookings, all-bookings (admin),
  *  vehicle-specific bookings (admin), and booking cancellation.
- * ============================================================
  */
 class BookingControllerTest {
 
@@ -42,7 +39,7 @@ class BookingControllerTest {
     @Mock
     private Authentication authentication;
 
-    // ── The class we are actually testing ────────────────────
+    /** The class we are actually testing */
     @InjectMocks
     private BookingController bookingController;
 
@@ -52,25 +49,22 @@ class BookingControllerTest {
         when(authentication.getName()).thenReturn("user@example.com");
     }
 
-    // =========================================================
-    //  BOOK VEHICLE TESTS
-    // =========================================================
-
+    /**  BOOK VEHICLE TESTS  */
     @Test
     @DisplayName("Book Vehicle — success: returns 200 with BookingResponseDto")
     void bookVehicle_validRequest_returnsBookingResponse() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         BookingRequestDto dto = buildBookingRequestDto(3L, "2025-06-01T10:00:00", "2025-06-05T10:00:00");
 
         BookingResponseDto mockResponse = buildBookingResponseDto(1L, 3L, "Honda City", "CONFIRMED");
 
         when(bookingService.bookVehicle("user@example.com", dto)).thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<BookingResponseDto> response =
                 bookingController.bookVehicle(dto, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertNotNull(response, "Response should not be null");
         assertEquals(200, response.getStatusCode().value(), "HTTP status should be 200 OK");
         assertNotNull(response.getBody(), "Response body should not be null");
@@ -84,13 +78,13 @@ class BookingControllerTest {
     @Test
     @DisplayName("Book Vehicle — past start date: service throws BadRequestException")
     void bookVehicle_pastStartDate_throwsBadRequestException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         BookingRequestDto dto = buildBookingRequestDto(3L, "2020-01-01T10:00:00", "2020-01-05T10:00:00");
 
         when(bookingService.bookVehicle(anyString(), any(BookingRequestDto.class)))
                 .thenThrow(new BadRequestException("Start date must be present or future"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> bookingController.bookVehicle(dto, authentication));
 
@@ -100,13 +94,13 @@ class BookingControllerTest {
     @Test
     @DisplayName("Book Vehicle — end before start: service throws BadRequestException")
     void bookVehicle_endDateBeforeStartDate_throwsBadRequestException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         BookingRequestDto dto = buildBookingRequestDto(3L, "2025-06-05T10:00:00", "2025-06-01T10:00:00");
 
         when(bookingService.bookVehicle(anyString(), any(BookingRequestDto.class)))
                 .thenThrow(new BadRequestException("End date must be after start date"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> bookingController.bookVehicle(dto, authentication));
 
@@ -116,13 +110,13 @@ class BookingControllerTest {
     @Test
     @DisplayName("Book Vehicle — conflicting booking: service throws BadRequestException")
     void bookVehicle_conflictingBooking_throwsBadRequestException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         BookingRequestDto dto = buildBookingRequestDto(3L, "2025-06-01T10:00:00", "2025-06-05T10:00:00");
 
         when(bookingService.bookVehicle(anyString(), any(BookingRequestDto.class)))
                 .thenThrow(new BadRequestException("Vehicle is not available for the selected time range"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> bookingController.bookVehicle(dto, authentication));
 
@@ -132,13 +126,14 @@ class BookingControllerTest {
     @Test
     @DisplayName("Book Vehicle — vehicle not found: service throws ResourceNotFoundException")
     void bookVehicle_vehicleNotFound_throwsResourceNotFoundException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
+
         BookingRequestDto dto = buildBookingRequestDto(999L, "2025-06-01T10:00:00", "2025-06-05T10:00:00");
 
         when(bookingService.bookVehicle(anyString(), any(BookingRequestDto.class)))
                 .thenThrow(new ResourceNotFoundException("Vehicle not found with id: 999"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
                 () -> bookingController.bookVehicle(dto, authentication));
 
@@ -148,28 +143,26 @@ class BookingControllerTest {
     @Test
     @DisplayName("Book Vehicle — email extracted from Authentication correctly")
     void bookVehicle_usesEmailFromAuthentication() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         BookingRequestDto dto = buildBookingRequestDto(2L, "2025-07-01T10:00:00", "2025-07-05T10:00:00");
         BookingResponseDto mockResponse = buildBookingResponseDto(5L, 2L, "Honda Activa", "CONFIRMED");
 
         when(bookingService.bookVehicle(anyString(), any(BookingRequestDto.class)))
                 .thenReturn(mockResponse);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         bookingController.bookVehicle(dto, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         verify(bookingService).bookVehicle(eq("user@example.com"), eq(dto));
     }
 
-    // =========================================================
-    //  GET MY BOOKINGS TESTS
-    // =========================================================
+    /*   GET MY BOOKINGS TESTS */
 
     @Test
     @DisplayName("Get My Bookings — success: returns 200 with list of bookings")
     void getMyBookings_authenticatedUser_returnsBookingList() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         List<BookingResponseDto> mockBookings = List.of(
                 buildBookingResponseDto(1L, 3L, "Honda City", "CONFIRMED"),
                 buildBookingResponseDto(2L, 4L, "Yamaha FZ", "COMPLETED")
@@ -177,11 +170,11 @@ class BookingControllerTest {
 
         when(bookingService.getMyBookings("user@example.com")).thenReturn(mockBookings);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<BookingResponseDto>> response =
                 bookingController.getMyBookings(authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
@@ -193,14 +186,14 @@ class BookingControllerTest {
     @Test
     @DisplayName("Get My Bookings — no bookings: returns 200 with empty list")
     void getMyBookings_noBookings_returnsEmptyList() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         when(bookingService.getMyBookings("user@example.com")).thenReturn(List.of());
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<BookingResponseDto>> response =
                 bookingController.getMyBookings(authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
@@ -209,18 +202,16 @@ class BookingControllerTest {
     @Test
     @DisplayName("Get My Bookings — user not found: throws ResourceNotFoundException")
     void getMyBookings_userNotFound_throwsResourceNotFoundException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         when(bookingService.getMyBookings(anyString()))
                 .thenThrow(new ResourceNotFoundException("User not found"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         assertThrows(ResourceNotFoundException.class,
                 () -> bookingController.getMyBookings(authentication));
     }
 
-    // =========================================================
-    //  GET VEHICLE BOOKINGS (ADMIN) TESTS
-    // =========================================================
+    /**  GET VEHICLE BOOKINGS (ADMIN) TESTS */
 
     @Test
     @DisplayName("Get Vehicle Bookings — success: returns 200 with vehicle's booking list")
@@ -235,11 +226,11 @@ class BookingControllerTest {
 
         when(bookingService.getVehicleBookings(vehicleId)).thenReturn(mockBookings);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<BookingResponseDto>> response =
                 bookingController.getVehicleBookings(vehicleId);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
@@ -250,23 +241,21 @@ class BookingControllerTest {
     @Test
     @DisplayName("Get Vehicle Bookings — vehicle not found: throws ResourceNotFoundException")
     void getVehicleBookings_vehicleNotFound_throwsResourceNotFoundException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         when(bookingService.getVehicleBookings(999L))
                 .thenThrow(new ResourceNotFoundException("Vehicle not found with id: 999"));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         assertThrows(ResourceNotFoundException.class,
                 () -> bookingController.getVehicleBookings(999L));
     }
 
-    // =========================================================
-    //  GET ALL BOOKINGS (ADMIN) TESTS
-    // =========================================================
+    /**  GET ALL BOOKINGS (ADMIN) TESTS */
 
     @Test
     @DisplayName("Get All Bookings — success: returns 200 with all bookings")
     void getAllBookings_adminUser_returnsAllBookings() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         List<BookingResponseDto> mockBookings = List.of(
                 buildBookingResponseDto(1L, 3L, "Honda City", "CONFIRMED"),
                 buildBookingResponseDto(2L, 4L, "Yamaha FZ", "COMPLETED"),
@@ -275,11 +264,11 @@ class BookingControllerTest {
 
         when(bookingService.getAllBookings()).thenReturn(mockBookings);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<BookingResponseDto>> response =
                 bookingController.getAllBookings();
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(3, response.getBody().size());
@@ -290,36 +279,34 @@ class BookingControllerTest {
     @Test
     @DisplayName("Get All Bookings — no bookings in system: returns empty list")
     void getAllBookings_noBookingsExist_returnsEmptyList() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         when(bookingService.getAllBookings()).thenReturn(List.of());
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<List<BookingResponseDto>> response =
                 bookingController.getAllBookings();
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
     }
 
-    // =========================================================
-    //  CANCEL BOOKING TESTS
-    // =========================================================
+    /**  CANCEL BOOKING TESTS */
 
     @Test
     @DisplayName("Cancel Booking — success: returns 200 with cancellation message")
     void cancelBooking_validBookingId_returnsCancelledMessage() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long bookingId = 5L;
 
         doNothing().when(bookingService).cancelBooking("user@example.com", bookingId);
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         ResponseEntity<String> response =
                 bookingController.cancelBooking(bookingId, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         assertEquals(200, response.getStatusCode().value());
         assertEquals("Booking cancelled successfully", response.getBody());
 
@@ -329,13 +316,13 @@ class BookingControllerTest {
     @Test
     @DisplayName("Cancel Booking — booking not found: throws ResourceNotFoundException")
     void cancelBooking_bookingNotFound_throwsResourceNotFoundException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long bookingId = 404L;
 
         doThrow(new ResourceNotFoundException("Booking not found with id: 404"))
                 .when(bookingService).cancelBooking(anyString(), eq(bookingId));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
                 () -> bookingController.cancelBooking(bookingId, authentication));
 
@@ -345,13 +332,13 @@ class BookingControllerTest {
     @Test
     @DisplayName("Cancel Booking — not owner: throws ForbiddenException")
     void cancelBooking_notOwner_throwsForbiddenException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long bookingId = 7L;
 
         doThrow(new ForbiddenException("You can cancel only your own booking"))
                 .when(bookingService).cancelBooking(anyString(), eq(bookingId));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         ForbiddenException ex = assertThrows(ForbiddenException.class,
                 () -> bookingController.cancelBooking(bookingId, authentication));
 
@@ -361,13 +348,13 @@ class BookingControllerTest {
     @Test
     @DisplayName("Cancel Booking — already cancelled: throws BadRequestException")
     void cancelBooking_alreadyCancelled_throwsBadRequestException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long bookingId = 9L;
 
         doThrow(new BadRequestException("Booking is already cancelled"))
                 .when(bookingService).cancelBooking(anyString(), eq(bookingId));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> bookingController.cancelBooking(bookingId, authentication));
 
@@ -377,13 +364,13 @@ class BookingControllerTest {
     @Test
     @DisplayName("Cancel Booking — after start date: throws BadRequestException")
     void cancelBooking_afterStartDate_throwsBadRequestException() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long bookingId = 11L;
 
         doThrow(new BadRequestException("Cannot cancel booking after start date"))
                 .when(bookingService).cancelBooking(anyString(), eq(bookingId));
 
-        // ── ACT + ASSERT ──────────────────────────────────────
+        /**  ACT + ASSERT  */
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> bookingController.cancelBooking(bookingId, authentication));
 
@@ -393,20 +380,18 @@ class BookingControllerTest {
     @Test
     @DisplayName("Cancel Booking — email extracted from Authentication correctly")
     void cancelBooking_usesEmailFromAuthentication() {
-        // ── ARRANGE ───────────────────────────────────────────
+        /**  ARRANGE  */
         Long bookingId = 15L;
         doNothing().when(bookingService).cancelBooking(anyString(), eq(bookingId));
 
-        // ── ACT ───────────────────────────────────────────────
+        /**  ACT  */
         bookingController.cancelBooking(bookingId, authentication);
 
-        // ── ASSERT ────────────────────────────────────────────
+        /**  ASSERT  */
         verify(bookingService).cancelBooking(eq("user@example.com"), eq(15L));
     }
 
-    // =========================================================
-    //  HELPER METHODS
-    // =========================================================
+    /**  HELPER METHODS */
 
     private BookingRequestDto buildBookingRequestDto(Long vehicleId, String start, String end) {
         BookingRequestDto dto = new BookingRequestDto();

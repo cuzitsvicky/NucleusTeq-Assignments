@@ -24,9 +24,16 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ *  VehicleServiceTest — Pure Unit Tests (no Spring context)
+ *
+ *  Tests the VehicleService in isolation by mocking VehicleRepository, BookingRepository, and UserService.
+ *  Covers all public methods of VehicleService, including both success scenarios and expected exceptions.
+ */
 @ExtendWith(MockitoExtension.class)
 class VehicleServiceTest {
 
+    /**  Mocks */
     @Mock
     private VehicleRepository vehicleRepository;
 
@@ -36,6 +43,7 @@ class VehicleServiceTest {
     @Mock
     private UserService userService;
 
+    /**  The class we are actually testing — all dependencies are mocked. */
     @InjectMocks
     private VehicleService vehicleService;
 
@@ -59,7 +67,7 @@ class VehicleServiceTest {
         vehicle.setAddedBy(admin);
     }
 
-    // ── getAllVehicles ──────────────────────────────────────
+    /** getAllVehicles */
 
     @Test
     void getAllVehicles_success() {
@@ -80,7 +88,7 @@ class VehicleServiceTest {
         assertThat(result).isEmpty();
     }
 
-    // ── getAvailableVehicles ────────────────────────────────
+    /** getAvailableVehicles */
 
     @Test
     void getAvailableVehicles_returnsOnlyAvailable() {
@@ -99,7 +107,7 @@ class VehicleServiceTest {
         assertThat(result.get(0).isAvailabilityStatus()).isTrue();
     }
 
-    // ── getAvailableVehiclesForRange ────────────────────────
+    /** getAvailableVehiclesForRange */
 
     @Test
     void getAvailableVehiclesForRange_success() {
@@ -157,7 +165,7 @@ class VehicleServiceTest {
                 .hasMessageContaining("End date must be after start date");
     }
 
-    // ── getVehicleById ──────────────────────────────────────
+    /** getVehicleById */
 
     @Test
     void getVehicleById_success() {
@@ -179,7 +187,7 @@ class VehicleServiceTest {
                 .hasMessageContaining("Vehicle not found");
     }
 
-    // ── addVehicle ──────────────────────────────────────────
+    /** addVehicle */
 
     @Test
     void addVehicle_success_typeCarUpperCase() {
@@ -253,7 +261,7 @@ class VehicleServiceTest {
         verify(vehicleRepository, never()).save(any());
     }
 
-    // ── updateVehicle ───────────────────────────────────────
+    /** updateVehicle */
 
     @Test
     void updateVehicle_success() {
@@ -298,7 +306,7 @@ class VehicleServiceTest {
                 .hasMessageContaining("Car or Bike");
     }
 
-    // ── deleteVehicle ───────────────────────────────────────
+    /** deleteVehicle */
 
     @Test
     void deleteVehicle_success_whenNoActiveBookings() {
