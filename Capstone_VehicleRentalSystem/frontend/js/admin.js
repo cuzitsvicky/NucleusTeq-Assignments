@@ -1,15 +1,3 @@
-/**
- * admin.js — Admin panel logic for NexRide.
- *
- * Handles:
- *  - Vehicle CRUD (add, update, delete)
- *  - Viewing all bookings system-wide
- *  - Viewing bookings per vehicle
- *  - Cancelling any booking that has not yet started (admin privilege)
- *
- * Depends on: scripts.js (apiRequest, escapeHtml, formatDateTime, etc.)
- */
-
 // Guard: redirect non-admins away from this page
 requireLogin();
 requireAdminPage();
