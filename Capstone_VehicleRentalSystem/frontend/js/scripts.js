@@ -38,7 +38,7 @@ function showError(message, elementId = "pageError") {
 
   errorTimeout = setTimeout(() => {
     clearError(elementId);
-  }, 3000);
+  }, 5000);
 }
 
 /* Clear error message display */
