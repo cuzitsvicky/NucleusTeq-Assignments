@@ -353,13 +353,14 @@ GET /api/vehicles/available?start=2025-06-01T10:00:00&end=2025-06-05T10:00:00
   "createdAt": "2025-05-20T14:22:00"
 }
 ```
+---
 
 > **Booking Rules:**
 > - Start date must be in the future.
 > - End date must be after start date.
-> - No overlapping `CONFIRMED` or `PENDING` bookings for the same vehicle.
+> - No overlapping `CONFIRMED` bookings for the same vehicle.
 > - Cancellation is only allowed before the start date.
-> - Expired `CONFIRMED`/`PENDING` bookings are auto-transitioned to `COMPLETED` on retrieval.
+> - Expired `CONFIRMED` bookings are auto-transitioned to `COMPLETED` on retrieval.
 
 ---
 
