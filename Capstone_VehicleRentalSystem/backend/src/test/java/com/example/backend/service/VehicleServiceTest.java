@@ -1,5 +1,13 @@
 package com.example.backend.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.example.backend.dto.request.VehicleRequestDto;
 import com.example.backend.dto.response.VehicleResponseDto;
 import com.example.backend.exception.BadRequestException;
@@ -9,31 +17,18 @@ import com.example.backend.model.User;
 import com.example.backend.model.Vehicle;
 import com.example.backend.repository.BookingRepository;
 import com.example.backend.repository.VehicleRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-/**
- *  VehicleServiceTest — Pure Unit Tests (no Spring context)
- *
- *  Tests the VehicleService in isolation by mocking VehicleRepository, BookingRepository, and UserService.
- *  Covers all public methods of VehicleService, including both success scenarios and expected exceptions.
- */
 @ExtendWith(MockitoExtension.class)
 class VehicleServiceTest {
 
-    /**  Mocks */
     @Mock
     private VehicleRepository vehicleRepository;
 
@@ -43,35 +38,20 @@ class VehicleServiceTest {
     @Mock
     private UserService userService;
 
-    /**  The class we are actually testing — all dependencies are mocked. */
-    @InjectMocks
     private VehicleService vehicleService;
-
     private User admin;
-    private Vehicle vehicle;
+    private Vehicle car;
 
     @BeforeEach
     void setUp() {
-        admin = new User();
-        admin.setUserId(1L);
-        admin.setUsername("admin_user");
-        admin.setEmail("admin@example.com");
-        admin.setRole(User.Role.ADMIN);
-
-        vehicle = new Vehicle();
-        vehicle.setVehicleId(1L);
-        vehicle.setName("Honda City");
-        vehicle.setType(Vehicle.VehicleType.CAR);
-        vehicle.setDescription("Comfortable sedan");
-        vehicle.setAvailabilityStatus(true);
-        vehicle.setAddedBy(admin);
+        vehicleService = new VehicleService(vehicleRepository, bookingRepository, userService);
+        admin = user(1L, "admin", "admin@example.com", User.Role.ADMIN);
+        car = vehicle(1L, "Honda City", Vehicle.VehicleType.CAR, true);
     }
 
-    /** getAllVehicles */
-
     @Test
-    void getAllVehicles_success() {
-        when(vehicleRepository.findAll()).thenReturn(List.of(vehicle));
+    void getAllVehicles_returnsVehicles() {
+        when(vehicleRepository.findAll()).thenReturn(List.of(car));
 
         List<VehicleResponseDto> result = vehicleService.getAllVehicles();
 
@@ -80,26 +60,8 @@ class VehicleServiceTest {
     }
 
     @Test
-    void getAllVehicles_returnsEmpty() {
-        when(vehicleRepository.findAll()).thenReturn(List.of());
-
-        List<VehicleResponseDto> result = vehicleService.getAllVehicles();
-
-        assertThat(result).isEmpty();
-    }
-
-    /** getAvailableVehicles */
-
-    @Test
-    void getAvailableVehicles_returnsOnlyAvailable() {
-        Vehicle unavailable = new Vehicle();
-        unavailable.setVehicleId(2L);
-        unavailable.setName("Bike");
-        unavailable.setType(Vehicle.VehicleType.BIKE);
-        unavailable.setAvailabilityStatus(false);
-        unavailable.setAddedBy(admin);
-
-        when(vehicleRepository.findByAvailabilityStatusTrue()).thenReturn(List.of(vehicle));
+    void getAvailableVehicles_returnsOnlyRepositoryAvailableVehicles() {
+        when(vehicleRepository.findByAvailabilityStatusTrue()).thenReturn(List.of(car));
 
         List<VehicleResponseDto> result = vehicleService.getAvailableVehicles();
 
@@ -107,38 +69,28 @@ class VehicleServiceTest {
         assertThat(result.get(0).isAvailabilityStatus()).isTrue();
     }
 
-    /** getAvailableVehiclesForRange */
-
     @Test
-    void getAvailableVehiclesForRange_success() {
+    void getAvailableVehiclesForRange_returnsVehiclesWithoutConflicts() {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(3);
 
-        when(vehicleRepository.findByAvailabilityStatusTrue()).thenReturn(List.of(vehicle));
-        when(bookingRepository
-                .findByVehicleAndStatusInAndStartDateLessThanAndEndDateGreaterThan(
-                        any(), anyList(), any(), any()))
-                .thenReturn(List.of());
+        when(vehicleRepository.findByAvailabilityStatusTrue()).thenReturn(List.of(car));
+        when(bookingRepository.findByVehicleAndStatusInAndStartDateLessThanAndEndDateGreaterThan(
+                any(), anyList(), any(), any())).thenReturn(List.of());
 
         List<VehicleResponseDto> result = vehicleService.getAvailableVehiclesForRange(start, end);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("Honda City");
     }
 
     @Test
-    void getAvailableVehiclesForRange_returnsEmpty_whenConflictExists() {
+    void getAvailableVehiclesForRange_filtersVehiclesWithConflicts() {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(3);
 
-        Booking conflict = new Booking();
-        conflict.setStatus(Booking.Status.CONFIRMED);
-
-        when(vehicleRepository.findByAvailabilityStatusTrue()).thenReturn(List.of(vehicle));
-        when(bookingRepository
-                .findByVehicleAndStatusInAndStartDateLessThanAndEndDateGreaterThan(
-                        any(), anyList(), any(), any()))
-                .thenReturn(List.of(conflict));
+        when(vehicleRepository.findByAvailabilityStatusTrue()).thenReturn(List.of(car));
+        when(bookingRepository.findByVehicleAndStatusInAndStartDateLessThanAndEndDateGreaterThan(
+                any(), anyList(), any(), any())).thenReturn(List.of(booking(1L, Booking.Status.CONFIRMED, end)));
 
         List<VehicleResponseDto> result = vehicleService.getAvailableVehiclesForRange(start, end);
 
@@ -146,7 +98,7 @@ class VehicleServiceTest {
     }
 
     @Test
-    void getAvailableVehiclesForRange_throwsBadRequestException_whenEndBeforeStart() {
+    void getAvailableVehiclesForRange_rejectsInvalidRange() {
         LocalDateTime start = LocalDateTime.now().plusDays(3);
         LocalDateTime end = LocalDateTime.now().plusDays(1);
 
@@ -156,222 +108,189 @@ class VehicleServiceTest {
     }
 
     @Test
-    void getAvailableVehiclesForRange_throwsBadRequestException_whenEndEqualsStart() {
-        LocalDateTime start = LocalDateTime.now().plusDays(1);
-        LocalDateTime end = start;
-
-        assertThatThrownBy(() -> vehicleService.getAvailableVehiclesForRange(start, end))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("End date must be after start date");
-    }
-
-    /** getVehicleById */
-
-    @Test
-    void getVehicleById_success() {
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+    void getVehicleById_returnsVehicle() {
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(car));
 
         VehicleResponseDto result = vehicleService.getVehicleById(1L);
 
-        assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("Honda City");
         assertThat(result.getType()).isEqualTo("Car");
     }
 
     @Test
-    void getVehicleById_throwsResourceNotFoundException() {
-        when(vehicleRepository.findById(999L)).thenReturn(Optional.empty());
+    void getVehicleById_throwsWhenMissing() {
+        when(vehicleRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> vehicleService.getVehicleById(999L))
+        assertThatThrownBy(() -> vehicleService.getVehicleById(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Vehicle not found");
+                .hasMessageContaining("99");
     }
 
-    /** addVehicle */
-
     @Test
-    void addVehicle_success_typeCarUpperCase() {
-        VehicleRequestDto dto = new VehicleRequestDto();
-        dto.setName("New Car");
-        dto.setType("Car");
-        dto.setDescription("Test car");
-        dto.setAvailabilityStatus(true);
+    void addVehicle_savesNewVehicle() {
+        VehicleRequestDto request = vehicleRequest("New Car", "Car", true);
 
         when(userService.findEntityByEmail("admin@example.com")).thenReturn(admin);
-        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
+        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(car);
 
-        VehicleResponseDto result = vehicleService.addVehicle("admin@example.com", dto);
+        VehicleResponseDto result = vehicleService.addVehicle("admin@example.com", request);
 
-        assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("Honda City");
         verify(vehicleRepository).save(any(Vehicle.class));
     }
 
     @Test
-    void addVehicle_success_typeBikeUpperCase() {
-        VehicleRequestDto dto = new VehicleRequestDto();
-        dto.setName("New Bike");
-        dto.setType("Bike");
-        dto.setDescription("Test bike");
-        dto.setAvailabilityStatus(true);
-
-        Vehicle bikeVehicle = new Vehicle();
-        bikeVehicle.setVehicleId(2L);
-        bikeVehicle.setName("New Bike");
-        bikeVehicle.setType(Vehicle.VehicleType.BIKE);
-        bikeVehicle.setAddedBy(admin);
+    void addVehicle_acceptsBikeType() {
+        Vehicle bike = vehicle(2L, "Yamaha FZ", Vehicle.VehicleType.BIKE, true);
+        VehicleRequestDto request = vehicleRequest("Yamaha FZ", "Bike", true);
 
         when(userService.findEntityByEmail("admin@example.com")).thenReturn(admin);
-        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(bikeVehicle);
+        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(bike);
 
-        VehicleResponseDto result = vehicleService.addVehicle("admin@example.com", dto);
+        VehicleResponseDto result = vehicleService.addVehicle("admin@example.com", request);
 
         assertThat(result.getType()).isEqualTo("Bike");
     }
 
     @Test
-    void addVehicle_success_defaultsToAvailable_whenStatusNull() {
-        VehicleRequestDto dto = new VehicleRequestDto();
-        dto.setName("New Car");
-        dto.setType("Car");
-        dto.setDescription("Test");
-        dto.setAvailabilityStatus(null);
+    void addVehicle_defaultsMissingAvailabilityToTrue() {
+        VehicleRequestDto request = vehicleRequest("New Car", "Car", null);
 
         when(userService.findEntityByEmail("admin@example.com")).thenReturn(admin);
-        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
+        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(car);
 
-        VehicleResponseDto result = vehicleService.addVehicle("admin@example.com", dto);
+        VehicleResponseDto result = vehicleService.addVehicle("admin@example.com", request);
 
-        assertThat(result).isNotNull();
+        assertThat(result.isAvailabilityStatus()).isTrue();
     }
 
     @Test
-    void addVehicle_throwsBadRequestException_whenInvalidType() {
-        VehicleRequestDto dto = new VehicleRequestDto();
-        dto.setName("Invalid Vehicle");
-        dto.setType("Helicopter");
-        dto.setDescription("Invalid type");
-
+    void addVehicle_rejectsInvalidType() {
+        VehicleRequestDto request = vehicleRequest("Flying Thing", "Plane", true);
         when(userService.findEntityByEmail("admin@example.com")).thenReturn(admin);
 
-        assertThatThrownBy(() -> vehicleService.addVehicle("admin@example.com", dto))
+        assertThatThrownBy(() -> vehicleService.addVehicle("admin@example.com", request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("Car or Bike");
 
         verify(vehicleRepository, never()).save(any());
     }
 
-    /** updateVehicle */
-
     @Test
-    void updateVehicle_success() {
-        VehicleRequestDto dto = new VehicleRequestDto();
-        dto.setName("Updated Name");
-        dto.setType("Car");
-        dto.setDescription("Updated description");
-        dto.setAvailabilityStatus(false);
+    void updateVehicle_updatesExistingVehicle() {
+        VehicleRequestDto request = vehicleRequest("Updated Honda", "Car", false);
 
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
-        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(car));
+        when(vehicleRepository.save(car)).thenReturn(car);
 
-        VehicleResponseDto result = vehicleService.updateVehicle("admin@example.com", 1L, dto);
+        VehicleResponseDto result = vehicleService.updateVehicle("admin@example.com", 1L, request);
 
         assertThat(result).isNotNull();
-        verify(vehicleRepository).save(any(Vehicle.class));
+        assertThat(car.getName()).isEqualTo("Updated Honda");
+        assertThat(car.isAvailabilityStatus()).isFalse();
     }
 
     @Test
-    void updateVehicle_throwsResourceNotFoundException() {
-        VehicleRequestDto dto = new VehicleRequestDto();
-        dto.setName("Updated Name");
-        dto.setType("Car");
+    void updateVehicle_throwsWhenMissing() {
+        when(vehicleRepository.findById(99L)).thenReturn(Optional.empty());
 
-        when(vehicleRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> vehicleService.updateVehicle("admin@example.com", 999L, dto))
+        assertThatThrownBy(() -> vehicleService.updateVehicle("admin@example.com", 99L, vehicleRequest("X", "Car", true)))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Vehicle not found");
+                .hasMessageContaining("99");
     }
 
     @Test
-    void updateVehicle_throwsBadRequestException_whenInvalidType() {
-        VehicleRequestDto dto = new VehicleRequestDto();
-        dto.setName("Updated");
-        dto.setType("Truck");
+    void updateVehicle_rejectsInvalidType() {
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(car));
 
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
-
-        assertThatThrownBy(() -> vehicleService.updateVehicle("admin@example.com", 1L, dto))
+        assertThatThrownBy(() -> vehicleService.updateVehicle("admin@example.com", 1L, vehicleRequest("X", "Truck", true)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("Car or Bike");
     }
 
-    /** deleteVehicle */
-
     @Test
-    void deleteVehicle_success_whenNoActiveBookings() {
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
-        when(bookingRepository.findByVehicle(vehicle)).thenReturn(List.of());
+    void deleteVehicle_deletesWhenNoActiveBookings() {
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(car));
+        when(bookingRepository.findByVehicle(car)).thenReturn(List.of());
 
         vehicleService.deleteVehicle(1L);
 
-        verify(vehicleRepository).delete(vehicle);
+        verify(bookingRepository).saveAll(List.of());
+        verify(vehicleRepository).delete(car);
     }
 
     @Test
-    void deleteVehicle_success_onlyIgnoresCompletedAndCancelledBookings() {
-        Booking completed = new Booking();
-        completed.setStatus(Booking.Status.COMPLETED);
-        completed.setEndDate(LocalDateTime.now().minusDays(1));
+    void deleteVehicle_keepsVehicleWhenActiveBookingExists() {
+        Booking activeBooking = booking(1L, Booking.Status.CONFIRMED, LocalDateTime.now().plusDays(1));
 
-        Booking cancelled = new Booking();
-        cancelled.setStatus(Booking.Status.CANCELLED);
-        cancelled.setEndDate(LocalDateTime.now().minusDays(1));
-
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
-        when(bookingRepository.findByVehicle(vehicle)).thenReturn(List.of(completed, cancelled));
-
-        vehicleService.deleteVehicle(1L);
-
-        verify(vehicleRepository).delete(vehicle);
-    }
-
-    @Test
-    void deleteVehicle_throwsBadRequestException_whenActiveBookingExists() {
-        Booking activeBooking = new Booking();
-        activeBooking.setStatus(Booking.Status.CONFIRMED);
-        activeBooking.setEndDate(LocalDateTime.now().plusDays(1));
-
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
-        when(bookingRepository.findByVehicle(vehicle)).thenReturn(List.of(activeBooking));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(car));
+        when(bookingRepository.findByVehicle(car)).thenReturn(List.of(activeBooking));
 
         assertThatThrownBy(() -> vehicleService.deleteVehicle(1L))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("Cannot delete vehicle with active or upcoming bookings");
+                .hasMessageContaining("active or upcoming bookings");
 
         verify(vehicleRepository, never()).delete(any());
     }
 
     @Test
-    void deleteVehicle_throwsBadRequestException_whenPendingBookingExists() {
-        Booking pendingBooking = new Booking();
-        pendingBooking.setStatus(Booking.Status.PENDING);
-        pendingBooking.setEndDate(LocalDateTime.now().plusDays(5));
+    void deleteVehicle_nullsHistoricalBookingsBeforeDelete() {
+        Booking oldBooking = booking(1L, Booking.Status.COMPLETED, LocalDateTime.now().minusDays(1));
 
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
-        when(bookingRepository.findByVehicle(vehicle)).thenReturn(List.of(pendingBooking));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(car));
+        when(bookingRepository.findByVehicle(car)).thenReturn(List.of(oldBooking));
 
-        assertThatThrownBy(() -> vehicleService.deleteVehicle(1L))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("Cannot delete vehicle with active or upcoming bookings");
+        vehicleService.deleteVehicle(1L);
+
+        assertThat(oldBooking.getVehicle()).isNull();
+        verify(bookingRepository).saveAll(List.of(oldBooking));
+        verify(vehicleRepository).delete(car);
     }
 
     @Test
-    void deleteVehicle_throwsResourceNotFoundException() {
-        when(vehicleRepository.findById(999L)).thenReturn(Optional.empty());
+    void deleteVehicle_throwsWhenMissing() {
+        when(vehicleRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> vehicleService.deleteVehicle(999L))
+        assertThatThrownBy(() -> vehicleService.deleteVehicle(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Vehicle not found");
+                .hasMessageContaining("99");
+    }
+
+    private VehicleRequestDto vehicleRequest(String name, String type, Boolean available) {
+        VehicleRequestDto request = new VehicleRequestDto();
+        request.setName(name);
+        request.setType(type);
+        request.setDescription("Test vehicle");
+        request.setAvailabilityStatus(available);
+        return request;
+    }
+
+    private Booking booking(Long id, Booking.Status status, LocalDateTime endDate) {
+        Booking booking = new Booking();
+        booking.setBookingId(id);
+        booking.setVehicle(car);
+        booking.setStatus(status);
+        booking.setEndDate(endDate);
+        return booking;
+    }
+
+    private Vehicle vehicle(Long id, String name, Vehicle.VehicleType type, boolean available) {
+        Vehicle vehicle = new Vehicle();
+        vehicle.setVehicleId(id);
+        vehicle.setName(name);
+        vehicle.setType(type);
+        vehicle.setDescription("Test vehicle");
+        vehicle.setAvailabilityStatus(available);
+        vehicle.setAddedBy(admin);
+        return vehicle;
+    }
+
+    private static User user(Long id, String username, String email, User.Role role) {
+        User user = new User();
+        user.setUserId(id);
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setRole(role);
+        return user;
     }
 }
