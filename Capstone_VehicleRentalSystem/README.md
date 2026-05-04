@@ -20,7 +20,7 @@
 - [API Endpoints](#-api-endpoints)
 - [Security & Authentication](#-security--authentication)
 - [Frontend Pages](#-frontend-pages)
-- [Environment Configuration](#-environment-configuration)
+- [Environment Configuration](#environment-configuration)
 
 ---
 
@@ -459,6 +459,8 @@ Central utility module providing:
 - `showError()` / `clearError()` — UI error display
 
 ---
+
+<a id="environment-configuration"></a>
 
 ## ⚙️ Environment Configuration
 
