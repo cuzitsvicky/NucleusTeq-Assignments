@@ -81,102 +81,68 @@ Users can browse vehicles, check availability for specific date ranges, and mana
 
 ```
 Capstone_VehicleRentalSystem/
-│
-├── Entity Relationship.md          # Database ER documentation
-│
-├── backend/                        # Spring Boot application
-│   ├── mvnw / mvnw.cmd             # Maven wrapper scripts
-│   ├── pom.xml                     # Maven dependencies & build config
-│   └── src/
-│       └── main/
-│           ├── java/com/example/backend/
-│           │   │
-│           │   ├── BackendApplication.java         # Application entry point
-│           │   │
-│           │   ├── config/
-│           │   │   ├── AppConfig.java              # BCrypt bean configuration
-│           │   │   └── CorsConfig.java             # CORS mapping configuration
-│           │   │
-│           │   ├── controller/
-│           │   │   ├── AdminController.java        # Admin vehicle management endpoints
-│           │   │   ├── AuthController.java         # Auth (signup/login) endpoints
-│           │   │   ├── BookingController.java      # Booking CRUD endpoints
-│           │   │   ├── UserController.java         # User profile endpoint
-│           │   │   └── VehicleController.java      # Vehicle browsing endpoints
-│           │   │
-│           │   ├── dto/
-│           │   │   ├── request/
-│           │   │   │   ├── BookingRequestDto.java
-│           │   │   │   ├── LoginRequestDto.java
-│           │   │   │   ├── SignupRequestDto.java
-│           │   │   │   └── VehicleRequestDto.java
-│           │   │   └── response/
-│           │   │       ├── BookingResponseDto.java
-│           │   │       ├── ErrorResponse.java
-│           │   │       ├── LoginResponseDto.java
-│           │   │       ├── SignUpResponseDto.java
-│           │   │       └── VehicleResponseDto.java
-│           │   │
-│           │   ├── exception/
-│           │   │   ├── BadRequestException.java
-│           │   │   ├── DuplicateResourceException.java
-│           │   │   ├── ForbiddenException.java
-│           │   │   ├── GlobalExceptionHandler.java  # Centralized error handling
-│           │   │   ├── ResourceNotFoundException.java
-│           │   │   └── UnauthorizedException.java
-│           │   │
-│           │   ├── model/
-│           │   │   ├── Booking.java                # Booking entity
-│           │   │   ├── User.java                   # User entity (USER/ADMIN roles)
-│           │   │   └── Vehicle.java                # Vehicle entity (CAR/BIKE types)
-│           │   │
-│           │   ├── repository/
-│           │   │   ├── BookingRepository.java      # JPA repository for bookings
-│           │   │   ├── UserRepository.java         # JPA repository for users
-│           │   │   └── VehicleRepository.java      # JPA repository for vehicles
-│           │   │
-│           │   ├── security/
-│           │   │   ├── AuthService.java            # Signup & login business logic
-│           │   │   ├── AuthUtil.java               # JWT generation & validation
-│           │   │   ├── CustomUserDetailsService.java # Spring Security user loader
-│           │   │   ├── JwtAuthFilter.java          # JWT request filter
-│           │   │   └── WebSecurityConfig.java      # Security filter chain config
-│           │   │
-│           │   └── service/
-│           │       ├── BookingService.java         # Booking business logic
-│           │       ├── UserService.java            # User retrieval logic
-│           │       └── VehicleService.java         # Vehicle business logic
-│           │
-│           └── resources/
-│               └── application.properties          # App configuration (gitignored)
-│
-└── frontend/                       # Static HTML/CSS/JS frontend
-    ├── index.html                  # Landing page & login overlay
-    ├── register.html               # User registration page
-    ├── vehicles.html               # Vehicle browsing (user view)
-    ├── bookings.html               # My bookings (user view)
-    ├── UserProfile.html            # User profile page
-    ├── admin.html                  # Admin dashboard
-    │
-    ├── css/
-    │   ├── styles.css              # Global stylesheet (dark theme)
-    │   └── userprofile.css         # Profile page-specific styles
-    │
-    ├── js/
-    │   ├── scripts.js              # Shared utilities (API, auth, helpers)
-    │   ├── index.js                # Login page logic
-    │   ├── register.js             # Registration form logic
-    │   ├── vehicles.js             # Vehicle browsing, filtering, booking
-    │   ├── bookings.js             # My bookings page logic
-    │   ├── profile.js              # Profile page logic
-    │   └── admin.js                # Admin dashboard logic
-    │
-    └── img/                        # Static image assets
-        ├── logo.png
-        ├── car.png
-        ├── car2.png
-        ├── car3.png
-        └── bike.png
+|
+|-- Entity Relationship Diagram.png
+|-- Entity Relationship.md
+|-- Login and Signup Flow.png
+|-- README.md
+|
+|-- backend/                         # Spring Boot application
+|   |-- mvnw / mvnw.cmd              # Maven wrapper scripts
+|   |-- pom.xml                      # Maven dependencies, tests, and JaCoCo config
+|   |
+|   |-- src/
+|   |   |-- main/
+|   |   |   |-- java/com/example/backend/
+|   |   |   |   |-- BackendApplication.java
+|   |   |   |   |-- config/
+|   |   |   |   |-- controller/
+|   |   |   |   |-- dto/
+|   |   |   |   |   |-- request/
+|   |   |   |   |   `-- response/
+|   |   |   |   |-- exception/
+|   |   |   |   |-- model/
+|   |   |   |   |-- repository/
+|   |   |   |   |-- security/
+|   |   |   |   `-- service/
+|   |   |   `-- resources/
+|   |   |       `-- application.properties
+|   |   |
+|   |   `-- test/java/com/example/backend/
+|   |       |-- BackendApplicationTests.java
+|   |       |-- controller/            # Controller tests
+|   |       |-- exception/             # Global exception handler tests
+|   |       |-- security/              # Security and JWT tests
+|   |       `-- service/               # Service tests
+|   |
+|   `-- target/site/jacoco/index.html # Generated JaCoCo HTML report after tests
+|
+|-- frontend/                         # Static HTML/CSS/JS frontend
+|   |-- admin.html
+|   |-- bookings.html
+|   |-- index.html
+|   |-- register.html
+|   |-- UserProfile.html
+|   |-- vehicles.html
+|   |-- css/
+|   |   |-- styles.css
+|   |   `-- userprofile.css
+|   |-- js/
+|   |   |-- admin.js
+|   |   |-- bookings.js
+|   |   |-- index.js
+|   |   |-- profile.js
+|   |   |-- register.js
+|   |   |-- scripts.js
+|   |   `-- vehicles.js
+|   `-- img/
+|       |-- bike.png
+|       |-- car2.png
+|       |-- car3.png
+|       `-- logo.png
+|
+`-- postman/
+    `-- VehicleRentalSystem.postman_collection.json
 ```
 
 ---
