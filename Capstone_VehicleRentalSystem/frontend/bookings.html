@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexRide</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="img/logo.png">
+</head>
+
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <div class="navbar-brand"><img src="img/logo.png" alt="Car Logo" class="navbar-logo">
+            <h1>NexRide</h1>
+        </div>
+        <div class="navbar-menu">
+            <a href="vehicles.html" class="nav-link">Vehicles</a>
+            <a href="bookings.html" class="nav-link active">My Bookings</a>
+            <a href="Userprofile.html" class="nav-link">Profile</a>
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+        </div>
+        <div class="navbar-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+    <div class="container">
+
+        <!-- Main content area for user bookings -->
+
+        <h1>My Bookings</h1>
+        <div id="pageError" class="error" style="display:none;"></div>
+        <div id="bookingList" class="booking-list"></div>
+        <div id="noBookingsMessage" class="message">You have no bookings.</div>
+
+    </div>
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>© 2025 NexRide. All rights reserved.</p>
+    </footer>
+    <script src="js/scripts.js"></script>
+    <script src="js/bookings.js"></script>
+</body>
+
+</html>

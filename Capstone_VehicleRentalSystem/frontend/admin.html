@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexRide</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="img/logo.png">
+</head>
+
+<body>
+    <!-- Admin dashboard for managing vehicles and bookings -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="admin.html" class="logo-link">
+                <img src="img/logo.png" alt="Car Logo" class="navbar-logo">
+                <h1>NexRide</h1>
+            </a>
+        </div>
+
+        <div class="navbar-menu">
+            <a href="#" class="nav-link" data-admin-nav="bookings"
+                onclick="showAllBookings(); return false;">Bookings</a>
+            <a href="#" class="nav-link" data-admin-nav="vehicles"
+                onclick="showManageVehicles(); return false;">Vehicles</a>
+            <a href="#" class="nav-link" data-admin-nav="add-vehicle" onclick="showAddVehicleForm(); return false;">Add
+                Vehicle</a>
+            <a href="#" class="nav-link" onclick="logout()">Logout</a>
+        </div>
+
+        <div class="navbar-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+
+    <!-- Main content area for admin dashboard -->
+    <div class="container">
+        <div id="pageError" class="error" style="display:none;"></div>
+
+        <!-- Section for adding a new vehicle -->
+        <section class="form-section" id="addVehicleSection" style="display:none;">
+            <h2>Add New Vehicle</h2>
+            <form id="addVehicleForm">
+                <div class="form-group">
+                    <label for="name">Vehicle Name</label>
+                    <input type="text" id="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="type">Type</label>
+                    <select id="type" name="type" required>
+                        <option value="">Select vehicle type</option>
+                        <option value="Car">Car</option>
+                        <option value="Bike">Bike</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description"></textarea>
+                </div>
+
+                <div class="form-group" style="flex-direction:row;align-items:center;gap:12px;">
+                    <input type="checkbox" id="availabilityStatus" checked>
+                    <label for="availabilityStatus"
+                        style="text-transform:none;letter-spacing:0;font-size:0.9rem;color:var(--text-m);">
+                        Available for booking
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">Add Vehicle</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelAdd()">Cancel</button>
+            </form>
+        </section>
+
+        <!-- Section for updating an existing vehicle -->
+        <section class="form-section" id="updateVehicleSection" style="display:none;">
+            <h2>Update Vehicle</h2>
+            <form id="updateVehicleForm">
+                <input type="hidden" id="updateVehicleId">
+
+                <div class="form-group">
+                    <label for="updateName">Vehicle Name</label>
+                    <input type="text" id="updateName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="updateType">Type</label>
+                    <select id="updateType" name="type" required>
+                        <option value="">Select vehicle type</option>
+                        <option value="Car">Car</option>
+                        <option value="Bike">Bike</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="updateDescription">Description</label>
+                    <textarea id="updateDescription"></textarea>
+                </div>
+
+                <div class="form-group" style="flex-direction:row;align-items:center;gap:12px;">
+                    <input type="checkbox" id="updateAvailabilityStatus">
+                    <label for="updateAvailabilityStatus"
+                        style="text-transform:none;letter-spacing:0;font-size:0.9rem;color:var(--text-m);">
+                        Available for booking
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">Update Vehicle</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelUpdate()">Cancel</button>
+            </form>
+        </section>
+
+        <!-- Section for managing vehicles -->
+        <section id="manageVehiclesSection" style="display:none;">
+            <h2>All Vehicles</h2>
+
+            <div class="date-filter-bar">
+                <div class="date-filter-title">
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="flex-shrink:0">
+                        <rect x="3" y="4" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.6" />
+                        <path d="M3 8h14M7 2v4M13 2v4" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" />
+                    </svg>
+                    <span>Check availability for dates</span>
+                </div>
+                <div class="date-filter-inputs">
+                    <div class="date-filter-field">
+                        <label for="filterStart">From</label>
+                        <input type="datetime-local" id="filterStart">
+                    </div>
+                    <div class="date-filter-sep">to</div>
+                    <div class="date-filter-field">
+                        <label for="filterEnd">To</label>
+                        <input type="datetime-local" id="filterEnd">
+                    </div>
+                    <button class="btn date-filter-btn" id="checkAvailabilityBtn" onclick="applyDateFilter()">
+                        Check
+                    </button>
+                    <button class="btn btn-secondary date-filter-clear" id="clearDateFilterBtn"
+                        onclick="clearDateFilter()" style="display:none;">
+                        Clear
+                    </button>
+                </div>
+                <div id="dateFilterError" class="date-filter-error" style="display:none;"></div>
+                <div id="dateFilterBadge" class="date-filter-badge" style="display:none;">
+                    Showing vehicles available for the selected dates
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-search">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none">
+                        <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.6" />
+                        <path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search by name..." oninput="applyFilters()">
+                </div>
+
+                <div class="filter-chips">
+                    <span class="filter-label">Type</span>
+                    <button class="chip active" data-filter="type" data-value="all"
+                        onclick="setChip(this,'type')">All</button>
+                    <button class="chip" data-filter="type" data-value="Car"
+                        onclick="setChip(this,'type')">Cars</button>
+                    <button class="chip" data-filter="type" data-value="Bike"
+                        onclick="setChip(this,'type')">Bikes</button>
+                </div>
+
+                <div class="filter-chips">
+                    <span class="filter-label">Status</span>
+                    <button class="chip active" data-filter="status" data-value="all"
+                        onclick="setChip(this,'status')">All</button>
+                    <button class="chip" data-filter="status" data-value="available"
+                        onclick="setChip(this,'status')">Available</button>
+                    <button class="chip" data-filter="status" data-value="unavailable"
+                        onclick="setChip(this,'status')">Unavailable</button>
+                </div>
+
+                <button class="chip reset-chip" onclick="resetFilters()">Reset</button>
+            </div>
+
+            <p id="filterCount" class="filter-count" style="display:none;"></p>
+            <div id="vehicleList" class="vehicle-list"></div>
+            <div id="noVehiclesMessage" class="message">No vehicles available.</div>
+        </section>
+
+        <!-- Section for viewing bookings of a specific vehicle -->
+        <section id="vehicleBookingsSection" style="display:none;">
+            <h2>Bookings for <span id="vehicleBookingsTitle"></span></h2>
+            <button class="btn btn-secondary-back" onclick="showManageVehicles()">← Back to Vehicles</button>
+            <div id="vehicleBookingList" class="booking-list"></div>
+            <div id="noVehicleBookingsMessage" class="message">No bookings for this vehicle.</div>
+        </section>
+
+        <!-- Section for viewing and managing all bookings -->
+        <section id="allBookingsSection" style="display:none;">
+            <h2>All Bookings</h2>
+            <div class="filter-bar">
+                <div class="filter-chips">
+                    <span class="filter-label">Status</span>
+                    <button class="chip active" data-filter="booking-status" data-value="all"
+                        onclick="setBookingStatusFilter(this)">All</button>
+                    <button class="chip" data-filter="booking-status" data-value="CONFIRMED"
+                        onclick="setBookingStatusFilter(this)">Confirmed</button>
+                    <button class="chip" data-filter="booking-status" data-value="COMPLETED"
+                        onclick="setBookingStatusFilter(this)">Completed</button>
+                    <button class="chip" data-filter="booking-status" data-value="CANCELLED"
+                        onclick="setBookingStatusFilter(this)">Cancelled</button>
+                </div>
+            </div>
+            <p id="bookingFilterCount" class="filter-count" style="display:none;"></p>
+            <div id="bookingList" class="booking-list"></div>
+            <div id="noBookingsMessage" class="message">No bookings available.</div>
+        </section>
+    </div>
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>© 2026 NexRide. All rights reserved.</p>
+    </footer>
+
+    <script src="js/scripts.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
