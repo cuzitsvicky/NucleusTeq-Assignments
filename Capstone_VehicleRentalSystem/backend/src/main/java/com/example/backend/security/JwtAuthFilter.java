@@ -46,18 +46,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         if (authUtil.validateToken(token)) {
-            String username = authUtil.extractUsername(token);
-            String role     = authUtil.extractRole(token);
+            String email = authUtil.extractEmail(token);
+            String role  = authUtil.extractRole(token);
 
-            log.debug("Valid JWT — authenticating user: {}, role: {} for request: {} {}", username, role, request.getMethod(), path);
+            log.debug("Valid JWT - authenticating email: {}, role: {} for request: {} {}", email, role, request.getMethod(), path);
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    username, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
+                    email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
 
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            log.debug("SecurityContext populated for user: {}", username);
+            log.debug("SecurityContext populated for email: {}", email);
         } else {
             log.warn("Invalid JWT token received for request: {} {}", request.getMethod(), path);
         }

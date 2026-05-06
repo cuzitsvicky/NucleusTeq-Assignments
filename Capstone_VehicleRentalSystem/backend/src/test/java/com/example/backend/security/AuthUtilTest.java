@@ -17,11 +17,11 @@ class AuthUtilTest {
     }
 
     @Test
-    void generateToken_containsUsernameAndRole() {
+    void generateToken_containsEmailAndRole() {
         String token = authUtil.generateToken("john@example.com", "USER");
 
         assertThat(token).isNotBlank();
-        assertThat(authUtil.extractUsername(token)).isEqualTo("john@example.com");
+        assertThat(authUtil.extractEmail(token)).isEqualTo("john@example.com");
         assertThat(authUtil.extractRole(token)).isEqualTo("USER");
         assertThat(authUtil.validateToken(token)).isTrue();
     }
