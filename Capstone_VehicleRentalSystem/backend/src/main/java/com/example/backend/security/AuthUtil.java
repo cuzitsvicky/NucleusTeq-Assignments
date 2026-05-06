@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
-/* AuthUtil is a utility class for handling JWT token generation, validation, and extraction of claims such as username and role.
+/* AuthUtil is a utility class for handling JWT token generation, validation, and extraction of claims such as email and role.
  * It uses the configured secret key to sign and verify JWT tokens, ensuring secure authentication and authorization in the application.
  */
 @Component
@@ -29,17 +29,17 @@ public class AuthUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
-    /* Generates a JWT token for the given username and role. */
-    public String generateToken(String username, String role) {
-        log.debug("Generating JWT token for user: {}, role: {}", username, role);
+    /* Generates a JWT token for the given email and role. */
+    public String generateToken(String email, String role) {
+        log.debug("Generating JWT token for email: {}, role: {}", email, role);
         String token = Jwts.builder()
-                .subject(username)
+                .subject(email)
                 .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getKey())
                 .compact();
-        log.debug("JWT token generated successfully for user: {}", username);
+        log.debug("JWT token generated successfully for email: {}", email);
         return token;
     }
 
@@ -52,11 +52,11 @@ public class AuthUtil {
                 .getPayload();
     }
 
-    /* Extracts the username (email) from the JWT token. */
-    public String extractUsername(String token) {
-        String username = extractClaims(token).getSubject();
-        log.debug("Extracted username from JWT: {}", username);
-        return username;
+    /* Extracts the email from the JWT token subject. */
+    public String extractEmail(String token) {
+        String email = extractClaims(token).getSubject();
+        log.debug("Extracted email from JWT: {}", email);
+        return email;
     }
 
     /* Extracts the user's role from the JWT token. */

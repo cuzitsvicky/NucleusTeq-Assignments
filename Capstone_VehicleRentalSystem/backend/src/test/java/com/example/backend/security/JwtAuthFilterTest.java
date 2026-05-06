@@ -57,7 +57,7 @@ class JwtAuthFilterTest {
 
         assertThat(chain.calls).isEqualTo(1);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        verify(authUtil, never()).extractUsername("bad-token");
+        verify(authUtil, never()).extractEmail("bad-token");
         verify(authUtil, never()).extractRole("bad-token");
     }
 
@@ -70,7 +70,7 @@ class JwtAuthFilterTest {
         CountingFilterChain chain = new CountingFilterChain();
 
         when(authUtil.validateToken("valid-token")).thenReturn(true);
-        when(authUtil.extractUsername("valid-token")).thenReturn("john@example.com");
+        when(authUtil.extractEmail("valid-token")).thenReturn("john@example.com");
         when(authUtil.extractRole("valid-token")).thenReturn("USER");
 
         filter.doFilter(request, response, chain);
