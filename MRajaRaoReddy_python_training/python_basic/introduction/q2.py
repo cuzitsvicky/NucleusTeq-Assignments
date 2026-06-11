@@ -7,5 +7,6 @@ def check_python_version() -> str:
 
     return f"Python version: {sys.version}"
 
-print(check_python_version())
+if __name__ == "__main__":
+    print(check_python_version())
 

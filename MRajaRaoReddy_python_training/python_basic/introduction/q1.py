@@ -4,4 +4,5 @@
 def print_welcome_message() -> None:
     print("Welcome to Python Training")
 
-print_welcome_message()    
+if __name__ == "__main__":
+    print_welcome_message()    

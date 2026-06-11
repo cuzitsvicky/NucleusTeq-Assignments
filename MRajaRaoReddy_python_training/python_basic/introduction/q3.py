@@ -10,5 +10,5 @@ def get_user_input_and_print() -> None:
     print(f"\nHello, {name}! You are {age} years old.")
     print(f"Welcome to the Python training program, {name}!")
 
-
-get_user_input_and_print()
+if __name__ == "__main__":
+    get_user_input_and_print()
