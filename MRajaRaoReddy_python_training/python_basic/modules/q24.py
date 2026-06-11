@@ -1,22 +1,15 @@
 # Question 24: Create your own module and import it.
 
-from MRajaRaoReddy_python_training.python_basic.functions.q17 import calculate_square
-from MRajaRaoReddy_python_training.python_basic.functions.q18 import is_palindrome
-from MRajaRaoReddy_python_training.python_basic.functions.q19 import find_max_in_list
+# Importing functions from the custom module created in the same directory (custom_module.py)
+from custom_module import add_numbers, multiply_numbers, subtract_numbers, divide_numbers, power_numbers
 
+# Taking input from the user for two numbers
+first_number = int(input("Enter first number: "))
+second_number = int(input("Enter second number: "))
 
-def create_and_import_module() -> None:
-    
-    print("\nImporting and using custom module functions:")
-    
-    squared: float = calculate_square(7)
-    print(f"Square of 7 = {squared}")
-    
-    is_pal: bool = is_palindrome("racecar")
-    print(f"Is 'racecar' a palindrome? {is_pal}")
-    
-    max_val: float = find_max_in_list([3, 7, 1, 9, 4])
-    print(f"Maximum in [3, 7, 1, 9, 4] = {max_val}")
-
-if __name__ == "__main__":
-    create_and_import_module()
+# Using the imported functions to perform operations and print results
+print("Sum =", add_numbers(first_number, second_number))
+print("Product =", multiply_numbers(first_number, second_number))
+print("Difference =", subtract_numbers(first_number, second_number))
+print("Quotient =", divide_numbers(first_number, second_number))
+print("Power =", power_numbers(first_number, second_number))
