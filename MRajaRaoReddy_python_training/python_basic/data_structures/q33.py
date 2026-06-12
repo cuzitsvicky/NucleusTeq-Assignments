@@ -21,9 +21,10 @@ def count_character_frequency(text: str) -> Dict[str, int]:
     return frequency
 
 if __name__ == "__main__":
-    input_string: str = input("Enter a string: ")
+    user_input = input("Enter a string (or press Enter for default): ").strip()
+    input_string: str = user_input if user_input else "hello world"
+
     char_frequency: Dict[str, int] = count_character_frequency(input_string)
-    
     print(f"\nInput string: '{input_string}'")
     print("Character Frequency:")
     for char, freq in char_frequency.items():
