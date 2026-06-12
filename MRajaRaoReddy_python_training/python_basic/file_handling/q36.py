@@ -1,6 +1,8 @@
 # Question 36: Read a file and count words, lines, and characters.
 
-def count_file_contents(filename: str) -> tuple[int, int, int]:
+from typing import Tuple
+
+def count_file_contents(filename: str) -> Tuple[int, int, int]:
     """
     Count words, lines, and characters in a file.
 
