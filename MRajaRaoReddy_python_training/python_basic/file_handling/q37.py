@@ -13,8 +13,8 @@ def append_to_file(filename: str, text: str) -> None:
 
 
 if __name__ == "__main__":
-    user_text = input("Enter text to append: ")
+    user_text = input("Enter text to append (or press Enter for default): ").strip()
+    text_to_append: str = user_text if user_text else "Appended text."
 
-    append_to_file("my_name.txt", user_text)
-
+    append_to_file("my_name.txt", text_to_append)
     print("Data appended successfully.")
