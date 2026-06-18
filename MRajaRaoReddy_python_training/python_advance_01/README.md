@@ -11,13 +11,6 @@ This folder contains comprehensive Python advanced training materials covering e
 - [How to Run](#how-to-run)
 - [Assignment Breakdown](#assignment-breakdown)
 
-## 🎯 Overview
-
-This Python Advanced training course covers 40+ questions and practical examples designed to deepen your understanding of Python's advanced features. The course is structured progressively, starting with exception handling and advancing to concurrent programming and testing practices.
-
-**Total Questions:** 40 assignments across 7 major topics  
-**Difficulty Level:** Intermediate to Advanced  
-**Estimated Duration:** 40-50 hours
 
 ## 📁 Folder Structure
 
