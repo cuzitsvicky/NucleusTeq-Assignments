@@ -1,1 +1,0 @@
-# No external dependencies - using Python built-ins only (math, random)
