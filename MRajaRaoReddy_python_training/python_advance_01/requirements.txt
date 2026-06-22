@@ -1,0 +1,5 @@
+# Python Advanced Training - Requirements
+# All other dependencies (threading, multiprocessing, re, pdb, typing, functools, concurrent.futures)
+# are part of the Python standard library and require no installation.
+
+pytest>=7.0.0
