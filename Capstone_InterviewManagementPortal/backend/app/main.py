@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-
+from .routers import auth
 from .core.logging_config import setup_logging
 from .handlers import register_exception_handlers
 
@@ -19,3 +19,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
