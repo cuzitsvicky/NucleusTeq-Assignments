@@ -1,0 +1,26 @@
+import logging
+from ..repositories import auth_repo
+from ..utils import verify_password, get_password_hash
+from ..exceptions import UnauthorizedException, ForbiddenException
+
+logger = logging.getLogger("app")
+
+
+def authenticate_user(email: str, password: str, is_basic_auth: bool = False) -> dict:
+    user = auth_repo.get_user_by_email(email.strip().lower())
+    if not user or not verify_password(password, user["password"]):
+        headers = {"WWW-Authenticate": "Basic"} if is_basic_auth else None
+        raise UnauthorizedException(
+            detail="Invalid email or password",
+            headers=headers
+        )
+    if not user.get("active", True):
+        logger.warning(f"Login attempt for disabled account: {email}")
+        raise ForbiddenException(detail="User account is disabled")
+    return user
+
+
+def reset_password(user_id: str, new_password: str):
+    hashed = get_password_hash(new_password)
+    auth_repo.update_password(user_id, hashed)
+    logger.info(f"User {user_id} reset their password successfully")
