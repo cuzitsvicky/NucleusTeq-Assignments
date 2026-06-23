@@ -1,0 +1,1 @@
+from .app_constants import REQUIRED_EMAIL_DOMAIN, ALLOWED_RESUME_EXTENSION

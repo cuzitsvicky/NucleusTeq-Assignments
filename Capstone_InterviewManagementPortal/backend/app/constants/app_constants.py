@@ -1,0 +1,2 @@
+REQUIRED_EMAIL_DOMAIN = "nucleusteq.com"
+ALLOWED_RESUME_EXTENSION = ".pdf"

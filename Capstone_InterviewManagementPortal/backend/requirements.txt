@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pymongo
+pydantic[email]
+python-multipart
+pytest
+pytest-asyncio
+pytest-cov
+python-dotenv
