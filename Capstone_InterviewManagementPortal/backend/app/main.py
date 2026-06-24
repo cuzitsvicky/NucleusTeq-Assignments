@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from .routers import auth
 from .core.logging_config import setup_logging
-from .handlers import register_exception_handlers
+from .exceptions import register_exception_handlers
 
 # Setup logging
 setup_logging()
