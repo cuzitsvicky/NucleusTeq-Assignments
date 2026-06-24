@@ -1,1 +1,6 @@
-from .app_constants import REQUIRED_EMAIL_DOMAIN, ALLOWED_RESUME_EXTENSION
+from .app_constants import (
+    REQUIRED_EMAIL_DOMAIN,
+    ALLOWED_RESUME_EXTENSION,
+    MAX_RESUME_SIZE_BYTES,
+    PAGE_SIZE,
+)
