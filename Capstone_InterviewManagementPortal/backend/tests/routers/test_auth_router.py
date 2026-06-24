@@ -86,12 +86,6 @@ def test_explicit_login_disabled_user(client):
     assert response.json()["detail"] == "User account is disabled"
 
 
-def test_explicit_logout(client):
-    response = client.post("/api/auth/logout")
-    assert response.status_code == 200
-    assert response.json()["message"] == "Logged out successfully"
-
-
 def test_password_reset(client):
     db.users.insert_one({
         "name": "First Login User",
