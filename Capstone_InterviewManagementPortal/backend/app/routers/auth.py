@@ -16,6 +16,15 @@ logger = logging.getLogger("app")
 
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    """
+    Get current user.
+
+    Args:
+        credentials (HTTPBasicCredentials): Credentials for basic authentication
+    
+    Returns:
+        User document
+    """
     return auth_service.authenticate_user(
         credentials.username, credentials.password, is_basic_auth=True
     )
@@ -23,6 +32,15 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
 
 @router.post("/login", response_model=LoginResponse)
 def login(credentials: LoginRequest):
+    """
+    Login user.
+
+    Args:
+        credentials (LoginRequest): Credentials for login
+    
+    Returns:
+        LoginResponse: Response with user and token
+    """
     user = auth_service.authenticate_user(credentials.email, credentials.password)
     
     # Generate the basic auth token (base64 of "email:password")
@@ -42,14 +60,17 @@ def login(credentials: LoginRequest):
         token=token
     )
 
-
-@router.post("/logout")
-def logout():
-    return {"message": "Logged out successfully"}
-
-
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: dict = Depends(get_current_user)):
+    """
+    Get current user.
+
+    Args:
+        current_user (dict): Current user
+    
+    Returns:
+        UserResponse: Response with user information
+    """
     return UserResponse(
         id=str(current_user["_id"]),
         name=current_user.get("name", ""),
@@ -64,5 +85,15 @@ def get_me(current_user: dict = Depends(get_current_user)):
 def reset_password(
     payload: PasswordResetRequest, current_user: dict = Depends(get_current_user)
 ):
+    """
+    Reset password.
+
+    Args:
+        payload (PasswordResetRequest): Password reset request
+        current_user (dict): Current user
+    
+    Returns:
+        dict: Message indicating successful password reset
+    """
     auth_service.reset_password(str(current_user["_id"]), payload.new_password)
     return {"message": "Password reset successfully"}
