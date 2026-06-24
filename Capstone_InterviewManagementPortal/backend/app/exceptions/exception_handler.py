@@ -30,7 +30,7 @@ def _error_response(status_code: int, error: str, detail, headers: dict = None):
 
 def register_exception_handlers(app: FastAPI):
 
-    # ── 1. Our own custom AppException and all its subclasses ────────────────
+    # 1. Our own custom AppException and all its subclasses 
     @app.exception_handler(AppException)
     async def app_exception_handler(request: Request, exc: AppException):
         error_map = {
@@ -54,7 +54,7 @@ def register_exception_handlers(app: FastAPI):
             headers=exc.headers,
         )
 
-    # ── 2. Pydantic / FastAPI request validation errors (422) ─────────────────
+    # 2. Pydantic / FastAPI request validation errors (422) 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
         request: Request, exc: RequestValidationError
@@ -78,7 +78,7 @@ def register_exception_handlers(app: FastAPI):
             detail=errors,
         )
 
-    # ── 3. Starlette / FastAPI HTTP exceptions (404 from router, 405, etc.) ───
+    # 3. Starlette / FastAPI HTTP exceptions (404 from router, 405, etc.) 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         error_map = {
