@@ -1,4 +1,4 @@
-from app.db.database import db
+from app.core.database import db
 from app.utils.security_utils import get_password_hash
 
 

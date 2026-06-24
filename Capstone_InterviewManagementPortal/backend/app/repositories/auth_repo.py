@@ -1,4 +1,4 @@
-from ..db.database import db
+from ..core.database import db
 from bson.objectid import ObjectId
 
 

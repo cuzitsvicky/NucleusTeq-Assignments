@@ -1,6 +1,6 @@
 import pytest
 from app.services import auth_service
-from app.db.database import db
+from app.core.database import db
 from app.utils.security_utils import get_password_hash, verify_password
 from app.exceptions import UnauthorizedException, ForbiddenException
 
