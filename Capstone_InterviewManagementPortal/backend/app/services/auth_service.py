@@ -2,6 +2,8 @@ import logging
 from ..repositories import auth_repo
 from ..utils import verify_password, get_password_hash
 from ..exceptions import UnauthorizedException, ForbiddenException
+from ..enums import UserRole
+
 
 logger = logging.getLogger("app")
 
@@ -31,6 +33,10 @@ def authenticate_user(email: str, password: str, is_basic_auth: bool = False) ->
     if not user.get("active", True):
         logger.warning(f"Login attempt for disabled account: {email}")
         raise ForbiddenException(detail="User account is disabled")
+    # Validate role
+    if user.get("role") not in [r.value for r in UserRole]:
+        logger.warning(f"Login attempt with invalid role: {user.get('role')} for email: {email}")
+        raise ForbiddenException(detail="Invalid user role configuration")
     return user
 
 

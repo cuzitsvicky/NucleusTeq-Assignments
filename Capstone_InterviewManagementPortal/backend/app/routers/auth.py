@@ -9,6 +9,8 @@ from ..schemas import (
     LoginResponse,
 )
 from ..services import auth_service
+from ..exceptions import ForbiddenException
+
 
 router = APIRouter()
 security = HTTPBasic()
@@ -29,6 +31,10 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
         credentials.username, credentials.password, is_basic_auth=True
     )
 
+def check_password_reset(current_user: dict = Depends(get_current_user)):
+    if current_user.get("reset_required", False):
+        raise ForbiddenException(detail="Password reset required on first login")
+    return current_user
 
 @router.post("/login", response_model=LoginResponse)
 def login(credentials: LoginRequest):
