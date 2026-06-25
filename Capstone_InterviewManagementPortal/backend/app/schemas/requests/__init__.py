@@ -1,1 +1,10 @@
-from .user_requests import  LoginRequest, PasswordResetRequest
+from .user_create_request import UserCreateRequest
+from .user_update_request import UserUpdateRequest
+from .password_reset_request import PasswordResetRequest
+from .login_request import LoginRequest
+from .status_update_request import StatusUpdateRequest
+from .candidate_update_request import CandidateUpdateRequest
+from .job_create_request import JobCreateRequest
+from .interview_create_request import InterviewCreateRequest
+from .feedback_submit_request import FeedbackSubmitRequest
+
