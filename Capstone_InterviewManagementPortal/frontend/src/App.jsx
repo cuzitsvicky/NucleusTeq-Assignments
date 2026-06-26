@@ -8,7 +8,7 @@ import JobsView from './views/JobsView';
 import CandidatesView from './views/CandidatesView';
 import InterviewsView from './views/InterviewsView';
 import UsersView from './views/UsersView';
-import { ShieldAlert, Check } from 'lucide-react';
+import { ShieldAlert, Check, Eye, EyeOff } from 'lucide-react';
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('portal_token'));
@@ -19,6 +19,8 @@ export default function App() {
   // Forced Password Change Form State
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resetError, setResetError] = useState(null);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
@@ -97,29 +99,51 @@ export default function App() {
           <form onSubmit={handleForcedPasswordReset}>
             <div className="form-group">
               <label htmlFor="new-pass">New Password (6-12 characters)</label>
-              <input
-                id="new-pass"
-                type="password"
-                className="form-control"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
-                required
-                disabled={resetLoading}
-              />
+              <div className="password-input-container">
+                <input
+                  id="new-pass"
+                  type={showNewPassword ? 'text' : 'password'}
+                  className="form-control"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  required
+                  disabled={resetLoading}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                  tabIndex={-1}
+                >
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <div className="form-group">
               <label htmlFor="confirm-pass">Confirm Password</label>
-              <input
-                id="confirm-pass"
-                type="password"
-                className="form-control"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
-                required
-                disabled={resetLoading}
-              />
+              <div className="password-input-container">
+                <input
+                  id="confirm-pass"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  className="form-control"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                  required
+                  disabled={resetLoading}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             <button
