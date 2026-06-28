@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     # MongoDB configuration
     MONGO_URI: str = "mongodb://localhost:27017"
-    DB_NAME: str = "CapstoneProject"
+    DB_NAME: str = "Interview_Management_Portal"
 
     # Model configuration for pydantic_settings
     model_config = SettingsConfigDict(
