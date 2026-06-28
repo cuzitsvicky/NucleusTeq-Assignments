@@ -1,10 +1,17 @@
 import os
 import pytest
+import asyncio
 from fastapi.testclient import TestClient
 from pymongo import MongoClient
 
 # Set env DB_NAME to test database before imports
-os.environ["DB_NAME"] = "interview_portal_test1"
+os.environ["DB_NAME"] = "interview_portal_test"
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 from app.main import app
 from app.core.config import settings
@@ -28,8 +35,8 @@ def run_around_tests():
 
 
 @pytest.fixture
-def admin_headers():
-    db.users.insert_one({
+async def admin_headers():
+    await db.users.insert_one({
         "name": "Test Admin",
         "email": "admin@nucleusteq.com",
         "password": get_password_hash("admin123"),
@@ -41,8 +48,8 @@ def admin_headers():
 
 
 @pytest.fixture
-def hr_headers():
-    db.users.insert_one({
+async def hr_headers():
+    await db.users.insert_one({
         "name": "Test HR",
         "email": "hr@nucleusteq.com",
         "password": get_password_hash("hr123"),
@@ -54,8 +61,8 @@ def hr_headers():
 
 
 @pytest.fixture
-def interviewer_headers():
-    db.users.insert_one({
+async def interviewer_headers():
+    await db.users.insert_one({
         "name": "Test Interviewer",
         "email": "interviewer@nucleusteq.com",
         "password": get_password_hash("int123"),

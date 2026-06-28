@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { apiService } from './services/api';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
@@ -58,6 +58,12 @@ export default function App() {
     try {
       await apiService.resetPassword(token, newPassword);
       setResetSuccess(true);
+      
+      // Generate new basic auth token with new password and update token state/localStorage
+      const authStr = `${user.email.trim().toLowerCase()}:${newPassword}`;
+      const newToken = btoa(authStr);
+      setToken(newToken);
+      localStorage.setItem('portal_token', newToken);
       
       // Update local user state reset_required to false
       const updatedUser = { ...user, reset_required: false };
