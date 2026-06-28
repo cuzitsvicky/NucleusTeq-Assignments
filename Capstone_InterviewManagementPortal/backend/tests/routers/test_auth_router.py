@@ -1,5 +1,12 @@
-from app.core.database import db
+from pymongo import MongoClient
+
+from app.core.config import settings
 from app.utils.security_utils import get_password_hash
+
+
+def insert_user(user_data: dict):
+    mongo_client = MongoClient(settings.MONGO_URI)
+    return mongo_client[settings.DB_NAME].users.insert_one(user_data)
 
 
 def test_login_and_me(client, admin_headers):
@@ -16,7 +23,7 @@ def test_login_invalid_credentials(client):
 
 
 def test_disabled_user_login(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Test Disabled",
         "email": "disabled@nucleusteq.com",
         "password": get_password_hash("pass123"),
@@ -31,7 +38,7 @@ def test_disabled_user_login(client):
 
 
 def test_explicit_login_success(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Explicit Login User",
         "email": "explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -53,7 +60,7 @@ def test_explicit_login_success(client):
 
 
 def test_explicit_login_invalid_credentials(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Explicit Login User",
         "email": "explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -69,7 +76,7 @@ def test_explicit_login_invalid_credentials(client):
 
 
 def test_explicit_login_disabled_user(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Disabled User",
         "email": "disabled_explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -86,8 +93,9 @@ def test_explicit_login_disabled_user(client):
     assert response.json()["detail"] == "User account is disabled"
 
 
+
 def test_password_reset(client):
-    db.users.insert_one({
+    insert_user({
         "name": "First Login User",
         "email": "first@nucleusteq.com",
         "password": get_password_hash("temp123"),
