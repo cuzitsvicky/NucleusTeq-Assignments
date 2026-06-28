@@ -1,7 +1,8 @@
 import pytest
 from app.core.database import db
 
-def test_router_register_user(client, admin_headers, hr_headers):
+@pytest.mark.asyncio
+async def test_router_register_user(client, admin_headers, hr_headers):
     payload = {
         "name": "New Employee",
         "email": "employee@nucleusteq.com",
@@ -22,7 +23,8 @@ def test_router_register_user(client, admin_headers, hr_headers):
     assert res_data["active"] is True
     assert res_data["reset_required"] is True
 
-def test_router_get_users(client, admin_headers, hr_headers):
+@pytest.mark.asyncio
+async def test_router_get_users(client, admin_headers, hr_headers):
     # Non-admin (HR) list users attempt -> 403 Forbidden
     hr_resp = client.get("/api/auth/users", headers=hr_headers)
     assert hr_resp.status_code == 403
@@ -32,7 +34,8 @@ def test_router_get_users(client, admin_headers, hr_headers):
     assert admin_resp.status_code == 200
     assert len(admin_resp.json()) >= 1
 
-def test_router_get_interviewers(client, admin_headers, hr_headers, interviewer_headers):
+@pytest.mark.asyncio
+async def test_router_get_interviewers(client, admin_headers, hr_headers, interviewer_headers):
     # Interviewer access to list interviewers -> 403 Forbidden
     int_resp = client.get("/api/auth/interviewers", headers=interviewer_headers)
     assert int_resp.status_code == 403
@@ -42,7 +45,8 @@ def test_router_get_interviewers(client, admin_headers, hr_headers, interviewer_
     assert hr_resp.status_code == 200
     assert isinstance(hr_resp.json(), list)
 
-def test_router_update_and_disable_user(client, admin_headers, hr_headers):
+@pytest.mark.asyncio
+async def test_router_update_and_disable_user(client, admin_headers, hr_headers):
     # Create target user to update
     register_resp = client.post("/api/auth/register", json={
         "name": "Target User",
@@ -68,12 +72,13 @@ def test_router_update_and_disable_user(client, admin_headers, hr_headers):
     assert admin_resp.json()["message"] == "User updated"
     
     # Double check database state to verify update and disable
-    user_doc = db.users.find_one({"email": "target@nucleusteq.com"})
+    user_doc = await db.users.find_one({"email": "target@nucleusteq.com"})
     assert user_doc["name"] == "Updated Name"
     assert user_doc["role"] == "HR"
     assert user_doc["active"] is False
 
-def test_router_update_user_self_block(client, admin_headers):
+@pytest.mark.asyncio
+async def test_router_update_user_self_block(client, admin_headers):
     # Get current admin profile to fetch ID
     me_resp = client.get("/api/auth/me", headers=admin_headers)
     assert me_resp.status_code == 200
