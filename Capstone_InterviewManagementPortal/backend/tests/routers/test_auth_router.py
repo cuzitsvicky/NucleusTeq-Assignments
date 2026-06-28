@@ -9,7 +9,7 @@ def insert_user(user_data: dict):
     return mongo_client[settings.DB_NAME].users.insert_one(user_data)
 
 
-async def test_login_and_me(client, admin_headers):
+def test_login_and_me(client, admin_headers):
     response = client.get("/api/auth/me", headers=admin_headers)
     assert response.status_code == 200
     assert response.json()["email"] == "admin@nucleusteq.com"
@@ -17,13 +17,13 @@ async def test_login_and_me(client, admin_headers):
     assert response.json()["reset_required"] is False
 
 
-async def test_login_invalid_credentials(client):
+def test_login_invalid_credentials(client):
     response = client.get("/api/auth/me", headers={"Authorization": "Basic YWRtaW5AbnVjbGV1c3RlcS5jb206d3JvbmdwYXNz"})
     assert response.status_code == 401
 
 
 def test_disabled_user_login(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Test Disabled",
         "email": "disabled@nucleusteq.com",
         "password": get_password_hash("pass123"),
@@ -38,7 +38,7 @@ def test_disabled_user_login(client):
 
 
 def test_explicit_login_success(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Explicit Login User",
         "email": "explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -60,7 +60,7 @@ def test_explicit_login_success(client):
 
 
 def test_explicit_login_invalid_credentials(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Explicit Login User",
         "email": "explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -76,7 +76,7 @@ def test_explicit_login_invalid_credentials(client):
 
 
 def test_explicit_login_disabled_user(client):
-    db.users.insert_one({
+    insert_user({
         "name": "Disabled User",
         "email": "disabled_explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -95,7 +95,7 @@ def test_explicit_login_disabled_user(client):
 
 
 def test_password_reset(client):
-    db.users.insert_one({
+    insert_user({
         "name": "First Login User",
         "email": "first@nucleusteq.com",
         "password": get_password_hash("temp123"),
