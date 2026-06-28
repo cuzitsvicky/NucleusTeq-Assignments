@@ -1,5 +1,7 @@
 import pytest
-from app.core.database import db
+from pymongo import MongoClient
+
+from app.core.config import settings
 
 @pytest.mark.asyncio
 async def test_router_register_user(client, admin_headers, hr_headers):
@@ -72,7 +74,10 @@ async def test_router_update_and_disable_user(client, admin_headers, hr_headers)
     assert admin_resp.json()["message"] == "User updated"
     
     # Double check database state to verify update and disable
-    user_doc = await db.users.find_one({"email": "target@nucleusteq.com"})
+    mongo_client = MongoClient(settings.MONGO_URI)
+    user_doc = mongo_client[settings.DB_NAME].users.find_one(
+        {"email": "target@nucleusteq.com"}
+    )
     assert user_doc["name"] == "Updated Name"
     assert user_doc["role"] == "HR"
     assert user_doc["active"] is False

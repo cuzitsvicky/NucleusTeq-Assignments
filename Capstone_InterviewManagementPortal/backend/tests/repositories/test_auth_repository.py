@@ -1,11 +1,16 @@
 from app.repositories import auth_repo
-from app.core.database import db
+import pytest
+from pymongo import MongoClient
+
+from app.core.config import settings
 from app.utils.security_utils import get_password_hash, verify_password
 
 
+@pytest.mark.asyncio
 async def test_auth_repo_get_user_by_email():
     # Insert a user first
-    await db.users.insert_one({
+    mongo_client = MongoClient(settings.MONGO_URI)
+    mongo_client[settings.DB_NAME].users.insert_one({
         "name": "Auth Repo User",
         "email": "repouser@nucleusteq.com",
         "password": get_password_hash("password123"),
@@ -25,21 +30,24 @@ async def test_auth_repo_get_user_by_email():
     assert user_case["name"] == "Auth Repo User"
 
 
+@pytest.mark.asyncio
 async def test_auth_repo_update_password():
-    user_id = (await db.users.insert_one({
+    mongo_client = MongoClient(settings.MONGO_URI)
+    users = mongo_client[settings.DB_NAME].users
+    user_id = users.insert_one({
         "name": "Auth Repo User",
         "email": "repouser@nucleusteq.com",
         "password": get_password_hash("password123"),
         "role": "HR",
         "active": True,
         "reset_required": True
-    })).inserted_id
+    }).inserted_id
     
     # Update password
     new_hashed = get_password_hash("newPassword123")
     await auth_repo.update_password(str(user_id), new_hashed)
     
     # Fetch from db and verify
-    user = await db.users.find_one({"_id": user_id})
+    user = users.find_one({"_id": user_id})
     assert user["reset_required"] is False
     assert verify_password("newPassword123", user["password"]) is True

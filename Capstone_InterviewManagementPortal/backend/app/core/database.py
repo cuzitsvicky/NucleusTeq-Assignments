@@ -1,57 +1,85 @@
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorGridFSBucket
-from .config import settings
 import asyncio
+import logging
+from typing import Optional
 
-_clients = {}
+from motor.motor_asyncio import (
+    AsyncIOMotorClient,
+    AsyncIOMotorDatabase,
+    AsyncIOMotorGridFSBucket,
+)
 
-def get_active_db():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = None
-        
-    if loop not in _clients:
-        _clients[loop] = AsyncIOMotorClient(settings.MONGO_URI)
-    return _clients[loop][settings.DB_NAME]
+from .config import settings
 
-class ClientProxy:
-    def __getattr__(self, name):
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-            
-        if loop not in _clients:
-            _clients[loop] = AsyncIOMotorClient(settings.MONGO_URI)
-        return getattr(_clients[loop], name)
+logger = logging.getLogger("app")
 
-client = ClientProxy()
+client: Optional[AsyncIOMotorClient] = None
+_db: Optional[AsyncIOMotorDatabase] = None
+fs: Optional[AsyncIOMotorGridFSBucket] = None
+_client_loop: Optional[asyncio.AbstractEventLoop] = None
+
+
+def _ensure_client() -> AsyncIOMotorClient:
+    global client, _db, fs, _client_loop
+
+    loop = asyncio.get_running_loop()
+    if client is None or _client_loop is not loop or _client_loop.is_closed():
+        if client is not None:
+            client.close()
+        client = AsyncIOMotorClient(settings.MONGO_URI, io_loop=loop)
+        _db = client[settings.DB_NAME]
+        fs = None
+        _client_loop = loop
+    return client
+
+
+def get_active_db() -> AsyncIOMotorDatabase:
+    _ensure_client()
+    if _db is None:
+        raise RuntimeError("MongoDB database is not initialized")
+    return _db
+
 
 class DatabaseProxy:
-    def __getattr__(self, name):
+    def __getattr__(self, name: str):
         return getattr(get_active_db(), name)
-        
-    def __getitem__(self, name):
+
+    def __getitem__(self, name: str):
         return get_active_db()[name]
+
 
 db = DatabaseProxy()
 
-class LazyGridFSBucket:
-    def __init__(self):
-        self._buckets = {}
 
-    @property
-    def bucket(self):
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-            
-        if loop not in self._buckets:
-            self._buckets[loop] = AsyncIOMotorGridFSBucket(get_active_db())
-        return self._buckets[loop]
+def get_gridfs_bucket() -> AsyncIOMotorGridFSBucket:
+    global fs
 
-    def __getattr__(self, name):
-        return getattr(self.bucket, name)
+    if fs is None:
+        fs = AsyncIOMotorGridFSBucket(get_active_db())
+    return fs
 
-fs = LazyGridFSBucket()
+
+async def connect_to_mongo() -> None:
+    try:
+        active_client = _ensure_client()
+        await active_client.admin.command("ping")
+        get_gridfs_bucket()
+        logger.info("Connected to MongoDB database '%s'", settings.DB_NAME)
+    except Exception:
+        logger.exception("Failed to connect to MongoDB")
+        raise
+
+
+async def close_mongo_connection() -> None:
+    global client, _db, fs, _client_loop
+
+    try:
+        if client is not None:
+            client.close()
+        client = None
+        _db = None
+        fs = None
+        _client_loop = None
+        logger.info("Closed MongoDB connection")
+    except Exception:
+        logger.exception("Failed to close MongoDB connection")
+        raise

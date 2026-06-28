@@ -1,8 +1,15 @@
-from app.core.database import db
+from pymongo import MongoClient
+
+from app.core.config import settings
 from app.utils.security_utils import get_password_hash
 
 
-async def test_login_and_me(client, admin_headers):
+def insert_user(user_data: dict):
+    mongo_client = MongoClient(settings.MONGO_URI)
+    return mongo_client[settings.DB_NAME].users.insert_one(user_data)
+
+
+def test_login_and_me(client, admin_headers):
     response = client.get("/api/auth/me", headers=admin_headers)
     assert response.status_code == 200
     assert response.json()["email"] == "admin@nucleusteq.com"
@@ -10,13 +17,13 @@ async def test_login_and_me(client, admin_headers):
     assert response.json()["reset_required"] is False
 
 
-async def test_login_invalid_credentials(client):
+def test_login_invalid_credentials(client):
     response = client.get("/api/auth/me", headers={"Authorization": "Basic YWRtaW5AbnVjbGV1c3RlcS5jb206d3JvbmdwYXNz"})
     assert response.status_code == 401
 
 
-async def test_disabled_user_login(client):
-    await db.users.insert_one({
+def test_disabled_user_login(client):
+    insert_user({
         "name": "Test Disabled",
         "email": "disabled@nucleusteq.com",
         "password": get_password_hash("pass123"),
@@ -30,8 +37,8 @@ async def test_disabled_user_login(client):
     assert response.json()["detail"] == "User account is disabled"
 
 
-async def test_explicit_login_success(client):
-    await db.users.insert_one({
+def test_explicit_login_success(client):
+    insert_user({
         "name": "Explicit Login User",
         "email": "explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -52,8 +59,8 @@ async def test_explicit_login_success(client):
     assert res_data["token"] == "ZXhwbGljaXRAbnVjbGV1c3RlcS5jb206bG9naW5QYXNzMTIz"
 
 
-async def test_explicit_login_invalid_credentials(client):
-    await db.users.insert_one({
+def test_explicit_login_invalid_credentials(client):
+    insert_user({
         "name": "Explicit Login User",
         "email": "explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -68,8 +75,8 @@ async def test_explicit_login_invalid_credentials(client):
     assert response2.status_code == 401
 
 
-async def test_explicit_login_disabled_user(client):
-    await db.users.insert_one({
+def test_explicit_login_disabled_user(client):
+    insert_user({
         "name": "Disabled User",
         "email": "disabled_explicit@nucleusteq.com",
         "password": get_password_hash("loginPass123"),
@@ -87,8 +94,8 @@ async def test_explicit_login_disabled_user(client):
 
 
 
-async def test_password_reset(client):
-    await db.users.insert_one({
+def test_password_reset(client):
+    insert_user({
         "name": "First Login User",
         "email": "first@nucleusteq.com",
         "password": get_password_hash("temp123"),
