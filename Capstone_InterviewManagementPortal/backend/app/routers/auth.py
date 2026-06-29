@@ -14,7 +14,7 @@ from ..exceptions import ForbiddenException
 
 router = APIRouter()
 security = HTTPBasic()
-logger = logging.getLogger("app")
+logger = logging.getLogger(__name__)
 
 
 async def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
