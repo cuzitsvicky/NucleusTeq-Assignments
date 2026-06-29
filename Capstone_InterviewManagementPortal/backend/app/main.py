@@ -6,7 +6,7 @@ import logging
 
 from .core.database import close_mongo_connection, connect_to_mongo
 from .core.logging_config import setup_logging
-from .routers import auth, users
+from .routers import auth, users, jobs
 from .exceptions import register_exception_handlers
 
 setup_logging()
@@ -36,3 +36,4 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/auth", tags=["Users"])
+app.include_router(jobs.router, prefix="/api/jobs", tags=["Jobs"])
