@@ -6,7 +6,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .custom_exceptions import AppException
 
-logger = logging.getLogger("app")
+logger = logging.getLogger(__name__)
 
 
 def _error_response(status_code: int, error: str, detail, headers: dict = None):

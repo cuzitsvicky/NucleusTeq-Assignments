@@ -1,3 +1,4 @@
+# Constants
 REQUIRED_EMAIL_DOMAIN = "nucleusteq.com"
 ALLOWED_RESUME_EXTENSION = ".pdf"
 MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024  #5MB

@@ -10,7 +10,7 @@ from .routers import auth
 from .exceptions import register_exception_handlers
 
 setup_logging()
-logger = logging.getLogger("app")
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
