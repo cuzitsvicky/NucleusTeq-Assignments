@@ -9,7 +9,7 @@ from motor.motor_asyncio import (
 
 from .config import settings
 
-logger = logging.getLogger("app")
+logger = logging.getLogger(__name__)
 
 # Shared MongoDB objects
 client: Optional[AsyncIOMotorClient] = None

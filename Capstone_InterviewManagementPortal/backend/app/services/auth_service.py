@@ -3,7 +3,7 @@ from ..repositories import auth_repo
 from ..utils import verify_password, get_password_hash
 from ..exceptions import UnauthorizedException, ForbiddenException
 
-logger = logging.getLogger("app")
+logger = logging.getLogger(__name__)
 
 
 async def authenticate_user(email: str, password: str, is_basic_auth: bool = False) -> dict:
