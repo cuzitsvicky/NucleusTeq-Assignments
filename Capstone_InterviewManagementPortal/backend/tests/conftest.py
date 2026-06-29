@@ -1,35 +1,64 @@
 import os
+import base64
 import pytest
-from fastapi.testclient import TestClient
-from pymongo import MongoClient
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 
 # Set env DB_NAME to test database before imports
-os.environ["DB_NAME"] = "interview_portal_test1"
+os.environ["DB_NAME"] = "interview_portal_test"
 
 from app.main import app
 from app.core.config import settings
-from app.core.database import db
 from app.utils.security_utils import get_password_hash
 
 
-@pytest.fixture(scope="session")
-def client():
-    return TestClient(app)
+def create_basic_auth_headers(email: str, password: str) -> dict:
+    """
+    Generate HTTP Basic Authentication headers.
+    """
+    token = base64.b64encode(f"{email}:{password}".encode()).decode()
+    return {"Authorization": f"Basic {token}"}
 
 
-@pytest.fixture(autouse=True)
-def run_around_tests():
-    # Clean the test database before each test run
-    mongo_client = MongoClient(settings.MONGO_URI)
-    mongo_client.drop_database(settings.DB_NAME)
+@pytest_asyncio.fixture(scope="function")
+async def client():
+    """
+    Asynchronous HTTPX client that yields a request client bound to the FastAPI app.
+    Properly handles the app lifespan startup (connecting to MongoDB) and shutdown.
+    """
+    from app.core.database import connect_to_mongo, close_mongo_connection
+    await connect_to_mongo()
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
+    await close_mongo_connection()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def async_client(client):
+    """
+    Alias fixture for client to maintain backwards compatibility.
+    """
+    yield client
+
+
+@pytest_asyncio.fixture(autouse=True, scope="function")
+async def run_around_tests(client):
+    """
+    Ensure every test runs against a clean database.
+    """
+    from app.core.database import db
+    await db.client.drop_database(settings.DB_NAME)
     yield
-    # Clean up after test
-    mongo_client.drop_database(settings.DB_NAME)
+    await db.client.drop_database(settings.DB_NAME)
 
 
-@pytest.fixture
-def admin_headers():
-    db.users.insert_one({
+@pytest_asyncio.fixture(scope="function")
+async def admin_headers(client):
+    """
+    Insert a test administrator user and return basic auth headers.
+    """
+    from app.core.database import db
+    await db.users.insert_one({
         "name": "Test Admin",
         "email": "admin@nucleusteq.com",
         "password": get_password_hash("admin123"),
@@ -37,12 +66,16 @@ def admin_headers():
         "active": True,
         "reset_required": False
     })
-    return {"Authorization": "Basic YWRtaW5AbnVjbGV1c3RlcS5jb206YWRtaW4xMjM="} # admin@nucleusteq.com:admin123
+    return create_basic_auth_headers("admin@nucleusteq.com", "admin123")
 
 
-@pytest.fixture
-def hr_headers():
-    db.users.insert_one({
+@pytest_asyncio.fixture(scope="function")
+async def hr_headers(client):
+    """
+    Insert a test HR user and return basic auth headers.
+    """
+    from app.core.database import db
+    await db.users.insert_one({
         "name": "Test HR",
         "email": "hr@nucleusteq.com",
         "password": get_password_hash("hr123"),
@@ -50,12 +83,16 @@ def hr_headers():
         "active": True,
         "reset_required": False
     })
-    return {"Authorization": "Basic aHJAbnVjbGV1c3RlcS5jb206aHIxMjM="} # hr@nucleusteq.com:hr123
+    return create_basic_auth_headers("hr@nucleusteq.com", "hr123")
 
 
-@pytest.fixture
-def interviewer_headers():
-    db.users.insert_one({
+@pytest_asyncio.fixture(scope="function")
+async def interviewer_headers(client):
+    """
+    Insert a test Interviewer user and return basic auth headers.
+    """
+    from app.core.database import db
+    await db.users.insert_one({
         "name": "Test Interviewer",
         "email": "interviewer@nucleusteq.com",
         "password": get_password_hash("int123"),
@@ -63,4 +100,4 @@ def interviewer_headers():
         "active": True,
         "reset_required": False
     })
-    return {"Authorization": "Basic aW50ZXJ2aWV3ZXJAbnVjbGV1c3RlcS5jb206aW50MTIz"} # interviewer@nucleusteq.com:int123
+    return create_basic_auth_headers("interviewer@nucleusteq.com", "int123")
