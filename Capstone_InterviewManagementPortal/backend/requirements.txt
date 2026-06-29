@@ -2,7 +2,10 @@ fastapi
 uvicorn
 pymongo
 pydantic[email]
+pydantic-settings
+python-dotenv
 python-multipart
+httpx
 pytest
 pytest-asyncio
 pytest-cov
