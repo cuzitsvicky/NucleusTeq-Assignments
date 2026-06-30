@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -56,7 +55,6 @@ export default function Sidebar({
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <span style={{ fontSize: '1.5rem' }}>🎯</span>
             <span>TalentPort</span>
           </div>
         </div>

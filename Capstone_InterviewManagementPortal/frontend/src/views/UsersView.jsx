@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
 import Modal from '../components/Modal';
 import { Plus, Users } from 'lucide-react';
@@ -159,7 +159,7 @@ export default function UsersView({ token, user }) {
               <tr>
                 <th>Name</th>
                 <th>Email Address</th>
-                <th>Role Role</th>
+                <th>Role</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
