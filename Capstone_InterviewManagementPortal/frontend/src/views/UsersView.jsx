@@ -1,22 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { apiService } from '../services/api';
 import Modal from '../components/Modal';
 import { Plus, Users } from 'lucide-react';
 
-/**
- * User Management View (Admins Only).
- * 
- * Props:
- * - token (string): Basic Auth credentials
- * - user (object): logged in user object
- */
 export default function UsersView({ token, user }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
+  const page = 1;
 
-  // Register Form State
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,7 +17,6 @@ export default function UsersView({ token, user }) {
   const [submitError, setSubmitError] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  // Edit Form State
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editUserId, setEditUserId] = useState('');
   const [editName, setEditName] = useState('');
@@ -65,7 +56,7 @@ export default function UsersView({ token, user }) {
     }
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -76,11 +67,11 @@ export default function UsersView({ token, user }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, token]);
 
   useEffect(() => {
     fetchUsers();
-  }, [token, page]);
+  }, [fetchUsers]);
 
   const handleOpenRegisterModal = () => {
     setName('');
@@ -123,7 +114,6 @@ export default function UsersView({ token, user }) {
         role: targetUser.role,
         active: updatedStatus
       });
-      // Refresh current page
       fetchUsers();
     } catch (err) {
       alert(`Error toggling account state: ${err.message}`);

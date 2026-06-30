@@ -1,26 +1,15 @@
-import React from 'react';
 import { Menu } from 'lucide-react';
 
-/**
- * Top Navbar Component.
- * 
- * Props:
- * - title (string): Title of the active section
- * - user (object): logged in user object { name, role, email }
- * - onMenuToggle (function): opens/closes the mobile sidebar
- */
+const pageTitles = {
+  dashboard: 'Dashboard',
+  jobs: 'Job Openings',
+  candidates: 'Candidate Pipeline',
+  interviews: 'Interviews & Feedback',
+  users: 'System User Management',
+};
+
 export default function Navbar({ title, user, onMenuToggle }) {
-  // Format page titles nicely
-  const getDisplayTitle = () => {
-    switch (title) {
-      case 'dashboard': return 'Dashboard';
-      case 'jobs': return 'Job Openings';
-      case 'candidates': return 'Candidate Pipeline';
-      case 'interviews': return 'Interviews & Feedback';
-      case 'users': return 'System User Management';
-      default: return 'Portal';
-    }
-  };
+  const displayTitle = pageTitles[title] || 'Portal';
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -33,7 +22,7 @@ export default function Navbar({ title, user, onMenuToggle }) {
         <button className="hamburger-btn" onClick={onMenuToggle}>
           <Menu size={24} />
         </button>
-        <h1 className="nav-title">{getDisplayTitle()}</h1>
+        <h1 className="nav-title">{displayTitle}</h1>
       </div>
 
       <div className="nav-right">

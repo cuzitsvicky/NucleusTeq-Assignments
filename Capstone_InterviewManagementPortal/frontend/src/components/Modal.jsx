@@ -1,24 +1,21 @@
-import React from 'react';
 import { X } from 'lucide-react';
 
-/**
- * Reusable modal popup window.
- * 
- * Props:
- * - isOpen (boolean): controls visibility
- * - onClose (function): triggered when closing the modal
- * - title (string): title text displayed in the header
- * - children (React node): content of the modal body
- */
-export default function Modal({ isOpen, onClose, title, children }) {
+export default function Modal({ isOpen, onClose, title, children, size }) {
   if (!isOpen) return null;
+
+  const contentClassName = `modal-content${size === 'large' ? ' modal-large' : ''}`;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className={contentClassName} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
-          <button className="modal-close-btn" onClick={onClose}>
+          <button
+            type="button"
+            className="modal-close-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+          >
             <X size={20} />
           </button>
         </div>
