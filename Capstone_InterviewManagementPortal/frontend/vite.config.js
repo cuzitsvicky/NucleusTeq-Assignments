@@ -1,7 +1,17 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(({ mode }) => {
+  const { API_BASE_URL } = loadEnv(mode, '.', '')
+
+  return {
+    plugins: [react()],
+    server: API_BASE_URL
+      ? {
+          proxy: {
+            '/api': API_BASE_URL,
+          },
+        }
+      : undefined,
+  }
 })

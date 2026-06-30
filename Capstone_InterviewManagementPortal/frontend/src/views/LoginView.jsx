@@ -1,13 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { apiService } from '../services/api';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 
-/**
- * Login Screen View.
- * 
- * Props:
- * - onLoginSuccess (function): callback returning { user, token }
- */
 export default function LoginView({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +28,7 @@ export default function LoginView({ onLoginSuccess }) {
     <div className="login-container">
       <div className="login-card">
         <div className="login-logo">
-        TalentPort
+         TalentPort
         </div>
         <div className="login-subtitle">
           Interview Management System
