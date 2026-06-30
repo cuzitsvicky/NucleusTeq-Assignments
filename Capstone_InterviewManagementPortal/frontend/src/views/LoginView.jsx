@@ -34,7 +34,7 @@ export default function LoginView({ onLoginSuccess }) {
     <div className="login-container">
       <div className="login-card">
         <div className="login-logo">
-          <span>🎯</span> TalentPort
+        TalentPort
         </div>
         <div className="login-subtitle">
           Interview Management System
