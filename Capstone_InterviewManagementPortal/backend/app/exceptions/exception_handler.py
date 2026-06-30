@@ -1,4 +1,5 @@
 import logging
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from .custom_exceptions import AppException
