@@ -105,7 +105,7 @@ body {
   flex-grow: 1;
 }
 
-.menu-item button {
+.menu-item a {
   width: 100%;
   padding: 12px 16px;
   margin-bottom: 4px;
@@ -120,15 +120,16 @@ body {
   gap: 12px;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
   transition: all var(--transition-fast);
 }
 
-.menu-item button:hover {
+.menu-item a:hover {
   background-color: var(--bg-color);
   color: var(--primary-color);
 }
 
-.menu-item.active button {
+.menu-item a.active {
   background-color: rgba(10, 102, 194, 0.08);
   color: var(--primary-color);
 }
