@@ -1,10 +1,10 @@
 :root {
-  --primary-color: #0A66C2;      
+  --primary-color: #0A66C2;      /* LinkedIn Blue */
   --primary-hover: #004182;
-  --bg-color: #F3F6F8;           
-  --card-bg: #FFFFFF;            
-  --text-primary: #191919;       
-  --text-secondary: #666666;     
+  --bg-color: #F3F6F8;           /* Light gray-blue canvas background */
+  --card-bg: #FFFFFF;            /* White card background */
+  --text-primary: #191919;       /* Dark charcoal for high contrast readability */
+  --text-secondary: #666666;     /* Medium gray for subtitles/labels */
   --border-color: #E0E0E0;
   --border-radius: 8px;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -105,7 +105,7 @@ body {
   flex-grow: 1;
 }
 
-.menu-item button {
+.menu-item a {
   width: 100%;
   padding: 12px 16px;
   margin-bottom: 4px;
@@ -120,15 +120,16 @@ body {
   gap: 12px;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
   transition: all var(--transition-fast);
 }
 
-.menu-item button:hover {
+.menu-item a:hover {
   background-color: var(--bg-color);
   color: var(--primary-color);
 }
 
-.menu-item.active button {
+.menu-item a.active {
   background-color: rgba(10, 102, 194, 0.08);
   color: var(--primary-color);
 }

@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -8,8 +9,6 @@ import {
 } from 'lucide-react';
 
 export default function Sidebar({ 
-  activeTab, 
-  setActiveTab, 
   userRole, 
   onLogout,
   isOpen,
@@ -18,20 +17,15 @@ export default function Sidebar({
   const isAdmin = userRole === 'Admin' || userRole === 'Administrator';
 
   const mainMenuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'jobs', label: 'Jobs', icon: Briefcase },
-    { id: 'candidates', label: 'Candidates', icon: UserCheck },
-    { id: 'interviews', label: 'Interviews', icon: Calendar },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/jobs', label: 'Jobs', icon: Briefcase },
+    { path: '/candidates', label: 'Candidates', icon: UserCheck },
+    { path: '/interviews', label: 'Interviews', icon: Calendar },
   ];
 
   const menuItems = isAdmin
-    ? [...mainMenuItems, { id: 'users', label: 'Users', icon: Users }]
+    ? [...mainMenuItems, { path: '/users', label: 'Users', icon: Users }]
     : mainMenuItems;
-
-  const handleTabChange = (tabId) => {
-    setActiveTab(tabId);
-    setIsOpen(false);
-  };
 
   return (
     <>
@@ -42,6 +36,7 @@ export default function Sidebar({
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
+            <span style={{ fontSize: '1.5rem' }}>🎯</span>
             <span>TalentPort</span>
           </div>
         </div>
@@ -51,13 +46,17 @@ export default function Sidebar({
             const Icon = item.icon;
             return (
               <li 
-                key={item.id} 
-                className={`menu-item ${activeTab === item.id ? 'active' : ''}`}
+                key={item.path} 
+                className="menu-item"
               >
-                <button onClick={() => handleTabChange(item.id)}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) => isActive ? 'active' : ''}
+                  onClick={() => setIsOpen(false)}
+                >
                   <Icon size={18} />
                   <span>{item.label}</span>
-                </button>
+                </NavLink>
               </li>
             );
           })}
