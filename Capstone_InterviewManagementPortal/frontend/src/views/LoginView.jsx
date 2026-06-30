@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { apiService } from '../services/api';
 import { LogIn } from 'lucide-react';
 
@@ -33,7 +33,7 @@ export default function LoginView({ onLoginSuccess }) {
     <div className="login-container">
       <div className="login-card">
         <div className="login-logo">
-          <span>🎯</span> TalentPort
+          TalentPort
         </div>
         <div className="login-subtitle">
           Interview Management System
