@@ -1,15 +1,17 @@
+import { useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 
 const pageTitles = {
-  dashboard: 'Dashboard',
-  jobs: 'Job Openings',
-  candidates: 'Candidate Pipeline',
-  interviews: 'Interviews & Feedback',
-  users: 'System User Management',
+  '/dashboard': 'Dashboard',
+  '/jobs': 'Job Openings',
+  '/candidates': 'Candidate Pipeline',
+  '/interviews': 'Interviews & Feedback',
+  '/users': 'System User Management',
 };
 
-export default function Navbar({ title, user, onMenuToggle }) {
-  const displayTitle = pageTitles[title] || 'Portal';
+export default function Navbar({ user, onMenuToggle }) {
+  const location = useLocation();
+  const displayTitle = pageTitles[location.pathname] || 'Portal';
 
   const getInitials = (name) => {
     if (!name) return 'U';
