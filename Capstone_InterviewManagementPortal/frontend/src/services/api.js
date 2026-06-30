@@ -1,18 +1,10 @@
-const API_BASE_URL = 'http://localhost:8000';
-
-/**
- * Centralized fetch helper that handles request options, basic authorization injection,
- * and parses response as JSON or returns custom validation errors.
- */
 async function apiRequest(endpoint, options = {}, token = null) {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
   const headers = { ...options.headers };
+
   if (token) {
     headers['Authorization'] = `Basic ${token}`;
   }
   
-  // Do not set Content-Type header if sending FormData (browser handles it automatically with boundaries)
   if (!(options.body instanceof FormData) && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
@@ -22,22 +14,20 @@ async function apiRequest(endpoint, options = {}, token = null) {
     headers
   };
   
-  const response = await fetch(url, config);
+  const response = await fetch(endpoint, config);
   
-  // Handle file download response
   if (response.headers.get('content-type') === 'application/pdf') {
     return response.blob();
   }
   
-  let data = null;
+  let data;
   try {
     data = await response.json();
-  } catch (err) {
-    // If not json response
+  } catch {
+    data = undefined;
   }
   
   if (!response.ok) {
-    // Standard error structure mapped from backend Centralized Exception Handler
     const errorMsg = data?.detail 
       ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail))
       : `HTTP Error ${response.status}: ${response.statusText}`;

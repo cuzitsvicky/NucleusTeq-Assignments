@@ -7,17 +7,6 @@ import {
   LogOut
 } from 'lucide-react';
 
-/**
- * Sidebar Navigation Component.
- * 
- * Props:
- * - activeTab (string): current page state ('dashboard', 'jobs', etc.)
- * - setActiveTab (function): updates tab state
- * - userRole (string): 'Admin' | 'HR' | 'Interviewer'
- * - onLogout (function): logs out the user
- * - isOpen (boolean): mobile open state
- * - setIsOpen (function): toggles mobile open state
- */
 export default function Sidebar({ 
   activeTab, 
   setActiveTab, 
@@ -26,28 +15,26 @@ export default function Sidebar({
   isOpen,
   setIsOpen
 }) {
-  const isAdmin = userRole === 'Admin';
+  const isAdmin = userRole === 'Admin' || userRole === 'Administrator';
 
-  const menuItems = [
+  const mainMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'jobs', label: 'Jobs', icon: Briefcase },
     { id: 'candidates', label: 'Candidates', icon: UserCheck },
     { id: 'interviews', label: 'Interviews', icon: Calendar },
   ];
 
-  // Only show User Management view for Admin role
-  if (isAdmin) {
-    menuItems.push({ id: 'users', label: 'Users', icon: Users });
-  }
+  const menuItems = isAdmin
+    ? [...mainMenuItems, { id: 'users', label: 'Users', icon: Users }]
+    : mainMenuItems;
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    setIsOpen(false); // Close sidebar on mobile after clicking
+    setIsOpen(false);
   };
 
   return (
     <>
-      {/* Mobile Drawer Overlay Background */}
       {isOpen && (
         <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>
       )}

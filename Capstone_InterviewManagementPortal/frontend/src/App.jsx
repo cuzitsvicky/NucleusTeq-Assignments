@@ -16,7 +16,6 @@ export default function App() {
   const [view, setView] = useState('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Forced Password Change Form State
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -58,14 +57,12 @@ export default function App() {
     try {
       await apiService.resetPassword(token, newPassword);
       setResetSuccess(true);
-      
-      // Generate new basic auth token with new password and update token state/localStorage
+
       const authStr = `${user.email.trim().toLowerCase()}:${newPassword}`;
       const newToken = btoa(authStr);
       setToken(newToken);
       localStorage.setItem('portal_token', newToken);
-      
-      // Update local user state reset_required to false
+
       const updatedUser = { ...user, reset_required: false };
       setUser(updatedUser);
       localStorage.setItem('portal_user', JSON.stringify(updatedUser));
@@ -76,12 +73,10 @@ export default function App() {
     }
   };
 
-  // If user is not authenticated, show Login view
   if (!token || !user) {
     return <LoginView onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // Force first-time password reset if backend flagged it
   if (user.reset_required) {
     return (
       <div className="reset-overlay">
@@ -166,7 +161,6 @@ export default function App() {
     );
   }
 
-  // Render view depending on navigation state
   const renderView = () => {
     switch (view) {
       case 'dashboard':
@@ -186,7 +180,6 @@ export default function App() {
 
   return (
     <div className="app-layout">
-      {/* Sidebar Navigation */}
       <Sidebar 
         activeTab={view} 
         setActiveTab={setView} 
@@ -196,7 +189,6 @@ export default function App() {
         setIsOpen={setIsMobileSidebarOpen}
       />
 
-      {/* Main Content Pane */}
       <main className="main-content">
         <Navbar 
           title={view} 

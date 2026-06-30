@@ -1,4 +1,3 @@
-
 function JobsView() {
   return (
     <div>JobsView</div>
