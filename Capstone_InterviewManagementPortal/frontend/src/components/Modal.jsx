@@ -1,9 +1,9 @@
-import { X } from 'lucide-react';
+import { X } from "lucide-react";
 
 export default function Modal({ isOpen, onClose, title, children, size }) {
   if (!isOpen) return null;
 
-  const contentClassName = `modal-content${size === 'large' ? ' modal-large' : ''}`;
+  const contentClassName = `modal-content${size === "large" ? " modal-large" : ""}`;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -19,9 +19,7 @@ export default function Modal({ isOpen, onClose, title, children, size }) {
             <X size={20} />
           </button>
         </div>
-        <div className="modal-body">
-          {children}
-        </div>
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   );
