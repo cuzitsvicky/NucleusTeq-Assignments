@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 export default function Sidebar({ userRole, onLogout, isOpen, setIsOpen }) {
-  const isAdmin = userRole === "Admin" || userRole === "Administrator";
+  const isAdmin = userRole === "Admin" ;
 
   const mainMenuItems = [
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -31,7 +31,6 @@ export default function Sidebar({ userRole, onLogout, isOpen, setIsOpen }) {
       <aside className={`sidebar ${isOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <span style={{ fontSize: "1.5rem" }}>🎯</span>
             <span>TalentPort</span>
           </div>
         </div>
