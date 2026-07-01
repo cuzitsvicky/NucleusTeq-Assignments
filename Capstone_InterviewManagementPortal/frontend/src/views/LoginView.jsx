@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { apiService } from '../services/api';
-import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { useState } from "react";
+import { apiService } from "../services/api";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export default function LoginView({ onLoginSuccess }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export default function LoginView({ onLoginSuccess }) {
       const data = await apiService.login(email, password);
       onLoginSuccess(data.token, data.user);
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      setError(err.message || "Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -27,18 +27,10 @@ export default function LoginView({ onLoginSuccess }) {
   return (
     <div className="login-container">
       <div className="login-card">
-        <div className="login-logo">
-         TalentPort
-        </div>
-        <div className="login-subtitle">
-          Interview Management System
-        </div>
+        <div className="login-logo">TalentPort</div>
+        <div className="login-subtitle">Interview Management System</div>
 
-        {error && (
-          <div className="alert alert-danger">
-            {error}
-          </div>
-        )}
+        {error && <div className="alert alert-danger">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -60,7 +52,7 @@ export default function LoginView({ onLoginSuccess }) {
             <div className="password-input-container">
               <input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 className="form-control"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -72,7 +64,7 @@ export default function LoginView({ onLoginSuccess }) {
                 type="button"
                 className="password-toggle-btn"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -83,11 +75,11 @@ export default function LoginView({ onLoginSuccess }) {
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', marginTop: '16px', borderRadius: '8px' }}
+            style={{ width: "100%", marginTop: "16px", borderRadius: "8px" }}
             disabled={loading}
           >
             <LogIn size={18} />
-            <span>{loading ? 'Signing in...' : 'Sign In'}</span>
+            <span>{loading ? "Signing in..." : "Sign In"}</span>
           </button>
         </form>
       </div>

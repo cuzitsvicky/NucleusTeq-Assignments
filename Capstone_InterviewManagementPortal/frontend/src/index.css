@@ -1,10 +1,10 @@
 :root {
   --primary-color: #0A66C2;      /* LinkedIn Blue */
   --primary-hover: #004182;
-  --bg-color: #F3F6F8;           /* Light gray-blue canvas background */
-  --card-bg: #FFFFFF;            /* White card background */
-  --text-primary: #191919;       /* Dark charcoal for high contrast readability */
-  --text-secondary: #666666;     /* Medium gray for subtitles/labels */
+  --bg-color: #F3F6F8;           
+  --card-bg: #FFFFFF;            
+  --text-primary: #191919;       
+  --text-secondary: #666666;    
   --border-color: #E0E0E0;
   --border-radius: 8px;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
