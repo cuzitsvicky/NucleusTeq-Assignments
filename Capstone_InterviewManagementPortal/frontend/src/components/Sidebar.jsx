@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 export default function Sidebar({ userRole, onLogout, isOpen, setIsOpen }) {
-  const isAdmin = userRole === "Admin" || userRole === "Administrator";
+  const isAdmin = userRole === "Admin" ;
 
   const mainMenuItems = [
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
