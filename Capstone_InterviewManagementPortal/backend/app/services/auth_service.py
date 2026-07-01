@@ -1,7 +1,3 @@
-"""
-Authentication service containing business logic for authentication.
-"""
-
 import base64
 import logging
 

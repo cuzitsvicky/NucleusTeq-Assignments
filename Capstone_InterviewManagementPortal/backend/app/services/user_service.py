@@ -4,7 +4,14 @@ from ..exceptions import BadRequestException
 from ..repositories import user_repo
 from ..utils import get_password_hash
 
-logger = logging.getLogger("app")
+logger = logging.getLogger("__name__")
+
+
+def format_user(user: dict):
+    user["id"] = str(user.pop("_id"))
+    user.pop("password", None)
+    user.setdefault("reset_required", False)
+    return user
 
 
 def format_user(user: dict):

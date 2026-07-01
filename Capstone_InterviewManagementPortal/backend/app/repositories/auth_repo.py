@@ -1,8 +1,3 @@
-"""
-Authentication repository containing database operations
-related to authentication.
-"""
-
 from bson.objectid import ObjectId
 
 from ..core.database import db
