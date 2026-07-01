@@ -1,7 +1,3 @@
-"""
-Authentication router containing login, current user and password reset endpoints.
-"""
-
 import logging
 
 from fastapi import APIRouter, Depends
