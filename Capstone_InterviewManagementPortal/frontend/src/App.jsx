@@ -114,7 +114,7 @@ export default function App() {
         err.message || "Failed to reset password. Please try again.",
       );
     } finally {
-      setResetLoading(false);
+      setLoading(false);
     }
   };
 
