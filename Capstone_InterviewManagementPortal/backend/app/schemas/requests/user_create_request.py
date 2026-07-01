@@ -15,8 +15,10 @@ class UserCreateRequest(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("Name cannot be blank")
-        if len(v) > 100:
-            raise ValueError("Name must not exceed 100 characters")
+        if len(v) <= 3:
+            raise ValueError("Name must be greater than 3 characters")
+        if len(v) >= 100:
+            raise ValueError("Name must be less than 100 characters")
         return v
 
     @field_validator("email")

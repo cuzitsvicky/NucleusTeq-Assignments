@@ -59,13 +59,32 @@ export const apiService = {
   },
 
   async resetPassword(token, newPassword) {
-    return apiRequest(
-      "/api/auth/reset-password",
-      {
-        method: "POST",
-        body: JSON.stringify({ new_password: newPassword }),
-      },
-      token,
-    );
+    return apiRequest('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ new_password: newPassword })
+    }, token);
   },
-};
+
+  async registerUser(token, userData) {
+    return apiRequest('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    }, token);
+  },
+
+  async getUsers(token, page = 1) {
+    return apiRequest(`/api/auth/users?page=${page}`, { method: 'GET' }, token);
+  },
+
+  async getActiveInterviewers(token) {
+    return apiRequest('/api/auth/interviewers', { method: 'GET' }, token);
+  },
+
+  async updateUser(token, userId, userData) {
+    return apiRequest(`/api/auth/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData)
+    }, token);
+  }
+
+}  
