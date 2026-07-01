@@ -13,14 +13,6 @@ def format_user(user: dict):
     user.setdefault("reset_required", False)
     return user
 
-
-def format_user(user: dict):
-    user["id"] = str(user.pop("_id"))
-    user.pop("password", None)
-    user.setdefault("reset_required", False)
-    return user
-
-
 async def register_user(user_data: dict):
     existing_user = await user_repo.get_user_by_email(user_data["email"])
 
