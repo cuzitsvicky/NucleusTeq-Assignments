@@ -2,6 +2,8 @@ from pydantic import BaseModel, field_validator
 from datetime import date, datetime
 import re
 
+from ...constants.app_constants import REQUIRED_EMAIL_DOMAIN
+
 class InterviewCreateRequest(BaseModel):
     candidate_id: str
     job_id: str
@@ -41,3 +43,20 @@ class InterviewCreateRequest(BaseModel):
     @classmethod
     def email_lowercase(cls, v: str) -> str:
         return v.strip().lower()
+
+    @field_validator("interviewer_email")
+    @classmethod
+    def email_must_be_nucleusteq(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
+            raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
+        return v
+    
+    @field_validator('interviewer_email')
+    @classmethod
+    def reject_strange_characters(cls, v: str) -> str:
+        # Enforce that the local part only contains normal letters, numbers, dots, or single hyphens/underscores
+        local_part = v.split('@')[0]
+        if not re.match(r"^[a-zA-Z0-9.]+$", local_part):
+            raise ValueError("Email contains unaccepted special characters")
+        return v

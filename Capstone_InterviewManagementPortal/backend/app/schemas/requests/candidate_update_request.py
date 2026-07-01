@@ -26,6 +26,15 @@ class CandidateUpdateRequest(BaseModel):
     @classmethod
     def email_lowercase(cls, v: str) -> str:
         return v.strip().lower()
+    
+    @field_validator('email')
+    @classmethod
+    def reject_strange_characters(cls, v: str) -> str:
+        # Enforce that the local part only contains normal letters, numbers, dots, or single hyphens/underscores
+        local_part = v.split('@')[0]
+        if not re.match(r"^[a-zA-Z0-9.]+$", local_part):
+            raise ValueError("Email contains unaccepted special characters")
+        return v
 
     @field_validator("mobile")
     @classmethod

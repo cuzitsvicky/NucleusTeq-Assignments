@@ -28,6 +28,15 @@ class UserCreateRequest(BaseModel):
         if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
             raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
         return v
+    
+    @field_validator('email')
+    @classmethod
+    def reject_strange_characters(cls, v: str) -> str:
+        # Enforce that the local part only contains normal letters, numbers, dots, or single hyphens/underscores
+        local_part = v.split('@')[0]
+        if not re.match(r"^[a-zA-Z0-9.]+$", local_part):
+            raise ValueError("Email contains unaccepted special characters")
+        return v
 
     @field_validator("password")
     @classmethod
