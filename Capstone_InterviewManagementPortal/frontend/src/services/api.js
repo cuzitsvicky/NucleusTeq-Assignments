@@ -28,11 +28,19 @@ async function apiRequest(endpoint, options = {}, token = null) {
   }
   
   if (!response.ok) {
-    const errorMsg = data?.detail 
-      ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail))
-      : `HTTP Error ${response.status}: ${response.statusText}`;
-    throw new Error(errorMsg);
-  }
+  let errorMsg = `HTTP Error ${response.status}: ${response.statusText}`;
+
+if (data?.errors?.length) {
+  errorMsg = data.errors[0].message.replace("Value error, ", "");
+} else if (data?.message) {
+  errorMsg = data.message;
+} else if (data?.detail) {
+  errorMsg = data.detail;
+}
+
+
+  throw new Error(errorMsg);
+}
   
   return data;
 }
@@ -78,6 +86,29 @@ export const apiService = {
       method: 'PUT',
       body: JSON.stringify(userData)
     }, token);
-  }
+  },
+
+  // --- Jobs Endpoints ---
+  async getJobs(token, page = 1) {
+    return apiRequest(`/api/jobs/?page=${page}`, { method: 'GET' }, token);
+  },
+
+  async getJobById(token, jobId) {
+    return apiRequest(`/api/jobs/${jobId}`, { method: 'GET' }, token);
+  },
+
+  async createJob(token, jobData) {
+    return apiRequest('/api/jobs/', {
+      method: 'POST',
+      body: JSON.stringify(jobData)
+    }, token);
+  },
+
+  async updateJob(token, jobId, jobData) {
+    return apiRequest(`/api/jobs/${jobId}`, {
+      method: 'PUT',
+      body: JSON.stringify(jobData)
+    }, token);
+  },
 
 }  
