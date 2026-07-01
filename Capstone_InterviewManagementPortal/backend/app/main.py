@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .core.database import connect_to_mongo, close_mongo_connection
 from .core.logging_config import setup_logging
+from .routers import auth, users
 from .exceptions import register_exception_handlers
 from .routers import auth
 
@@ -59,3 +60,4 @@ async def health():
 
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/api/auth", tags=["Users"])
