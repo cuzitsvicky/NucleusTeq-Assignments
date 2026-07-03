@@ -7,7 +7,8 @@ from .requests import (
     JobCreateRequest,
     InterviewCreateRequest,
     FeedbackSubmitRequest,
-    LoginRequest
+    LoginRequest,
+    CandidateCreateRequest
 )
 
 from .responses import (

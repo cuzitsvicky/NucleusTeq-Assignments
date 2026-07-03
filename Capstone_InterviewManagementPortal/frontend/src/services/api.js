@@ -111,4 +111,43 @@ export const apiService = {
     }, token);
   },
 
+  // --- Candidates Endpoints ---
+  async getCandidates(token, page = 1) {
+    return apiRequest(`/api/candidates/?page=${page}`, { method: 'GET' }, token);
+  },
+
+  async getCandidateById(token, candidateId) {
+    return apiRequest(`/api/candidates/${candidateId}`, { method: 'GET' }, token);
+  },
+
+  async createCandidate(token, formData) {
+    // Note: options.body is FormData, header is not json
+    return apiRequest('/api/candidates/', {
+      method: 'POST',
+      body: formData
+    }, token);
+  },
+
+  async updateCandidate(token, candidateId, candidateData) {
+    return apiRequest(`/api/candidates/${candidateId}`, {
+      method: 'PUT',
+      body: JSON.stringify(candidateData)
+    }, token);
+  },
+
+  async updateCandidateStatus(token, candidateId, status) {
+    return apiRequest(`/api/candidates/${candidateId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    }, token);
+  },
+
+  async getCandidateHistory(token, candidateId) {
+    return apiRequest(`/api/candidates/${candidateId}/history`, { method: 'GET' }, token);
+  },
+
+  async downloadResume(token, candidateId) {
+    const blob = await apiRequest(`/api/candidates/${candidateId}/resume`, { method: 'GET' }, token);
+    return URL.createObjectURL(blob);
+  },
 }  

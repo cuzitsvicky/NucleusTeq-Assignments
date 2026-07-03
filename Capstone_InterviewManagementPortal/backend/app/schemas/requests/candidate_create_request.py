@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator
 import re
 
-class CandidateUpdateRequest(BaseModel):
+class CandidateCreateRequest(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr

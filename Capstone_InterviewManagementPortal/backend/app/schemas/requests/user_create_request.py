@@ -19,6 +19,8 @@ class UserCreateRequest(BaseModel):
             raise ValueError("Name must be greater than 3 characters")
         if len(v) >= 100:
             raise ValueError("Name must be less than 100 characters")
+        if not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Name can only contain letters and spaces")
         return v
 
     @field_validator("email")
@@ -34,8 +36,8 @@ class UserCreateRequest(BaseModel):
     def reject_strange_characters(cls, v: str) -> str:
         # Enforce that the local part only contains normal letters, numbers, dots, or single hyphens/underscores
         local_part = v.split('@')[0]
-        if not re.match(r"^[a-zA-Z0-9.]+$", local_part):
-            raise ValueError("Email contains unaccepted special characters")
+        if not re.match(r"^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$", local_part):
+            raise ValueError("Email is invalid or contains unaccepted special characters")
         return v
 
     @field_validator("password")

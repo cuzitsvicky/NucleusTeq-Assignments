@@ -7,4 +7,4 @@ from .candidate_update_request import CandidateUpdateRequest
 from .job_create_request import JobCreateRequest
 from .interview_create_request import InterviewCreateRequest
 from .feedback_submit_request import FeedbackSubmitRequest
-
+from .candidate_create_request import CandidateCreateRequest

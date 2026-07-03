@@ -12,6 +12,7 @@ from fastapi import (
 from pydantic import EmailStr
 from typing import List
 
+
 from ..constants import MAX_RESUME_SIZE_BYTES
 from ..core.database import get_gridfs_bucket
 from ..exceptions import (
@@ -20,6 +21,7 @@ from ..exceptions import (
     InternalServerException,
 )
 from ..schemas import (
+    CandidateCreateRequest,
     CandidateResponse,
     CandidateUpdateRequest,
     StatusHistoryResponse,
@@ -59,6 +61,16 @@ async def create_candidate(
 ):
     require_hr_or_admin(current_user)
 
+    candidate_request = CandidateCreateRequest(
+    first_name=first_name,
+    last_name=last_name,
+    email=email,
+    mobile=mobile,
+    current_company=current_company,
+    total_experience=total_experience,
+    applied_job_id=applied_job_id,
+)
+
     validate_resume_extension(resume.filename)
 
     if resume.content_type != "application/pdf":
@@ -86,15 +98,15 @@ async def create_candidate(
     await grid_in.close()
 
     candidate = {
-        "first_name": first_name.strip(),
-        "last_name": last_name.strip(),
-        "email": email.strip().lower(),
-        "mobile": validate_mobile(mobile),
-        "current_company": current_company.strip(),
-        "total_experience": total_experience.strip(),
-        "applied_job_id": applied_job_id,
-        "resume_id": str(grid_in._id),
-        "resume_filename": resume.filename,
+       "first_name": candidate_request.first_name,
+       "last_name": candidate_request.last_name,
+       "email": candidate_request.email,
+       "mobile": candidate_request.mobile,
+       "current_company": candidate_request.current_company,
+       "total_experience": candidate_request.total_experience,
+       "applied_job_id": candidate_request.applied_job_id,
+       "resume_id": str(grid_in._id),
+       "resume_filename": resume.filename,
     }
 
     candidate_id = await candidate_service.create_candidate(
