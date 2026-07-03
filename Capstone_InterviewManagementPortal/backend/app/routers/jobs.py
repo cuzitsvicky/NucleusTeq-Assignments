@@ -29,7 +29,7 @@ async def create_job(
 
 @router.get("/", response_model=List[JobResponse])
 async def get_jobs(
-    page: int = 1,
+    page: int = 1,  #Improve this pagination through Query Parameters
     current_user: dict = Depends(check_password_reset),
 ):
     if page < 1:

@@ -33,7 +33,7 @@ class JobCreateRequest(BaseModel):
         if not v:
             raise ValueError("Experience required cannot be blank")
         pattern = (
-            r"^\d+(\.\d+)?(\s*-\s*\d+(\.\d+)?)?\s*(year|years|yr|yrs|month|months)$"
+            r"^\d+(\.\d+)?(\s*-\s*\d+(\.\d+)?)?\s*(year|years|month|months)$"
         )
         if not re.match(pattern, v, re.IGNORECASE):
             raise ValueError(
