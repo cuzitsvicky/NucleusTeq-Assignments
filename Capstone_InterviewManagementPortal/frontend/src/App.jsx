@@ -1,89 +1,108 @@
-import { useState } from "react";
-import { apiService } from "../services/api";
-import { LogIn, Eye, EyeOff } from "lucide-react";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import Login from './pages/Login.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Jobs from './pages/Jobs.jsx';
+import Candidates from './pages/Candidates.jsx';
+import Interviews from './pages/Interviews.jsx';
+import Users from './pages/Users.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
-export default function LoginView({ onLoginSuccess }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+function ProtectedRoute({ user, roles, children }) {
+  if (!roles.includes(user?.role)) {
+    return (
+      <section className="box">
+        <h1>Access Denied</h1>
+        <p>You are not allowed to open this page.</p>
+        <Link to="/">Go to Dashboard</Link>
+      </section>
+    );
+  }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  return children;
+}
 
-    try {
-      const data = await apiService.login(email, password);
-      // Bubble the token and user profile up to App.jsx so it can be stored
-      onLoginSuccess(data.token, data.user);
-    } catch (err) {
-      setError(err.message || "Login failed. Please check your credentials.");
-    } finally {
-      setLoading(false);
-    }
+export default function App() {
+  const savedToken = localStorage.getItem('token');
+  const savedUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const [token, setToken] = useState(savedToken);
+  const [user, setUser] = useState(savedUser);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  function onLogin(data) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    setToken(data.token);
+    setUser(data.user);
+    navigate(data.user.reset_required ? '/reset-password' : '/');
+  }
+
+  function logout() {
+    localStorage.clear();
+    setToken(null);
+    setUser(null);
+    navigate('/login');
+  }
+
+  function onPasswordReset(data) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    setToken(data.token);
+    setUser(data.user);
+    navigate('/');
+  }
+
+  if (!token) return <Login onLogin={onLogin} />;
+
+  if (user?.reset_required && location.pathname !== '/reset-password') {
+    return <Navigate to="/reset-password" />;
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-logo">TalentPort</div>
-        <p className="login-subtitle">Interview Management System</p>
+    <div className="layout">
+      <aside className="sidebar">
+        <h2>Interview Portal</h2>
+        <nav>
+          <Link to="/">Dashboard</Link>
+          {['Admin', 'HR'].includes(user?.role) && <Link to="/jobs">Jobs</Link>}
+          {['Admin', 'HR'].includes(user?.role) && <Link to="/candidates">Candidates</Link>}
+          <Link to="/interviews">Interviews</Link>
+          {user?.role === 'Admin' && <Link to="/users">Users</Link>}
+          <Link to="/reset-password">Reset Password</Link>
+        </nav>
+        <div className="account">
+          <p>Logged in as {user?.role}</p>
+          <span></span>
+          <button onClick={logout}>Logout</button>
+        </div>
+      </aside>
 
-        {error && <div className="alert alert-danger">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Work Email</label>
-            <input
-              id="email"
-              type="email"
-              className="form-control"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. yourname@nucleusteq.com"
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="password-input-container">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                className="form-control"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ width: "100%", marginTop: "16px", borderRadius: "8px" }}
-            disabled={loading}
-          >
-            <LogIn size={18} />
-            <span>{loading ? "Signing in..." : "Sign In"}</span>
-          </button>
-        </form>
-      </div>
+      <main className="content">
+        <Routes>
+          <Route path="/" element={<Dashboard token={token} />} />
+          <Route path="/jobs" element={
+            <ProtectedRoute user={user} roles={['Admin', 'HR']}>
+              <Jobs token={token} />
+            </ProtectedRoute>
+          } />
+          <Route path="/candidates" element={
+            <ProtectedRoute user={user} roles={['Admin', 'HR']}>
+              <Candidates token={token} />
+            </ProtectedRoute>
+          } />
+          <Route path="/interviews" element={<Interviews token={token} user={user} />} />
+          <Route path="/users" element={
+            <ProtectedRoute user={user} roles={['Admin']}>
+              <Users token={token} />
+            </ProtectedRoute>
+          } />
+          <Route path="/reset-password" element={
+            <ResetPassword token={token} user={user} onReset={onPasswordReset} />
+          } />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </main>
     </div>
   );
 }
