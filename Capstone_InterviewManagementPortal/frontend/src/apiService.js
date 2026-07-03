@@ -49,8 +49,6 @@ export const apiService = {
     method: 'PUT',
     body: JSON.stringify(userData)
   }, token),
-  getActiveInterviewers: token => apiRequest('/api/auth/interviewers', {}, token),
-  getDashboardStats: token => apiRequest('/api/dashboard/', {}, token),
   getJobs: (token, page = 1) => apiRequest(`/api/jobs/?page=${page}`, {}, token),
   createJob: (token, jobData) => apiRequest('/api/jobs/', {
     method: 'POST',
@@ -78,13 +76,4 @@ export const apiService = {
     const blob = await apiRequest(`/api/candidates/${id}/resume`, {}, token);
     return URL.createObjectURL(blob);
   },
-  getInterviews: (token, page = 1) => apiRequest(`/api/interviews/?page=${page}`, {}, token),
-  scheduleInterview: (token, data) => apiRequest('/api/interviews/schedule', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }, token),
-  submitFeedback: (token, id, data) => apiRequest(`/api/interviews/${id}/feedback`, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }, token)
 };
