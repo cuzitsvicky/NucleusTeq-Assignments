@@ -1,290 +1,108 @@
-import { useState } from "react";
-import {
-  BrowserRouter,
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-} from "react-router-dom";
-import { apiService } from "./services/api";
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
-import LoginView from "./views/LoginView";
-import DashboardView from "./views/DashboardView";
-import JobsView from "./views/JobsView";
-import CandidatesView from "./views/CandidatesView";
-import InterviewsView from "./views/InterviewsView";
-import UsersView from "./views/UsersView";
-import { ShieldAlert, Check, Eye, EyeOff } from "lucide-react";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import Login from './pages/Login.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Jobs from './pages/Jobs.jsx';
+import Candidates from './pages/Candidates.jsx';
+import Interviews from './pages/Interviews.jsx';
+import Users from './pages/Users.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
-function ProtectedRoute({ token, user, children }) {
-  if (!token || !user) {
-    return <Navigate to="/login" replace />;
+function ProtectedRoute({ user, roles, children }) {
+  if (!roles.includes(user?.role)) {
+    return (
+      <section className="box">
+        <h1>Access Denied</h1>
+        <p>You are not allowed to open this page.</p>
+        <Link to="/">Go to Dashboard</Link>
+      </section>
+    );
   }
 
   return children;
 }
 
-function AppLayout({
-  user,
-  onLogout,
-  isMobileSidebarOpen,
-  setIsMobileSidebarOpen,
-}) {
-  return (
-    <div className="app-layout">
-      <Sidebar
-        userRole={user.role}
-        onLogout={onLogout}
-        isOpen={isMobileSidebarOpen}
-        setIsOpen={setIsMobileSidebarOpen}
-      />
-
-      <main className="main-content">
-        <Navbar
-          user={user}
-          onMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-        />
-        <div className="page-body">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  );
-}
-
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem("portal_token"));
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("portal_user")),
-  );
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const savedToken = localStorage.getItem('token');
+  const savedUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const [token, setToken] = useState(savedToken);
+  const [user, setUser] = useState(savedUser);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [resetError, setResetError] = useState(null);
-  const [resetSuccess, setResetSuccess] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
+  function onLogin(data) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    setToken(data.token);
+    setUser(data.user);
+    navigate(data.user.reset_required ? '/reset-password' : '/');
+  }
 
-  const handleLoginSuccess = (userToken, userProfile) => {
-    setToken(userToken);
-    setUser(userProfile);
-    localStorage.setItem("portal_token", userToken);
-    localStorage.setItem("portal_user", JSON.stringify(userProfile));
-  };
-
-  const handleLogout = () => {
+  function logout() {
+    localStorage.clear();
     setToken(null);
     setUser(null);
-    localStorage.removeItem("portal_token");
-    localStorage.removeItem("portal_user");
-  };
+    navigate('/login');
+  }
 
-  const handleForcedPasswordReset = async (e) => {
-    e.preventDefault();
-    setResetError(null);
+  function onPasswordReset(data) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    setToken(data.token);
+    setUser(data.user);
+    navigate('/');
+  }
 
-    if (newPassword.length < 6 || newPassword.length > 12) {
-      setResetError("Password must be between 6 and 12 characters.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setResetError("Passwords do not match.");
-      return;
-    }
+  if (!token) return <Login onLogin={onLogin} />;
 
-    setResetLoading(true);
-
-    try {
-      await apiService.resetPassword(token, newPassword);
-      setResetSuccess(true);
-
-      const authStr = `${user.email.trim().toLowerCase()}:${newPassword}`;
-      const newToken = btoa(authStr);
-      setToken(newToken);
-      localStorage.setItem("portal_token", newToken);
-
-      const updatedUser = { ...user, reset_required: false };
-      setUser(updatedUser);
-      localStorage.setItem("portal_user", JSON.stringify(updatedUser));
-    } catch (err) {
-      setResetError(
-        err.message || "Failed to reset password. Please try again.",
-      );
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
-  if (token && user && user.reset_required) {
-    return (
-      <div className="reset-overlay">
-        <div className="reset-card">
-          <div className="text-center" style={{ marginBottom: "20px" }}>
-            <ShieldAlert size={40} style={{ color: "var(--primary-color)" }} />
-            <h2
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: "700",
-                marginTop: "8px",
-              }}
-            >
-              Security Setup Required
-            </h2>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.85rem",
-                marginTop: "4px",
-              }}
-            >
-              First-time login detected. You must change your password to
-              continue.
-            </p>
-          </div>
-
-          {resetError && <div className="alert alert-danger">{resetError}</div>}
-          {resetSuccess && (
-            <div className="alert alert-success">
-              <Check size={18} />
-              <span>Password updated! Redirecting...</span>
-            </div>
-          )}
-
-          <form onSubmit={handleForcedPasswordReset}>
-            <div className="form-group">
-              <label htmlFor="new-pass">New Password (6-12 characters)</label>
-              <div className="password-input-container">
-                <input
-                  id="new-pass"
-                  type={showNewPassword ? "text" : "password"}
-                  className="form-control"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  required
-                  disabled={resetLoading}
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  aria-label={
-                    showNewPassword ? "Hide password" : "Show password"
-                  }
-                  tabIndex={-1}
-                >
-                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-            <div className="form-group">
-              <label htmlFor="confirm-pass">Confirm Password</label>
-              <div className="password-input-container">
-                <input
-                  id="confirm-pass"
-                  type={showConfirmPassword ? "text" : "password"}
-                  className="form-control"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  required
-                  disabled={resetLoading}
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
-                  }
-                  tabIndex={-1}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ width: "100%", marginTop: "16px", borderRadius: "8px" }}
-              disabled={resetLoading}
-            >
-              <span>
-                {resetLoading
-                  ? "Saving Setup..."
-                  : "Change Password & Continue"}
-              </span>
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+  if (user?.reset_required && location.pathname !== '/reset-password') {
+    return <Navigate to="/reset-password" />;
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            token && user ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <LoginView onLoginSuccess={handleLoginSuccess} />
-            )
-          }
-        />
+    <div className="layout">
+      <aside className="sidebar">
+        <h2>Interview Portal</h2>
+        <nav>
+          <Link to="/">Dashboard</Link>
+          {['Admin', 'HR'].includes(user?.role) && <Link to="/jobs">Jobs</Link>}
+          {['Admin', 'HR'].includes(user?.role) && <Link to="/candidates">Candidates</Link>}
+          <Link to="/interviews">Interviews</Link>
+          {user?.role === 'Admin' && <Link to="/users">Users</Link>}
+          <Link to="/reset-password">Reset Password</Link>
+        </nav>
+        <div className="account">
+          <p>Logged in as {user?.role}</p>
+          <span></span>
+          <button onClick={logout}>Logout</button>
+        </div>
+      </aside>
 
-        <Route
-          element={
-            <ProtectedRoute token={token} user={user}>
-              <AppLayout
-                user={user}
-                onLogout={handleLogout}
-                isMobileSidebarOpen={isMobileSidebarOpen}
-                setIsMobileSidebarOpen={setIsMobileSidebarOpen}
-              />
+      <main className="content">
+        <Routes>
+          <Route path="/" element={<Dashboard token={token} />} />
+          <Route path="/jobs" element={
+            <ProtectedRoute user={user} roles={['Admin', 'HR']}>
+              <Jobs token={token} />
             </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route
-            path="/dashboard"
-            element={<DashboardView token={token} user={user} />}
-          />
-          <Route
-            path="/jobs"
-            element={<JobsView token={token} user={user} />}
-          />
-          <Route
-            path="/candidates"
-            element={<CandidatesView token={token} user={user} />}
-          />
-          <Route
-            path="/interviews"
-            element={<InterviewsView token={token} user={user} />}
-          />
-          <Route
-            path="/users"
-            element={<UsersView token={token} user={user} />}
-          />
-        </Route>
-
-        <Route
-          path="*"
-          element={
-            <Navigate to={token && user ? "/dashboard" : "/login"} replace />
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+          } />
+          <Route path="/candidates" element={
+            <ProtectedRoute user={user} roles={['Admin', 'HR']}>
+              <Candidates token={token} />
+            </ProtectedRoute>
+          } />
+          <Route path="/interviews" element={<Interviews token={token} user={user} />} />
+          <Route path="/users" element={
+            <ProtectedRoute user={user} roles={['Admin']}>
+              <Users token={token} />
+            </ProtectedRoute>
+          } />
+          <Route path="/reset-password" element={
+            <ResetPassword token={token} user={user} onReset={onPasswordReset} />
+          } />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </main>
+    </div>
   );
 }
