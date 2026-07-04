@@ -18,5 +18,6 @@ from .responses import (
     JobResponse,
     InterviewResponse,
     FeedbackResponse,
-    LoginResponse
+    LoginResponse,
+    PaginatedResponse
 )

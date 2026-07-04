@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 
-from ..constants import PAGE_SIZE
 from ..core.database import db
+from ..utils.pagination import paginate_collection
 
 
 async def get_user_by_email(email: str):
@@ -31,10 +31,24 @@ async def create_user(user_data: dict):
     return str(result.inserted_id)
 
 
-async def get_all_users(page: int = 1):
-    skip = (page - 1) * PAGE_SIZE
+async def get_all_users(
+    page: int = 1,
+    limit: int = 10,
+    name: str = "",
+    role: str = "",
+):
+    query = {}
 
-    return await db.users.find().skip(skip).limit(PAGE_SIZE).to_list(length=PAGE_SIZE)
+    if name:
+        query["name"] = {
+            "$regex": name.strip(),
+            "$options": "i",
+        }
+
+    if role:
+        query["role"] = role
+
+    return await paginate_collection(db.users, query, page, limit)
 
 
 async def update_user(user_id: str, user_data: dict):
@@ -50,10 +64,10 @@ async def update_user(user_id: str, user_data: dict):
     return result.modified_count
 
 
-async def get_active_interviewers():
-    return await db.users.find(
-        {
-            "role": "Interviewer",
-            "active": True,
-        }
-    ).to_list(length=None)
+async def get_active_interviewers(page: int = 1, limit: int = 10):
+    query = {
+        "role": "Interviewer",
+        "active": True,
+    }
+
+    return await paginate_collection(db.users, query, page, limit)

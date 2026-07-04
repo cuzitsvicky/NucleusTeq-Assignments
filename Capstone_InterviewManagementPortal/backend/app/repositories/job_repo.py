@@ -1,7 +1,7 @@
 from ..core.database import db
 from bson.objectid import ObjectId
 
-from ..constants import PAGE_SIZE
+from ..utils.pagination import paginate_collection
 
 
 async def create_job(job_data: dict):
@@ -9,9 +9,38 @@ async def create_job(job_data: dict):
     return str(result.inserted_id)
 
 
-async def get_all_jobs(page: int = 1):
-    skip = (page - 1) * PAGE_SIZE
-    return await db.jobs.find().skip(skip).limit(PAGE_SIZE).to_list(length=PAGE_SIZE)
+async def get_all_jobs(
+    page: int = 1,
+    limit: int = 10,
+    name: str = "",
+    employment_type: str = "",
+    location: str = "",
+    experience: str = "",
+):
+    query = {}
+
+    if name:
+        query["title"] = {
+            "$regex": name.strip(),
+            "$options": "i",
+        }
+
+    if employment_type:
+        query["employment_type"] = employment_type
+
+    if location:
+        query["location"] = {
+            "$regex": location.strip(),
+            "$options": "i",
+        }
+
+    if experience:
+        query["experience_required"] = {
+            "$regex": experience.strip(),
+            "$options": "i",
+        }
+
+    return await paginate_collection(db.jobs, query, page, limit)
 
 
 async def get_job_by_id(job_id: str):

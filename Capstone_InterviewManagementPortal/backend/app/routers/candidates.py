@@ -6,12 +6,12 @@ from fastapi import (
     Depends,
     File,
     Form,
+    Query,
     Response,
     UploadFile,
 )
-from pydantic import EmailStr
-from typing import List
 
+from pydantic import EmailStr
 
 from ..constants import MAX_RESUME_SIZE_BYTES
 from ..core.database import get_gridfs_bucket
@@ -24,6 +24,7 @@ from ..schemas import (
     CandidateCreateRequest,
     CandidateResponse,
     CandidateUpdateRequest,
+    PaginatedResponse,
     StatusHistoryResponse,
     StatusUpdateRequest,
 )
@@ -120,15 +121,19 @@ async def create_candidate(
     }
 
 
-@router.get("/", response_model=List[CandidateResponse])
+@router.get("/", response_model=PaginatedResponse[CandidateResponse])
 async def get_candidates(
-    page: int = 1,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    name: str = "",
     current_user: dict = Depends(check_password_reset),
 ):
     return await candidate_service.get_candidates_for_user(
         current_user["role"],
         current_user["email"],
         page,
+        limit,
+        name,
     )
 
 
@@ -223,14 +228,18 @@ async def update_status(
 
 @router.get(
     "/{candidate_id}/history",
-    response_model=List[StatusHistoryResponse],
+    response_model=PaginatedResponse[StatusHistoryResponse],
 )
 async def get_history(
     candidate_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     current_user: dict = Depends(check_password_reset),
 ):
     return await candidate_service.get_history_for_user(
         candidate_id,
         current_user["role"],
         current_user["email"],
+        page,
+        limit,
     )

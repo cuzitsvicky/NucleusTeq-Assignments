@@ -2,17 +2,15 @@
 User router containing endpoints for user management and registration.
 """
 
-from typing import List
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from ..exceptions import (
-    BadRequestException,
     ForbiddenException,
     NotFoundException,
 )
 from ..schemas import (
     UserCreateRequest,
+    PaginatedResponse,
     UserResponse,
     UserUpdateRequest,
 )
@@ -34,28 +32,30 @@ async def register(
     return UserResponse(**new_user)
 
 
-@router.get("/users", response_model=List[UserResponse])
+@router.get("/users", response_model=PaginatedResponse[UserResponse])
 async def get_users(
-    page: int = 1,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    name: str = "",
+    role: str = "",
     current_user: dict = Depends(check_password_reset),
 ):
     if current_user["role"] != "Admin":
         raise ForbiddenException("Not authorized")
 
-    if page < 1:
-        raise BadRequestException("Page number must be 1 or greater")
-
-    return await user_service.get_users(page)
+    return await user_service.get_users(page, limit, name, role)
 
 
-@router.get("/interviewers", response_model=List[UserResponse])
+@router.get("/interviewers", response_model=PaginatedResponse[UserResponse])
 async def get_interviewers(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     current_user: dict = Depends(check_password_reset),
 ):
     if current_user["role"] not in ("Admin", "HR"):
         raise ForbiddenException("Not authorized")
 
-    return await user_service.get_active_interviewers()
+    return await user_service.get_active_interviewers(page, limit)
 
 
 @router.put("/users/{user_id}")

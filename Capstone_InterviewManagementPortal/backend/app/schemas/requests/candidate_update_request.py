@@ -18,23 +18,14 @@ class CandidateUpdateRequest(BaseModel):
             raise ValueError("Name cannot be blank")
         if len(v) > 50:
             raise ValueError("Name must not exceed 50 characters")
-        if not re.fullmatch(r"[A-Za-z ]+", v):
-            raise ValueError("Name must contain only letters and spaces")
+        if not re.match(r"^[A-Za-z\s\-']+$", v):
+            raise ValueError("Name must contain only letters, spaces, or hyphens")
         return v
 
     @field_validator("email")
     @classmethod
     def email_lowercase(cls, v: str) -> str:
         return v.strip().lower()
-    
-    @field_validator('email')
-    @classmethod
-    def reject_strange_characters(cls, v: str) -> str:
-        # Enforce that the local part only contains normal letters, numbers, dots
-        local_part = v.split('@')[0]
-        if not re.match(r"^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$", local_part):
-            raise ValueError("Email is invalid or contains unaccepted special characters")
-        return v
 
     @field_validator("mobile")
     @classmethod
@@ -63,8 +54,14 @@ class CandidateUpdateRequest(BaseModel):
         if not v:
             raise ValueError("Total experience cannot be blank")
         pattern = (
-            r"^\d+(\.\d+)?(\s*-\s*\d+(\.\d+)?)?\s*(year|years|month|months)$"
+            r"^("
+            r"\d+(\.\d+)?(\s*-\s*\d+(\.\d+)?)?\s*(year|years|month|months)"
+            r"|"
+            r"\d+\s*(year|years)\s+\d+\s*(month|months)"
+            r")$"
         )
         if not re.match(pattern, v, re.IGNORECASE):
-            raise ValueError('Experience must follow format like "3 years", "6 months"')
+            raise ValueError(
+                'Experience must follow format like "3 years", "6 months", or "2 years 3 months"'
+            )
         return v

@@ -1,14 +1,12 @@
-from typing import List
-
 from bson.objectid import ObjectId
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from .auth import check_password_reset
 from ..exceptions import (
     BadRequestException,
     ForbiddenException,
 )
-from ..schemas import JobCreateRequest, JobResponse
+from ..schemas import JobCreateRequest, JobResponse, PaginatedResponse
 from ..services import job_service
 
 router = APIRouter()
@@ -27,15 +25,24 @@ async def create_job(
     return JobResponse(**new_job)
 
 
-@router.get("/", response_model=List[JobResponse])
+@router.get("/", response_model=PaginatedResponse[JobResponse])
 async def get_jobs(
-    page: int = 1,  #Improve this pagination through Query Parameters
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    name: str = "",
+    employment_type: str = "",
+    location: str = "",
+    experience: str = "",
     current_user: dict = Depends(check_password_reset),
 ):
-    if page < 1:
-        raise BadRequestException("Page number must be 1 or greater")
-
-    return await job_service.get_jobs(page=page)
+    return await job_service.get_jobs(
+        page=page,
+        limit=limit,
+        name=name,
+        employment_type=employment_type,
+        location=location,
+        experience=experience,
+    )
 
 
 @router.get("/{job_id}", response_model=JobResponse)

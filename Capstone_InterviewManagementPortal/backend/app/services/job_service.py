@@ -2,6 +2,7 @@ import logging
 
 from ..exceptions import NotFoundException
 from ..repositories import job_repo
+from ..utils.pagination import build_paginated_response
 
 logger = logging.getLogger(__name__)
 
@@ -15,13 +16,27 @@ async def create_job(job_data: dict):
     return job_data
 
 
-async def get_jobs(page: int = 1):
-    jobs = await job_repo.get_all_jobs(page=page)
+async def get_jobs(
+    page: int = 1,
+    limit: int = 10,
+    name: str = "",
+    employment_type: str = "",
+    location: str = "",
+    experience: str = "",
+):
+    jobs, total = await job_repo.get_all_jobs(
+        page=page,
+        limit=limit,
+        name=name,
+        employment_type=employment_type,
+        location=location,
+        experience=experience,
+    )
 
     for job in jobs:
         job["id"] = str(job.pop("_id"))
 
-    return jobs
+    return build_paginated_response(jobs, page, limit, total)
 
 
 async def get_job_by_id(job_id: str):

@@ -6,8 +6,8 @@ import datetime
 
 from bson.objectid import ObjectId
 
-from ..constants import PAGE_SIZE
 from ..core.database import db
+from ..utils.pagination import paginate_collection
 
 
 async def create_candidate(candidate_data: dict) -> str:
@@ -18,18 +18,33 @@ async def create_candidate(candidate_data: dict) -> str:
     return str(result.inserted_id)
 
 
-async def get_all_candidates(page: int = 1):
+async def get_all_candidates(
+    page: int = 1,
+    limit: int = 10,
+    name: str = "",
+):
     """
     Return paginated candidates.
     """
-    skip = (page - 1) * PAGE_SIZE
+    query = {}
 
-    return await (
-        db.candidates.find()
-        .skip(skip)
-        .limit(PAGE_SIZE)
-        .to_list(length=PAGE_SIZE)
-    )
+    if name:
+        query["$or"] = [
+            {
+                "first_name": {
+                    "$regex": name.strip(),
+                    "$options": "i",
+                }
+            },
+            {
+                "last_name": {
+                    "$regex": name.strip(),
+                    "$options": "i",
+                }
+            },
+        ]
+
+    return await paginate_collection(db.candidates, query, page, limit)
 
 
 async def get_candidate_by_id(candidate_id: str):
@@ -134,25 +149,36 @@ async def add_status_history(
     )
 
 
-async def get_status_history(candidate_id: str):
+async def get_status_history(
+    candidate_id: str,
+    page: int = 1,
+    limit: int = 10,
+):
     """
     Return candidate status history.
     """
-    return await (
-        db.status_history.find(
-            {"candidate_id": candidate_id}
-        )
-        .sort("timestamp", -1)
-        .to_list(length=None)
+    return await paginate_collection(
+        db.status_history,
+        {"candidate_id": candidate_id},
+        page,
+        limit,
+        sort=("timestamp", -1),
     )
 
 
-async def get_candidates_by_ids(candidate_ids: list):
+async def get_candidates_by_ids(
+    candidate_ids: list,
+    page: int = 1,
+    limit: int = 10,
+):
     """
     Return candidates matching provided ids.
     """
     object_ids = [ObjectId(cid) for cid in candidate_ids]
 
-    return await db.candidates.find(
-        {"_id": {"$in": object_ids}}
-    ).to_list(length=None)
+    return await paginate_collection(
+        db.candidates,
+        {"_id": {"$in": object_ids}},
+        page,
+        limit,
+    )
