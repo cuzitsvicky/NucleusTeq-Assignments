@@ -30,6 +30,18 @@ async function apiRequest(endpoint, options = {}, token = null) {
   return data;
 }
 
+function buildQuery(params = {}) {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, value);
+    }
+  });
+
+  return query.toString();
+}
+
 export const apiService = {
   login: (email, password) => apiRequest('/api/auth/login', {
     method: 'POST',
@@ -44,12 +56,18 @@ export const apiService = {
     method: 'POST',
     body: JSON.stringify(userData)
   }, token),
-  getUsers: (token, page = 1) => apiRequest(`/api/auth/users?page=${page}`, {}, token),
+  getUsers: (token, page = 1, limit = 10, filters = {}) => {
+    const query = buildQuery({ page, limit, ...filters });
+    return apiRequest(`/api/auth/users?${query}`, {}, token);
+  },
   updateUser: (token, id, userData) => apiRequest(`/api/auth/users/${id}`, {
     method: 'PUT',
     body: JSON.stringify(userData)
   }, token),
-  getJobs: (token, page = 1) => apiRequest(`/api/jobs/?page=${page}`, {}, token),
+  getJobs: (token, page = 1, limit = 10, filters = {}) => {
+    const query = buildQuery({ page, limit, ...filters });
+    return apiRequest(`/api/jobs/?${query}`, {}, token);
+  },
   createJob: (token, jobData) => apiRequest('/api/jobs/', {
     method: 'POST',
     body: JSON.stringify(jobData)
@@ -58,7 +76,10 @@ export const apiService = {
     method: 'PUT',
     body: JSON.stringify(jobData)
   }, token),
-  getCandidates: (token, page = 1) => apiRequest(`/api/candidates/?page=${page}`, {}, token),
+  getCandidates: (token, page = 1, limit = 10, filters = {}) => {
+    const query = buildQuery({ page, limit, ...filters });
+    return apiRequest(`/api/candidates/?${query}`, {}, token);
+  },
   createCandidate: (token, formData) => apiRequest('/api/candidates/', {
     method: 'POST',
     body: formData
@@ -71,7 +92,10 @@ export const apiService = {
     method: 'PUT',
     body: JSON.stringify({ status })
   }, token),
-  getCandidateHistory: (token, id) => apiRequest(`/api/candidates/${id}/history`, {}, token),
+  getCandidateHistory: (token, id, page = 1, limit = 10) => {
+    const query = buildQuery({ page, limit });
+    return apiRequest(`/api/candidates/${id}/history?${query}`, {}, token);
+  },
   downloadResume: async (token, id) => {
     const blob = await apiRequest(`/api/candidates/${id}/resume`, {}, token);
     return URL.createObjectURL(blob);

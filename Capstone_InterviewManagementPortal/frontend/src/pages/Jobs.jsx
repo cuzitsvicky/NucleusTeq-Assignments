@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
+import Pagination from '../components/Pagination.jsx';
+import useDebouncedValue from '../hooks/useDebouncedValue.js';
+import { emptyPagination, paginationFrom } from '../utils/pagination.js';
 
 const emptyJob = {
   title: '',
@@ -14,20 +17,53 @@ const emptyJob = {
 
 export default function Jobs({ token }) {
   const [jobs, setJobs] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(emptyPagination);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(emptyJob);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
+  const [filters, setFilters] = useState({
+    name: '',
+    employment_type: '',
+    location: '',
+    experience: ''
+  });
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+  const debouncedName = useDebouncedValue(filters.name);
+  const debouncedLocation = useDebouncedValue(filters.location);
+  const debouncedExperience = useDebouncedValue(filters.experience);
 
-  function load() {
-    apiService.getJobs(token).then(setJobs).catch(e => {
+  function load(nextPage = page) {
+    setLoading(true);
+    apiService.getJobs(token, nextPage, pagination.limit, {
+      name: debouncedName,
+      employment_type: filters.employment_type,
+      location: debouncedLocation,
+      experience: debouncedExperience
+    }).then(response => {
+      setJobs(response.data);
+      setPage(response.page);
+      setPagination(paginationFrom(response));
+    }).catch(e => {
       setMessageType('error');
       setMessage(e.message);
+    }).finally(() => {
+      setLoading(false);
     });
   }
 
-  useEffect(load, [token]);
+  useEffect(() => {
+    setPage(1);
+    load(1);
+  }, [
+    token,
+    debouncedName,
+    filters.employment_type,
+    debouncedLocation,
+    debouncedExperience
+  ]);
 
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -79,6 +115,32 @@ export default function Jobs({ token }) {
         </button>
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      {loading && <p>Loading...</p>}
+      <div className="filters">
+        <input
+          placeholder="Search by job name"
+          value={filters.name}
+          onChange={e => setFilters({ ...filters, name: e.target.value })}
+        />
+        <select
+          value={filters.employment_type}
+            onChange={e => setFilters({ ...filters, employment_type: e.target.value })}
+        >
+          <option value="">All job types</option>
+          <option>Full Time</option>
+          <option>Internship</option>
+        </select>
+        <input
+          placeholder="Filter by location"
+          value={filters.location}
+          onChange={e => setFilters({ ...filters, location: e.target.value })}
+        />
+        <input
+          placeholder="Filter by experience"
+          value={filters.experience}
+          onChange={e => setFilters({ ...filters, experience: e.target.value })}
+        />
+      </div>
       {showForm && (
         <form onSubmit={submit} className="form">
           <input name="title" placeholder="Title" value={form.title} onChange={change} />
@@ -120,6 +182,11 @@ export default function Jobs({ token }) {
           ))}
         </tbody>
       </table>
+      <Pagination
+        pagination={pagination}
+        loading={loading}
+        onPageChange={load}
+      />
     </section>
   );
 }

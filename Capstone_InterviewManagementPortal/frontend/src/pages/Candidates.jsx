@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
+import Pagination from '../components/Pagination.jsx';
+import useDebouncedValue from '../hooks/useDebouncedValue.js';
+import { emptyPagination, paginationFrom } from '../utils/pagination.js';
 
 const empty = {
   first_name: '',
@@ -14,27 +17,44 @@ const empty = {
 
 export default function Candidates({ token }) {
   const [candidates, setCandidates] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(emptyPagination);
+  const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [form, setForm] = useState(empty);
   const [resume, setResume] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
+  const [filters, setFilters] = useState({ name: '' });
   const [history, setHistory] = useState([]);
   const [historyName, setHistoryName] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+  const debouncedName = useDebouncedValue(filters.name);
 
-  function load() {
-    apiService.getCandidates(token).then(setCandidates).catch(e => {
+  function load(nextPage = page) {
+    setLoading(true);
+    apiService.getCandidates(token, nextPage, pagination.limit, {
+      name: debouncedName
+    }).then(response => {
+      setCandidates(response.data);
+      setPage(response.page);
+      setPagination(paginationFrom(response));
+    }).catch(e => {
       setMessageType('error');
       setMessage(e.message);
+    }).finally(() => {
+      setLoading(false);
     });
   }
 
-  useEffect(load, [token]);
+  useEffect(() => {
+    setPage(1);
+    load(1);
+  }, [token, debouncedName]);
 
   useEffect(() => {
-    apiService.getJobs(token).then(setJobs).catch(e => {
+    apiService.getJobs(token, 1, 100).then(response => setJobs(response.data)).catch(e => {
       setMessageType('error');
       setMessage(e.message);
     });
@@ -84,7 +104,8 @@ export default function Candidates({ token }) {
 
   async function showHistory(candidate) {
     try {
-      setHistory(await apiService.getCandidateHistory(token, candidate.id));
+      const response = await apiService.getCandidateHistory(token, candidate.id);
+      setHistory(response.data);
       setHistoryName(`${candidate.first_name} ${candidate.last_name}`);
     } catch (err) {
       setMessageType('error');
@@ -123,6 +144,14 @@ export default function Candidates({ token }) {
         </button>
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      {loading && <p>Loading...</p>}
+      <div className="filters">
+        <input
+          placeholder="Search by candidate name"
+          value={filters.name}
+          onChange={e => setFilters({ ...filters, name: e.target.value })}
+        />
+      </div>
       {showForm && (
         <form onSubmit={submit} className="form">
           <input name="first_name" placeholder="First name" value={form.first_name} onChange={change} />
@@ -130,7 +159,7 @@ export default function Candidates({ token }) {
           <input name="email" placeholder="Email" value={form.email} onChange={change} />
           <input name="mobile" placeholder="Mobile" value={form.mobile} onChange={change} />
           <input name="current_company" placeholder="Current company" value={form.current_company} onChange={change} />
-          <input name="total_experience" placeholder="Total experience" value={form.total_experience} onChange={change} />
+          <input name="total_experience" placeholder="2 years" value={form.total_experience} onChange={change} />
           <select name="applied_job_id" value={form.applied_job_id} onChange={change}>
             <option value="">Select applied job</option>
             {jobs.map(job => (
@@ -144,13 +173,16 @@ export default function Candidates({ token }) {
         </form>
       )}
       <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Job</th><th>Mobile</th><th>Current Company</th><th>Total Experience</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
           {candidates.map(c => (
             <tr key={c.id}>
               <td>{c.first_name} {c.last_name}</td>
               <td>{c.email}</td>
               <td>{c.job_title || c.applied_job_id}</td>
+              <td>{c.mobile}</td>
+              <td>{c.current_company}</td>
+              <td>{c.total_experience}</td>
               <td>{c.status}</td>
               <td>
                 <div className="actions">
@@ -168,6 +200,11 @@ export default function Candidates({ token }) {
           ))}
         </tbody>
       </table>
+      <Pagination
+        pagination={pagination}
+        loading={loading}
+        onPageChange={load}
+      />
       {historyName && (
         <div className="box">
           <div className="page-head">
