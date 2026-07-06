@@ -103,7 +103,39 @@ section {
   gap: 10px;
 }
 
-label { display: block; margin-top: 12px; }
+label { display: block; margin-top: 22px; }
+
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+}
+
+.add-btn {
+  width: auto;
+  min-width: 120px;
+  margin: 0 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
 
 input,
 select,
@@ -125,6 +157,13 @@ button {
   border: none;
 }
 
+.login.button {
+  margin-top: 20px;
+  cursor: pointer;
+  color: white;
+  background: #2563eb;
+  border: none;
+}
 .actions {
   display: flex;
   flex-wrap: wrap;

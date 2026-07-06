@@ -4,7 +4,7 @@ export default function Alert({ message, type = 'error', onClose }) {
   useEffect(() => {
     if (!message || !onClose) return undefined;
 
-    const timer = window.setTimeout(onClose, 5000);
+    const timer = window.setTimeout(onClose, 4000);
     return () => window.clearTimeout(timer);
   }, [message, onClose]);
 

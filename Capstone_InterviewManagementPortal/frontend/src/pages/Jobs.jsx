@@ -4,6 +4,7 @@ import Alert from '../components/Alert.jsx';
 import Pagination from '../components/Pagination.jsx';
 import useDebouncedValue from '../hooks/useDebouncedValue.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
+import { Plus } from 'lucide-react';
 
 const emptyJob = {
   title: '',
@@ -15,6 +16,13 @@ const emptyJob = {
   location: ''
 };
 
+const emptyFilters = {
+  name: '',
+  employment_type: '',
+  location: '',
+  experience: ''
+};
+
 export default function Jobs({ token }) {
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
@@ -23,12 +31,7 @@ export default function Jobs({ token }) {
   const [form, setForm] = useState(emptyJob);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
-  const [filters, setFilters] = useState({
-    name: '',
-    employment_type: '',
-    location: '',
-    experience: ''
-  });
+  const [filters, setFilters] = useState(emptyFilters);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
   const debouncedName = useDebouncedValue(filters.name);
@@ -67,6 +70,14 @@ export default function Jobs({ token }) {
 
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  function changeFilter(e) {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  }
+
+  function clearFilters() {
+    setFilters(emptyFilters);
   }
 
   async function submit(e) {
@@ -110,36 +121,51 @@ export default function Jobs({ token }) {
     <section>
       <div className="page-head">
         <h1>Jobs</h1>
-        <button className="add-btn" onClick={showForm ? closeForm : () => setShowForm(true)}>
-          {showForm ? 'Close' : 'Add Job'}
+        <button
+          className="add-btn"
+          onClick={showForm ? closeForm : () => setShowForm(true)}
+        >
+          {showForm ? (
+            'Close'
+          ) : (
+            <>
+              <Plus size={18} />
+              Add Job
+            </>
+          )}
         </button>
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       {loading && <p>Loading...</p>}
       <div className="filters">
         <input
+          name="name"
           placeholder="Search by job name"
           value={filters.name}
-          onChange={e => setFilters({ ...filters, name: e.target.value })}
+          onChange={changeFilter}
         />
         <select
+          name="employment_type"
           value={filters.employment_type}
-            onChange={e => setFilters({ ...filters, employment_type: e.target.value })}
+          onChange={changeFilter}
         >
           <option value="">All job types</option>
           <option>Full Time</option>
           <option>Internship</option>
         </select>
         <input
+          name="location"
           placeholder="Filter by location"
           value={filters.location}
-          onChange={e => setFilters({ ...filters, location: e.target.value })}
+          onChange={changeFilter}
         />
         <input
+          name="experience"
           placeholder="Filter by experience"
           value={filters.experience}
-          onChange={e => setFilters({ ...filters, experience: e.target.value })}
+          onChange={changeFilter}
         />
+        <button type="button" onClick={clearFilters}>Clear filters</button>
       </div>
       {showForm && (
         <form onSubmit={submit} className="form">
@@ -164,22 +190,35 @@ export default function Jobs({ token }) {
           </tr>
         </thead>
         <tbody>
-          {jobs.map(job => (
-            <tr key={job.id}>
-              <td>{job.title}</td>
-              <td>{job.job_details}</td>
-              <td>{job.job_role}</td>
-              <td>{job.required_skills}</td>
-              <td>{job.experience_required}</td>
-              <td>{job.employment_type}</td>
-              <td>{job.location}</td>
-              <td>
-                <div className="actions">
-                  <button type="button" onClick={() => editJob(job)}>Edit</button>
-                </div>
+          {jobs.length === 0 ? (
+            <tr>
+              <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                No jobs available. Please create a new job.
               </td>
             </tr>
-          ))}
+          ) : (
+            jobs.map(job => (
+              <tr key={job.id}>
+                <td>{job.title}</td>
+                <td>{job.job_details}</td>
+                <td>{job.job_role}</td>
+                <td>{job.required_skills}</td>
+                <td>{job.experience_required}</td>
+                <td>{job.employment_type}</td>
+                <td>{job.location}</td>
+                <td>
+                  <div className="actions">
+                    <button
+                      type="button"
+                      onClick={() => editJob(job)}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
       <Pagination

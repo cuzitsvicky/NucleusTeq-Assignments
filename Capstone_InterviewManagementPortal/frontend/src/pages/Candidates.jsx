@@ -4,6 +4,7 @@ import Alert from '../components/Alert.jsx';
 import Pagination from '../components/Pagination.jsx';
 import useDebouncedValue from '../hooks/useDebouncedValue.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
+import { Plus } from 'lucide-react';
 
 const empty = {
   first_name: '',
@@ -15,6 +16,14 @@ const empty = {
   applied_job_id: ''
 };
 
+const STATUS_OPTIONS = [
+  'PROFILE_CREATED',
+  'INTERVIEW_SCHEDULED',
+  'INTERVIEW_COMPLETED',
+  'SELECTED',
+  'REJECTED'
+];
+
 export default function Candidates({ token }) {
   const [candidates, setCandidates] = useState([]);
   const [page, setPage] = useState(1);
@@ -25,17 +34,21 @@ export default function Candidates({ token }) {
   const [resume, setResume] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
-  const [filters, setFilters] = useState({ name: '' });
+  const [filters, setFilters] = useState({ name: '', email: '', status: '', applied_job_id: '' });
   const [history, setHistory] = useState([]);
   const [historyName, setHistoryName] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
   const debouncedName = useDebouncedValue(filters.name);
+  const debouncedEmail = useDebouncedValue(filters.email);
 
   function load(nextPage = page) {
     setLoading(true);
     apiService.getCandidates(token, nextPage, pagination.limit, {
-      name: debouncedName
+      name: debouncedName,
+      email: debouncedEmail,
+      status: filters.status,
+      applied_job_id: filters.applied_job_id
     }).then(response => {
       setCandidates(response.data);
       setPage(response.page);
@@ -51,7 +64,7 @@ export default function Candidates({ token }) {
   useEffect(() => {
     setPage(1);
     load(1);
-  }, [token, debouncedName]);
+  }, [token, debouncedName, debouncedEmail, filters.status, filters.applied_job_id]);
 
   useEffect(() => {
     apiService.getJobs(token, 1, 100).then(response => setJobs(response.data)).catch(e => {
@@ -62,6 +75,14 @@ export default function Candidates({ token }) {
 
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  function changeFilter(e) {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  }
+
+  function clearFilters() {
+    setFilters({ name: '', email: '', status: '', applied_job_id: '' });
   }
 
   async function submit(e) {
@@ -139,18 +160,48 @@ export default function Candidates({ token }) {
     <section>
       <div className="page-head">
         <h1>Candidates</h1>
-        <button className="add-btn" onClick={showForm ? closeForm : () => setShowForm(true)}>
-          {showForm ? 'Close' : 'Add Candidate'}
+        <button
+          className="add-btn"
+          onClick={showForm ? closeForm : () => setShowForm(true)}
+        >
+          {showForm ? (
+            'Close'
+          ) : (
+            <>
+              <Plus size={18} />
+              Add Candidate
+            </>
+          )}
         </button>
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       {loading && <p>Loading...</p>}
       <div className="filters">
         <input
+          name="name"
           placeholder="Search by candidate name"
           value={filters.name}
-          onChange={e => setFilters({ ...filters, name: e.target.value })}
+          onChange={changeFilter}
         />
+        <input
+          name="email"
+          placeholder="Search by email"
+          value={filters.email}
+          onChange={changeFilter}
+        />
+        <select name="applied_job_id" value={filters.applied_job_id} onChange={changeFilter}>
+          <option value="">All jobs</option>
+          {jobs.map(job => (
+            <option key={job.id} value={job.id}>{job.title}</option>
+          ))}
+        </select>
+        <select name="status" value={filters.status} onChange={changeFilter}>
+          <option value="">All statuses</option>
+          {STATUS_OPTIONS.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <button type="button" onClick={clearFilters}>Clear filters</button>
       </div>
       {showForm && (
         <form onSubmit={submit} className="form">
@@ -175,29 +226,45 @@ export default function Candidates({ token }) {
       <table>
         <thead><tr><th>Name</th><th>Email</th><th>Job</th><th>Mobile</th><th>Current Company</th><th>Total Experience</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
-          {candidates.map(c => (
-            <tr key={c.id}>
-              <td>{c.first_name} {c.last_name}</td>
-              <td>{c.email}</td>
-              <td>{c.job_title || c.applied_job_id}</td>
-              <td>{c.mobile}</td>
-              <td>{c.current_company}</td>
-              <td>{c.total_experience}</td>
-              <td>{c.status}</td>
-              <td>
-                <div className="actions">
-                  <select onChange={e => changeStatus(c.id, e.target.value)} defaultValue="">
-                    <option value="" disabled>Status</option>
-                    <option>INTERVIEW_SCHEDULED</option><option>INTERVIEW_COMPLETED</option>
-                    <option>SELECTED</option><option>REJECTED</option>
-                  </select>
-                  <button type="button" onClick={() => openResume(c.id)}>Resume</button>
-                  <button type="button" onClick={() => showHistory(c)}>History</button>
-                  <button type="button" onClick={() => editCandidate(c)}>Edit</button>
-                </div>
+          {candidates.length === 0 ? (
+            <tr>
+              <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
+                No candidates available. Please create a new candidate.
               </td>
             </tr>
-          ))}
+          ) : (
+            candidates.map(c => (
+              <tr key={c.id}>
+                <td>{c.first_name} {c.last_name}</td>
+                <td>{c.email}</td>
+                <td>{c.job_title || c.applied_job_id}</td>
+                <td>{c.mobile}</td>
+                <td>{c.current_company}</td>
+                <td>{c.total_experience}</td>
+                <td>{c.status}</td>
+                <td>
+                  <div className="actions">
+                    <select onChange={e => changeStatus(c.id, e.target.value)} defaultValue="">
+                      <option value="" disabled>Status</option>
+                      <option>INTERVIEW_SCHEDULED</option>
+                      <option>INTERVIEW_COMPLETED</option>
+                      <option>SELECTED</option>
+                      <option>REJECTED</option>
+                    </select>
+                    <button type="button" onClick={() => openResume(c.id)}>
+                      Resume
+                    </button>
+                    <button type="button" onClick={() => showHistory(c)}>
+                      History
+                    </button>
+                    <button type="button" onClick={() => editCandidate(c)}>
+                      Edit
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
       <Pagination

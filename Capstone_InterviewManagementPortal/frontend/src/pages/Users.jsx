@@ -4,6 +4,7 @@ import Alert from '../components/Alert.jsx';
 import Pagination from '../components/Pagination.jsx';
 import useDebouncedValue from '../hooks/useDebouncedValue.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
+import { Plus } from 'lucide-react';
 
 const emptyUser = { name: '', email: '', password: '', role: 'HR' };
 
@@ -45,6 +46,13 @@ export default function Users({ token }) {
 
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  function clearFilters() {
+    setFilters({
+      name: '',
+      role: ''
+    });
   }
 
   async function submit(e) {
@@ -90,8 +98,18 @@ export default function Users({ token }) {
     <section>
       <div className="page-head">
         <h1>Users</h1>
-        <button className="add-btn" onClick={showForm ? closeForm : () => setShowForm(true)}>
-          {showForm ? 'Close' : 'Add User'}
+        <button
+          className="add-btn"
+          onClick={showForm ? closeForm : () => setShowForm(true)}
+        >
+          {showForm ? (
+            'Close'
+          ) : (
+            <>
+              <Plus size={18} />
+              Add User
+            </>
+          )}
         </button>
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
@@ -100,22 +118,32 @@ export default function Users({ token }) {
         <input
           placeholder="Search by name"
           value={filters.name}
-          onChange={e => setFilters({ ...filters, name: e.target.value })}
+          onChange={e =>
+            setFilters(current => ({
+              ...current,
+              name: e.target.value,
+            }))
+          }
         />
+
         <select
-  value={filters.role}
-  onChange={e =>
-    setFilters(current => ({
-      ...current,
-      role: e.target.value,
-    }))
-  }
->
+          value={filters.role}
+          onChange={e =>
+            setFilters(current => ({
+              ...current,
+              role: e.target.value,
+            }))
+          }
+        >
           <option value="">All roles</option>
           <option>Admin</option>
           <option>HR</option>
           <option>Interviewer</option>
         </select>
+
+        <button type="button" onClick={clearFilters}>
+          Clear filters
+        </button>
       </div>
       {showForm && (
         <form onSubmit={submit} className="form">
