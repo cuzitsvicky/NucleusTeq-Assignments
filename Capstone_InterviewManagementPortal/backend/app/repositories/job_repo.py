@@ -40,7 +40,7 @@ async def get_all_jobs(
             "$options": "i",
         }
 
-    return await paginate_collection(db.jobs, query, page, limit)
+    return await paginate_collection(db.jobs, query, page, limit, sort=("_id", -1))
 
 
 async def get_job_by_id(job_id: str):

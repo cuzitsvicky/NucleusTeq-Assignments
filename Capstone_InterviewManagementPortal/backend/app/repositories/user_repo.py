@@ -48,7 +48,7 @@ async def get_all_users(
     if role:
         query["role"] = role
 
-    return await paginate_collection(db.users, query, page, limit)
+    return await paginate_collection(db.users, query, page, limit, sort=("_id", -1))
 
 
 async def update_user(user_id: str, user_data: dict):
@@ -70,4 +70,4 @@ async def get_active_interviewers(page: int = 1, limit: int = 10):
         "active": True,
     }
 
-    return await paginate_collection(db.users, query, page, limit)
+    return await paginate_collection(db.users, query, page, limit, sort=("_id", -1))

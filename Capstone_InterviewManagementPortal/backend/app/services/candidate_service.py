@@ -17,6 +17,58 @@ from ..utils.pagination import build_paginated_response
 logger = logging.getLogger(__name__)
 
 
+from ..exceptions import (
+    BadRequestException,
+    ForbiddenException,
+    NotFoundException,
+)
+from ..enums import CandidateStatus  # wherever you place the enum you shared
+
+# Terminal statuses — no transition allowed once a candidate reaches these
+TERMINAL_STATUSES = {CandidateStatus.SELECTED, CandidateStatus.REJECTED}
+
+
+def _status_rank(status: str) -> int:
+    """
+    Rank based on the enum's own declaration order.
+    PROFILE_CREATED=0, INTERVIEW_SCHEDULED=1, INTERVIEW_COMPLETED=2,
+    SELECTED=3, REJECTED=3 (both terminal, same rank).
+    """
+    order = list(CandidateStatus)
+    try:
+        target = CandidateStatus(status)
+    except ValueError:
+        raise BadRequestException(f"Invalid status: {status}")
+
+    if target in TERMINAL_STATUSES:
+        return len(order) - 1  # SELECTED and REJECTED share the highest rank
+
+    return order.index(target)
+
+
+def validate_status_transition(current_status: str, new_status: str):
+    try:
+        current = CandidateStatus(current_status)
+    except ValueError:
+        # Unknown/legacy value already stored — don't block forward progress
+        return
+
+    target = CandidateStatus(new_status)  # validated for real errors below
+
+    if current == target:
+        raise BadRequestException(f"Candidate is already in status '{current.value}'")
+
+    if current in TERMINAL_STATUSES:
+        raise BadRequestException(
+            f"Cannot change status once candidate is '{current.value}'"
+        )
+
+    if _status_rank(target) < _status_rank(current):
+        raise BadRequestException(
+            f"Cannot revert status from '{current.value}' to '{target.value}'"
+        )
+
+
 async def create_candidate(candidate_data: dict, current_user_email: str):
     """
     Create a new candidate.
@@ -32,9 +84,7 @@ async def create_candidate(candidate_data: dict, current_user_email: str):
     )
 
     if existing:
-        raise BadRequestException(
-            "Email or Mobile already registered"
-        )
+        raise BadRequestException("Email or Mobile already registered")
 
     candidate_data["status"] = "PROFILE_CREATED"
 
@@ -59,21 +109,17 @@ async def get_candidates(
     page: int = 1,
     limit: int = 10,
     name: str = "",
+    email: str = "",
+    status: str = "",
+    applied_job_id: str = "",
 ):
-    """
-    Return paginated candidates.
-    """
-
     candidates, total = await candidate_repo.get_all_candidates(
-        page,
-        limit,
-        name,
+        page, limit, name, email, status, applied_job_id,
     )
 
     await attach_job_titles(candidates)
 
     return build_paginated_response(candidates, page, limit, total)
-
 
 async def get_candidates_by_ids(
     candidate_ids: list,
@@ -100,22 +146,25 @@ async def get_candidates_by_ids(
 
 async def get_candidates_for_user(
     role: str,
-    email: str,
+    email_user: str,
     page: int = 1,
     limit: int = 10,
     name: str = "",
+    email: str = "",
+    status: str = "",
+    applied_job_id: str = "",
 ):
     if role == "Interviewer":
         candidate_ids = (
             await interview_repo.get_candidate_ids_by_interviewer_email(
-                email
+                email_user
             )
         )
-
+        # Note: filtering by ids currently ignores name/email/status/job filters.
+        # If interviewers need filtering too, get_candidates_by_ids needs the same treatment.
         return await get_candidates_by_ids(candidate_ids, page, limit)
 
-    return await get_candidates(page, limit, name)
-
+    return await get_candidates(page, limit, name, email, status, applied_job_id)
 
 async def get_candidate_by_id(candidate_id: str):
     """
@@ -147,9 +196,7 @@ async def get_candidate_for_user(
     candidate = await get_candidate_by_id(candidate_id)
 
     if not candidate:
-        raise NotFoundException(
-            "Candidate not found"
-        )
+        raise NotFoundException("Candidate not found")
 
     return candidate
 
@@ -169,14 +216,10 @@ async def get_resume_candidate_for_user(
     candidate = await get_candidate_by_id(candidate_id)
 
     if not candidate:
-        raise NotFoundException(
-            "Candidate not found"
-        )
+        raise NotFoundException("Candidate not found")
 
     if not candidate.get("resume_id"):
-        raise NotFoundException(
-            "Resume not found for this candidate"
-        )
+        raise NotFoundException("Resume not found for this candidate")
 
     return candidate
 
@@ -186,12 +229,10 @@ async def update_candidate(
     candidate_data: dict,
     current_user_email: str,
 ):
-    existing = (
-        await candidate_repo.get_candidate_by_email_or_mobile_exclude(
-            candidate_data["email"],
-            candidate_data["mobile"],
-            candidate_id,
-        )
+    existing = await candidate_repo.get_candidate_by_email_or_mobile_exclude(
+        candidate_data["email"],
+        candidate_data["mobile"],
+        candidate_id,
     )
 
     if existing:
@@ -205,9 +246,7 @@ async def update_candidate(
     )
 
     if updated == 0:
-        raise BadRequestException(
-            "Candidate could not be updated"
-        )
+        raise BadRequestException("Candidate could not be updated")
 
     logger.info(
         "Candidate %s updated by %s",
@@ -221,15 +260,21 @@ async def update_status(
     status: str,
     current_user_email: str,
 ):
+    validate_candidate_id(candidate_id)
+
+    candidate = await candidate_repo.get_candidate_by_id(candidate_id)
+    if not candidate:
+        raise NotFoundException("Candidate not found")
+
+    validate_status_transition(candidate.get("status"), status)
+
     updated = await candidate_repo.update_candidate_status(
         candidate_id,
         status,
     )
 
     if updated == 0:
-        raise BadRequestException(
-            "Status could not be updated"
-        )
+        raise BadRequestException("Status could not be updated")
 
     await candidate_repo.add_status_history(
         candidate_id,
@@ -281,9 +326,7 @@ async def get_history_for_user(
 
 def validate_candidate_id(candidate_id: str):
     if not ObjectId.is_valid(candidate_id):
-        raise BadRequestException(
-            "Invalid candidate ID format"
-        )
+        raise BadRequestException("Invalid candidate ID format")
 
 
 async def ensure_candidate_access(
@@ -297,17 +340,13 @@ async def ensure_candidate_access(
     if role != "Interviewer":
         return
 
-    has_access = (
-        await interview_repo.interviewer_has_candidate(
-            email,
-            candidate_id,
-        )
+    has_access = await interview_repo.interviewer_has_candidate(
+        email,
+        candidate_id,
     )
 
     if not has_access:
-        raise ForbiddenException(
-            forbidden_message
-        )
+        raise ForbiddenException(forbidden_message)
 
 
 async def attach_job_title(candidate: dict):
@@ -317,13 +356,9 @@ async def attach_job_title(candidate: dict):
 
     candidate["id"] = str(candidate.pop("_id"))
 
-    job = await job_repo.get_job_by_id(
-        candidate["applied_job_id"]
-    )
+    job = await job_repo.get_job_by_id(candidate["applied_job_id"])
 
-    candidate["job_title"] = (
-        job["title"] if job else "Unknown"
-    )
+    candidate["job_title"] = job["title"] if job else "Unknown"
 
 
 async def attach_job_titles(candidates: list):

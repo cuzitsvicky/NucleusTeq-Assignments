@@ -10,7 +10,7 @@ async def create_interview(interview_data: dict):
 
 
 async def get_all_interviews(query: dict | None = None, page: int = 1, limit: int = 10):
-    return await paginate_collection(db.interviews, query or {}, page, limit)
+    return await paginate_collection(db.interviews, query or {}, page, limit, sort=("_id", -1))
 
 
 async def get_interview_by_id(interview_id: str):

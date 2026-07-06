@@ -22,30 +22,39 @@ async def get_all_candidates(
     page: int = 1,
     limit: int = 10,
     name: str = "",
+    email: str = "",
+    status: str = "",
+    applied_job_id: str = "",
 ):
     """
-    Return paginated candidates.
+    Return paginated candidates, optionally filtered.
     """
     query = {}
+    conditions = []
 
     if name:
-        query["$or"] = [
-            {
-                "first_name": {
-                    "$regex": name.strip(),
-                    "$options": "i",
-                }
-            },
-            {
-                "last_name": {
-                    "$regex": name.strip(),
-                    "$options": "i",
-                }
-            },
-        ]
+        conditions.append({
+            "$or": [
+                {"first_name": {"$regex": name.strip(), "$options": "i"}},
+                {"last_name": {"$regex": name.strip(), "$options": "i"}},
+            ]
+        })
 
-    return await paginate_collection(db.candidates, query, page, limit)
+    if email:
+        conditions.append({
+            "email": {"$regex": email.strip(), "$options": "i"}
+        })
 
+    if status:
+        conditions.append({"status": status})
+
+    if applied_job_id:
+        conditions.append({"applied_job_id": applied_job_id})
+
+    if conditions:
+        query["$and"] = conditions
+
+    return await paginate_collection(db.candidates, query, page, limit, sort=("_id", -1))
 
 async def get_candidate_by_id(candidate_id: str):
     """
@@ -181,4 +190,5 @@ async def get_candidates_by_ids(
         {"_id": {"$in": object_ids}},
         page,
         limit,
+        sort=("_id", -1)
     )

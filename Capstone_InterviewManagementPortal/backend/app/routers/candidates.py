@@ -126,6 +126,9 @@ async def get_candidates(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
     name: str = "",
+    email: str = "",
+    status: str = "",
+    applied_job_id: str = "",
     current_user: dict = Depends(check_password_reset),
 ):
     return await candidate_service.get_candidates_for_user(
@@ -134,8 +137,10 @@ async def get_candidates(
         page,
         limit,
         name,
+        email,
+        status,
+        applied_job_id,
     )
-
 
 @router.get("/{candidate_id}", response_model=CandidateResponse)
 async def get_candidate(

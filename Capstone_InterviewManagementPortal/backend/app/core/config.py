@@ -8,7 +8,7 @@ class Settings(BaseSettings):
         MONGO_URI (str): The connection URI for the MongoDB database.
             Defaults to 'mongodb://localhost:27017' if not set in environment.
         DB_NAME (str): The name of the MongoDB database.
-            Defaults to 'CapstoneProject' if not set in environment.
+            Defaults to 'Interview_Management_Portal' if not set in environment.
     """
     
     # MongoDB configuration
