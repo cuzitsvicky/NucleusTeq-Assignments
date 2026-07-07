@@ -33,7 +33,7 @@ function jobsAreEqual(first, second) {
   return JSON.stringify(normalizeJob(first)) === JSON.stringify(normalizeJob(second));
 }
 
-export default function Jobs({ token }) {
+export default function Jobs({ token, user }) {
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
@@ -143,19 +143,21 @@ export default function Jobs({ token }) {
     <section>
       <div className="page-head">
         <h1>Jobs</h1>
-        <button
-          className="add-btn"
-          onClick={showForm ? closeForm : () => setShowForm(true)}
-        >
-          {showForm ? (
-            'Close'
-          ) : (
-            <>
-              <Plus size={18} />
-              Add Job
-            </>
-          )}
-        </button>
+        {user?.role === 'HR' && (
+          <button
+            className="add-btn"
+            onClick={showForm ? closeForm : () => setShowForm(true)}
+          >
+            {showForm ? (
+              'Close'
+            ) : (
+              <>
+                <Plus size={18} />
+                Add Job
+              </>
+            )}
+          </button>
+        )}
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       {loading && <p>Loading...</p>}
@@ -189,7 +191,7 @@ export default function Jobs({ token }) {
         />
         <button type="button" onClick={clearFilters}>Clear filters</button>
       </div>
-      {showForm && (
+      {user?.role === 'HR' && showForm && (
         <form onSubmit={submit} className="form">
           <input name="title" placeholder="Title" value={form.title} onChange={change} />
           <input name="job_role" placeholder="Job role" value={form.job_role} onChange={change} />
@@ -229,14 +231,18 @@ export default function Jobs({ token }) {
                 <td>{job.employment_type}</td>
                 <td>{job.location}</td>
                 <td>
-                  <div className="actions">
-                    <button
-                      type="button"
-                      onClick={() => editJob(job)}
-                    >
-                      Edit
-                    </button>
-                  </div>
+                  {user?.role === 'HR' ? (
+                    <div className="actions">
+                      <button
+                        type="button"
+                        onClick={() => editJob(job)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  ) : (
+                    '-'
+                  )}
                 </td>
               </tr>
             ))

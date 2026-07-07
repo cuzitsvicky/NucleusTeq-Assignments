@@ -163,7 +163,7 @@ export default function Interviews({ token, user }) {
     <section>
       <div className="page-head">
         <h1>Interviews</h1>
-        {user?.role !== 'Interviewer' && (
+        {user?.role === 'HR' && (
           <button
             className="add-btn"
             onClick={() => setShowForm(!showForm)}
@@ -173,7 +173,7 @@ export default function Interviews({ token, user }) {
             ) : (
               <>
                 <Plus size={18} />
-                Add Interview
+                Schedule Interview
               </>
             )}
           </button>

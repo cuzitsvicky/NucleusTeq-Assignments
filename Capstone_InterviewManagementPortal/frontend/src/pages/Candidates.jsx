@@ -60,7 +60,7 @@ function candidatesAreEqual(first, second) {
   return JSON.stringify(normalizeCandidate(first)) === JSON.stringify(normalizeCandidate(second));
 }
 
-export default function Candidates({ token }) {
+export default function Candidates({ token, user }) {
   const [candidates, setCandidates] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
@@ -215,19 +215,22 @@ export default function Candidates({ token }) {
     <section>
       <div className="page-head">
         <h1>Candidates</h1>
-        <button
-          className="add-btn"
-          onClick={showForm ? closeForm : () => setShowForm(true)}
-        >
-          {showForm ? (
-            'Close'
-          ) : (
-            <>
-              <Plus size={18} />
-              Add Candidate
-            </>
-          )}
-        </button>
+
+        {user?.role === 'HR' && (
+          <button
+            className="add-btn"
+            onClick={showForm ? closeForm : () => setShowForm(true)}
+          >
+            {showForm ? (
+              'Close'
+            ) : (
+              <>
+                <Plus size={18} />
+                Add Candidate
+              </>
+            )}
+          </button>
+        )}
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       {loading && <p>Loading...</p>}
@@ -258,7 +261,7 @@ export default function Candidates({ token }) {
         </select>
         <button type="button" onClick={clearFilters}>Clear filters</button>
       </div>
-      {showForm && (
+      {user?.role === 'HR' && showForm && (
         <form onSubmit={submit} className="form">
           <input name="first_name" placeholder="First name" value={form.first_name} onChange={change} />
           <input name="last_name" placeholder="Last name" value={form.last_name} onChange={change} />
@@ -312,9 +315,11 @@ export default function Candidates({ token }) {
                     <button type="button" onClick={() => showHistory(c)}>
                       History
                     </button>
-                    <button type="button" onClick={() => editCandidate(c)}>
-                      Edit
-                    </button>
+                    {user?.role === 'HR' && (
+                      <button type="button" onClick={() => editCandidate(c)}>
+                        Edit
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
