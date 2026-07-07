@@ -1,5 +1,4 @@
 import logging
-
 from ..exceptions import NotFoundException
 from ..repositories import job_repo
 from ..utils.pagination import build_paginated_response
@@ -8,9 +7,18 @@ logger = logging.getLogger(__name__)
 
 
 async def create_job(job_data: dict):
+    """
+    Create a new job posting.
+    
+    Args:
+        job_data (dict): Job details including title, description, employment_type, location, experience.
+    
+    Returns:
+        dict: Created job data with ID.
+    """
+
     job_id = await job_repo.create_job(job_data)
     job_data["id"] = job_id
-
     logger.info("Job created successfully: %s", job_id)
 
     return job_data
@@ -24,6 +32,21 @@ async def get_jobs(
     location: str = "",
     experience: str = "",
 ):
+    """
+    Fetch paginated list of jobs with optional filters.
+    
+    Args:
+        page (int): Page number (default: 1).
+        limit (int): Results per page (default: 10).
+        name (str): Filter by job title.
+        employment_type (str): Filter by employment type.
+        location (str): Filter by job location.
+        experience (str): Filter by required experience.
+    
+    Returns:
+        dict: Paginated response with jobs and total count.
+    """
+    
     jobs, total = await job_repo.get_all_jobs(
         page=page,
         limit=limit,
@@ -40,6 +63,18 @@ async def get_jobs(
 
 
 async def get_job_by_id(job_id: str):
+    """
+    Fetch a single job by ID.
+    
+    Args:
+        job_id (str): Job ID.
+    
+    Returns:
+        dict: Job record.
+    
+    Raises:
+        NotFoundException: If job not found.
+    """
     job = await job_repo.get_job_by_id(job_id)
 
     if not job:
@@ -52,6 +87,16 @@ async def get_job_by_id(job_id: str):
 
 
 async def update_job(job_id: str, job_data: dict):
+    """
+    Update an existing job posting.
+    
+    Args:
+        job_id (str): Job ID.
+        job_data (dict): Updated job data.
+    
+    Raises:
+        NotFoundException: If job not found.
+    """
     job = await job_repo.get_job_by_id(job_id)
 
     if not job:

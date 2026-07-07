@@ -3,6 +3,7 @@ from ...constants.app_constants import REQUIRED_EMAIL_DOMAIN
 from ...enums.user_role import UserRole
 import re
 
+
 class UserCreateRequest(BaseModel):
     name: str
     email: EmailStr
@@ -30,14 +31,16 @@ class UserCreateRequest(BaseModel):
         if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
             raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
         return v
-    
-    @field_validator('email')
+
+    @field_validator("email")
     @classmethod
     def reject_strange_characters(cls, v: str) -> str:
         # Enforce that the local part only contains normal letters, numbers, dots, or single hyphens/underscores
-        local_part = v.split('@')[0]
+        local_part = v.split("@")[0]
         if not re.match(r"^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$", local_part):
-            raise ValueError("Email is invalid or contains unaccepted special characters")
+            raise ValueError(
+                "Email is invalid or contains unaccepted special characters"
+            )
         return v
 
     @field_validator("password")

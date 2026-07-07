@@ -1,5 +1,4 @@
 import logging
-
 from bson.objectid import ObjectId
 from fastapi import (
     APIRouter,
@@ -10,9 +9,7 @@ from fastapi import (
     Response,
     UploadFile,
 )
-
 from pydantic import EmailStr
-
 from ..constants import MAX_RESUME_SIZE_BYTES
 from ..core.database import get_gridfs_bucket
 from ..exceptions import (
@@ -29,24 +26,21 @@ from ..schemas import (
     StatusUpdateRequest,
 )
 from ..services import candidate_service
-from ..validators import (
-    validate_resume_extension,
-)
+from ..validators import (validate_resume_extension)
 from .auth import check_password_reset
 
 router = APIRouter()
-
 logger = logging.getLogger(__name__)
 
 
-def require_hr_or_admin(user: dict):
-    """
-    Allow only Admin and HR users.
-    """
-    if user["role"] not in ["Admin", "HR"]:
+# Helper function to check if the user has HR role
+def require_hr(user: dict):
+    
+    if user["role"] not in ["HR"]:
         raise ForbiddenException("Not authorized")
 
 
+# Endpoint to create a new candidate with resume upload
 @router.post("/")
 async def create_candidate(
     first_name: str = Form(...),
@@ -59,7 +53,8 @@ async def create_candidate(
     resume: UploadFile = File(...),
     current_user: dict = Depends(check_password_reset),
 ):
-    require_hr_or_admin(current_user)
+    
+    require_hr(current_user)
 
     candidate_request = CandidateCreateRequest(
     first_name=first_name,
@@ -74,24 +69,18 @@ async def create_candidate(
     validate_resume_extension(resume.filename)
 
     if resume.content_type != "application/pdf":
-        raise BadRequestException(
-            "Resume must be a PDF file"
-        )
+        raise BadRequestException("Resume must be a PDF file")
 
     resume_bytes = await resume.read()
 
     if len(resume_bytes) > MAX_RESUME_SIZE_BYTES:
-        raise BadRequestException(
-            "Resume file size must not exceed 5MB"
-        )
+        raise BadRequestException("Resume file size must not exceed 5MB")
 
     fs = get_gridfs_bucket()
 
     grid_in = fs.open_upload_stream(
         filename=resume.filename,
-        metadata={
-            "contentType": "application/pdf"
-        },
+        metadata={"contentType": "application/pdf"}
     )
 
     await grid_in.write(resume_bytes)
@@ -109,10 +98,7 @@ async def create_candidate(
        "resume_filename": resume.filename,
     }
 
-    candidate_id = await candidate_service.create_candidate(
-        candidate,
-        current_user["email"],
-    )
+    candidate_id = await candidate_service.create_candidate(candidate, current_user["email"])
 
     return {
         "message": "Candidate created successfully",
@@ -120,6 +106,7 @@ async def create_candidate(
     }
 
 
+# Endpoint to get a list of candidates with optional filters and pagination
 @router.get("/", response_model=PaginatedResponse[CandidateResponse])
 async def get_candidates(
     page: int = Query(1, ge=1),
@@ -141,6 +128,8 @@ async def get_candidates(
         applied_job_id,
     )
 
+
+# Endpoint to get a specific candidate by ID
 @router.get("/{candidate_id}", response_model=CandidateResponse)
 async def get_candidate(
     candidate_id: str,
@@ -153,6 +142,7 @@ async def get_candidate(
     )
 
 
+# Endpoint to download the resume of a specific candidate
 @router.get("/{candidate_id}/resume")
 async def get_resume(
     candidate_id: str,
@@ -167,38 +157,29 @@ async def get_resume(
     try:
         fs = get_gridfs_bucket()
 
-        grid_file = await fs.open_download_stream(
-            ObjectId(candidate["resume_id"])
-        )
+        grid_file = await fs.open_download_stream(ObjectId(candidate["resume_id"]))
 
         pdf = await grid_file.read()
 
         return Response(
             content=pdf,
             media_type="application/pdf",
-            headers={
-                "Content-Disposition":
-                f'inline; filename="{candidate["resume_filename"]}"'
-            },
+            headers={"Content-Disposition": f'inline; filename="{candidate["resume_filename"]}"'}
         )
 
     except Exception:
-        logger.exception(
-            "Error downloading resume for %s",
-            candidate_id,
-        )
-        raise InternalServerException(
-            "Error downloading resume"
-        )
+        logger.exception("Error downloading resume for %s", candidate_id)
+        raise InternalServerException("Error downloading resume")
 
 
+# Update candidate details
 @router.put("/{candidate_id}")
 async def update_candidate(
     candidate_id: str,
     candidate_update: CandidateUpdateRequest,
     current_user: dict = Depends(check_password_reset),
 ):
-    require_hr_or_admin(current_user)
+    require_hr(current_user)
 
     await candidate_service.update_candidate(
         candidate_id,
@@ -206,18 +187,17 @@ async def update_candidate(
         current_user["email"],
     )
 
-    return {
-        "message": "Candidate updated successfully"
-    }
+    return {"message": "Candidate updated successfully"}
 
 
+# Update candidate status
 @router.put("/{candidate_id}/status")
 async def update_status(
     candidate_id: str,
     status_update: StatusUpdateRequest,
     current_user: dict = Depends(check_password_reset),
 ):
-    require_hr_or_admin(current_user)
+    require_hr(current_user)
 
     await candidate_service.update_status(
         candidate_id,
@@ -225,15 +205,11 @@ async def update_status(
         current_user["email"],
     )
 
-    return {
-        "message": "Status updated successfully"
-    }
+    return {"message": "Status updated successfully"}
 
 
-@router.get(
-    "/{candidate_id}/history",
-    response_model=PaginatedResponse[StatusHistoryResponse],
-)
+# Get the status history for a specific candidate with pagination
+@router.get("/{candidate_id}/history", response_model=PaginatedResponse[StatusHistoryResponse])
 async def get_history(
     candidate_id: str,
     page: int = Query(1, ge=1),

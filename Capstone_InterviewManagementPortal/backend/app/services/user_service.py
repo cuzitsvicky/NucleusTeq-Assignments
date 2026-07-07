@@ -16,6 +16,19 @@ def format_user(user: dict):
 
 
 async def register_user(user_data: dict):
+    """
+    Register a new user with hashed password.
+    
+    Args:
+        user_data (dict): User details including email, password, name, and role.
+    
+    Returns:
+        dict: Created user data with ID.
+    
+    Raises:
+        BadRequestException: If email already registered.
+    """
+    
     existing_user = await user_repo.get_user_by_email(user_data["email"])
 
     if existing_user:
@@ -23,12 +36,7 @@ async def register_user(user_data: dict):
 
     user_data["password"] = get_password_hash(user_data["password"])
 
-    user_data.update(
-        {
-            "active": True,
-            "reset_required": True,
-        }
-    )
+    user_data.update({"active": True, "reset_required": True,})
 
     user_id = await user_repo.create_user(user_data)
     user_data["id"] = user_id
@@ -38,23 +46,37 @@ async def register_user(user_data: dict):
     return user_data
 
 
-async def get_users(
-    page: int = 1,
-    limit: int = 10,
-    name: str = "",
-    role: str = "",
-):
+async def get_users(page: int = 1, limit: int = 10, name: str = "", role: str = ""):
+    """
+    Fetch paginated list of users with optional filters.
+    
+    Args:
+        page (int): Page number (default: 1).
+        limit (int): Results per page (default: 10).
+        name (str): Filter by user name.
+        role (str): Filter by user role.
+    
+    Returns:
+        dict: Paginated response with users and total count.
+    """
+
+
     users, total = await user_repo.get_all_users(page, limit, name, role)
 
-    return build_paginated_response(
-        [format_user(user) for user in users],
-        page,
-        limit,
-        total,
-    )
+    return build_paginated_response([format_user(user) for user in users], page, limit, total)
 
 
 async def get_user_by_id(user_id: str):
+    """
+    Fetch single user by ID.
+    
+    Args:
+        user_id (str): User ID.
+    
+    Returns:
+        dict: User record or None if not found.
+    """
+
     user = await user_repo.get_user_by_id(user_id)
 
     if user:
@@ -64,6 +86,17 @@ async def get_user_by_id(user_id: str):
 
 
 async def update_user(user_id: str, user_data: dict):
+    """
+    Update user profile data.
+    
+    Args:
+        user_id (str): User ID.
+        user_data (dict): Updated user data.
+    
+    Raises:
+        BadRequestException: If no changes made or update fails.
+    """
+
     updated = await user_repo.update_user(user_id, user_data)
 
     if updated == 0:
@@ -73,11 +106,17 @@ async def update_user(user_id: str, user_data: dict):
 
 
 async def get_active_interviewers(page: int = 1, limit: int = 10):
+    """
+    Fetch paginated list of active interviewers.
+    
+    Args:
+        page (int): Page number (default: 1).
+        limit (int): Results per page (default: 10).
+    
+    Returns:
+        dict: Paginated response with active interviewers.
+    """
+
     users, total = await user_repo.get_active_interviewers(page, limit)
 
-    return build_paginated_response(
-        [format_user(user) for user in users],
-        page,
-        limit,
-        total,
-    )
+    return build_paginated_response([format_user(user) for user in users], page, limit, total)

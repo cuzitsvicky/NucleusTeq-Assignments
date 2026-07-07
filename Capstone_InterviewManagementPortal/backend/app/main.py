@@ -1,18 +1,18 @@
 from contextlib import asynccontextmanager
 import logging
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from .core.database import connect_to_mongo, close_mongo_connection
 from .core.logging_config import setup_logging
 from .exceptions import register_exception_handlers
 from .routers import auth, users, jobs, candidates, interviews
 
+# Setup logging configuration
 setup_logging()
+
 logger = logging.getLogger(__name__)
 
-
+# Lifespan context manager for FastAPI application
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting Interview Management Portal...")
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     await close_mongo_connection()
     logger.info("Application shutdown completed.")
 
-
+# FastAPI application instance
 app = FastAPI(
     title="Interview Management Portal",
     description="Backend APIs for Interview Management Portal.",
@@ -32,8 +32,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Register exception handlers for the FastAPI application
 register_exception_handlers(app)
 
+# Configure CORS middleware to allow requests from any origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -57,7 +59,7 @@ async def health():
         "status": "healthy",
     }
 
-
+# Register API routers for different modules of the application
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/auth", tags=["Users"])
 app.include_router(jobs.router, prefix="/api/jobs", tags=["Jobs"])

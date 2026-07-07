@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator
 import re
 
+
 class CandidateCreateRequest(BaseModel):
     first_name: str
     last_name: str
@@ -26,14 +27,16 @@ class CandidateCreateRequest(BaseModel):
     @classmethod
     def email_lowercase(cls, v: str) -> str:
         return v.strip().lower()
-    
-    @field_validator('email')
+
+    @field_validator("email")
     @classmethod
     def reject_strange_characters(cls, v: str) -> str:
         # Enforce that the local part only contains normal letters, numbers, dots
-        local_part = v.split('@')[0]
+        local_part = v.split("@")[0]
         if not re.match(r"^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$", local_part):
-            raise ValueError("Email is invalid or contains unaccepted special characters")
+            raise ValueError(
+                "Email is invalid or contains unaccepted special characters"
+            )
         return v
 
     @field_validator("mobile")

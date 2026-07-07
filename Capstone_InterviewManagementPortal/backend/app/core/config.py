@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     """
     Application settings loaded from environment variables or defaults.
@@ -10,17 +11,16 @@ class Settings(BaseSettings):
         DB_NAME (str): The name of the MongoDB database.
             Defaults to 'Interview_Management_Portal' if not set in environment.
     """
-    
+
     # MongoDB configuration
     MONGO_URI: str = "mongodb://localhost:27017"
     DB_NAME: str = "Interview_Management_Portal"
 
     # Model configuration for pydantic_settings
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
 
 # Settings instance to be imported by other modules
 settings = Settings()

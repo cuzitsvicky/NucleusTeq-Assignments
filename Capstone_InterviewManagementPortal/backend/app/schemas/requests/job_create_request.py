@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator
 from typing import Literal
 import re
 
+
 class JobCreateRequest(BaseModel):
     title: str
     job_details: str

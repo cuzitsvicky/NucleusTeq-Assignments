@@ -11,20 +11,17 @@ from ..services import job_service
 
 router = APIRouter()
 
-
+# Endpoint to create a new job posting
 @router.post("/", response_model=JobResponse)
-async def create_job(
-    job: JobCreateRequest,
-    current_user: dict = Depends(check_password_reset),
-):
-    if current_user["role"] not in ["Admin", "HR"]:
+async def create_job(job: JobCreateRequest, current_user: dict = Depends(check_password_reset)):
+    if current_user["role"] not in ["HR"]:
         raise ForbiddenException("Not authorized")
 
     new_job = await job_service.create_job(job.model_dump())
 
     return JobResponse(**new_job)
 
-
+# Endpoint to get a list of jobs with optional filters and pagination
 @router.get("/", response_model=PaginatedResponse[JobResponse])
 async def get_jobs(
     page: int = Query(1, ge=1),
@@ -44,12 +41,9 @@ async def get_jobs(
         experience=experience,
     )
 
-
+# Endpoint to get a specific job by ID
 @router.get("/{job_id}", response_model=JobResponse)
-async def get_job(
-    job_id: str,
-    current_user: dict = Depends(check_password_reset),
-):
+async def get_job(job_id: str, current_user: dict = Depends(check_password_reset)):
     if not ObjectId.is_valid(job_id):
         raise BadRequestException("Invalid job ID format")
 
@@ -57,14 +51,10 @@ async def get_job(
 
     return JobResponse(**job)
 
-
+# Endpoint to update a specific job by ID
 @router.put("/{job_id}")
-async def update_job(
-    job_id: str,
-    job: JobCreateRequest,
-    current_user: dict = Depends(check_password_reset),
-):
-    if current_user["role"] not in ["Admin", "HR"]:
+async def update_job(job_id: str, job: JobCreateRequest, current_user: dict = Depends(check_password_reset)):
+    if current_user["role"] not in ["HR"]:
         raise ForbiddenException("Not authorized")
 
     if not ObjectId.is_valid(job_id):

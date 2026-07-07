@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator
 from ...enums.user_role import UserRole
 import re
 
+
 class UserUpdateRequest(BaseModel):
     name: str
     role: UserRole

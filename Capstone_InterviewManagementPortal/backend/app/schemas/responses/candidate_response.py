@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
+
 class CandidateResponse(BaseModel):
     id: str
     first_name: str

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 # Enum for candidate status
 class CandidateStatus(str, Enum):
     PROFILE_CREATED = "PROFILE_CREATED"
