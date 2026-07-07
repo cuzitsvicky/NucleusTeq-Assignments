@@ -100,4 +100,13 @@ export const apiService = {
     const blob = await apiRequest(`/api/candidates/${id}/resume`, {}, token);
     return URL.createObjectURL(blob);
   },
+  getActiveInterviewers: (token, page = 1, limit = 10) => {
+    const query = buildQuery({ page, limit });
+    return apiRequest(`/api/auth/interviewers?${query}`, {}, token);
+  },
+  getInterviews: (token, page = 1, limit = 10) => apiRequest(`/api/interviews/?${buildQuery({ page, limit })}`, {}, token),
+  scheduleInterview: (token, data) => apiRequest('/api/interviews/schedule', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }, token),
 };

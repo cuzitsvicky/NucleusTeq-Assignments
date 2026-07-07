@@ -8,12 +8,25 @@ import { Plus } from 'lucide-react';
 
 const emptyUser = { name: '', email: '', password: '', role: 'HR' };
 
+function normalizeEditableUser(user) {
+  return {
+    name: String(user.name ?? '').trim(),
+    role: String(user.role ?? '').trim(),
+    active: Boolean(user.active)
+  };
+}
+
+function usersAreEqual(first, second) {
+  return JSON.stringify(normalizeEditableUser(first)) === JSON.stringify(normalizeEditableUser(second));
+}
+
 export default function Users({ token }) {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(emptyUser);
+  const [originalUser, setOriginalUser] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
   const [active, setActive] = useState(true);
@@ -57,17 +70,26 @@ export default function Users({ token }) {
 
   async function submit(e) {
     e.preventDefault();
+    const updatePayload = {
+      name: form.name,
+      role: form.role,
+      active
+    };
+
+    if (editingId && originalUser && usersAreEqual(updatePayload, originalUser)) {
+      setMessageType('info');
+      setMessage('No changes to update');
+      return;
+    }
+
     try {
       if (editingId) {
-        await apiService.updateUser(token, editingId, {
-          name: form.name,
-          role: form.role,
-          active
-        });
+        await apiService.updateUser(token, editingId, updatePayload);
       } else {
         await apiService.registerUser(token, form);
       }
       setForm(emptyUser);
+      setOriginalUser(null);
       setEditingId('');
       setActive(true);
       setShowForm(false);
@@ -82,6 +104,11 @@ export default function Users({ token }) {
 
   function editUser(user) {
     setForm({ name: user.name, email: user.email, password: '', role: user.role });
+    setOriginalUser({
+      name: user.name,
+      role: user.role,
+      active: user.active
+    });
     setActive(user.active);
     setEditingId(user.id);
     setShowForm(true);
@@ -89,6 +116,7 @@ export default function Users({ token }) {
 
   function closeForm() {
     setForm(emptyUser);
+    setOriginalUser(null);
     setEditingId('');
     setActive(true);
     setShowForm(false);

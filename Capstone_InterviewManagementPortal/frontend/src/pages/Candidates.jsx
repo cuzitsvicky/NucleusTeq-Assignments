@@ -3,6 +3,7 @@ import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
 import Pagination from '../components/Pagination.jsx';
 import useDebouncedValue from '../hooks/useDebouncedValue.js';
+import { formatTimestamp } from '../utils/dateFormat.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
 import { Plus } from 'lucide-react';
 
@@ -24,6 +25,41 @@ const STATUS_OPTIONS = [
   'REJECTED'
 ];
 
+function validateCandidateForm(form, resume, editingId) {
+  const labels = {
+    first_name: 'First name',
+    last_name: 'Last name',
+    email: 'Email',
+    mobile: 'Mobile',
+    current_company: 'Current company',
+    total_experience: 'Total experience',
+    applied_job_id: 'Applied job'
+  };
+
+  const missing = Object.entries(labels)
+    .filter(([key]) => !String(form[key] ?? '').trim())
+    .map(([, label]) => label);
+
+  if (missing.length) {
+    return `${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} required`;
+  }
+
+  if (!editingId && !resume) return 'Resume is required';
+  if (!editingId && resume?.type !== 'application/pdf') return 'Resume must be a PDF file';
+
+  return '';
+}
+
+function normalizeCandidate(candidate) {
+  return Object.fromEntries(
+    Object.entries(empty).map(([key]) => [key, String(candidate[key] ?? '').trim()])
+  );
+}
+
+function candidatesAreEqual(first, second) {
+  return JSON.stringify(normalizeCandidate(first)) === JSON.stringify(normalizeCandidate(second));
+}
+
 export default function Candidates({ token }) {
   const [candidates, setCandidates] = useState([]);
   const [page, setPage] = useState(1);
@@ -31,6 +67,7 @@ export default function Candidates({ token }) {
   const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [form, setForm] = useState(empty);
+  const [originalForm, setOriginalForm] = useState(null);
   const [resume, setResume] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
@@ -87,6 +124,19 @@ export default function Candidates({ token }) {
 
   async function submit(e) {
     e.preventDefault();
+    const validationError = validateCandidateForm(form, resume, editingId);
+    if (validationError) {
+      setMessageType('error');
+      setMessage(validationError);
+      return;
+    }
+
+    if (editingId && originalForm && candidatesAreEqual(form, originalForm)) {
+      setMessageType('info');
+      setMessage('No changes to update');
+      return;
+    }
+
     try {
       if (editingId) {
         await apiService.updateCandidate(token, editingId, form);
@@ -97,6 +147,7 @@ export default function Candidates({ token }) {
         await apiService.createCandidate(token, data);
       }
       setForm(empty);
+      setOriginalForm(null);
       setResume(null);
       setEditingId('');
       setShowForm(false);
@@ -135,7 +186,7 @@ export default function Candidates({ token }) {
   }
 
   function editCandidate(candidate) {
-    setForm({
+    const nextForm = {
       first_name: candidate.first_name,
       last_name: candidate.last_name,
       email: candidate.email,
@@ -143,7 +194,10 @@ export default function Candidates({ token }) {
       current_company: candidate.current_company,
       total_experience: candidate.total_experience,
       applied_job_id: candidate.applied_job_id
-    });
+    };
+
+    setForm(nextForm);
+    setOriginalForm(nextForm);
     setResume(null);
     setEditingId(candidate.id);
     setShowForm(true);
@@ -151,6 +205,7 @@ export default function Candidates({ token }) {
 
   function closeForm() {
     setForm(empty);
+    setOriginalForm(null);
     setResume(null);
     setEditingId('');
     setShowForm(false);
@@ -285,7 +340,7 @@ export default function Candidates({ token }) {
                 <tr key={item.id}>
                   <td>{item.status}</td>
                   <td>{item.updated_by}</td>
-                  <td>{item.timestamp}</td>
+                  <td>{formatTimestamp(item.timestamp)}</td>
                 </tr>
               ))}
             </tbody>

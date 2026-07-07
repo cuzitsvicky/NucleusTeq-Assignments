@@ -23,12 +23,23 @@ const emptyFilters = {
   experience: ''
 };
 
+function normalizeJob(job) {
+  return Object.fromEntries(
+    Object.entries(emptyJob).map(([key]) => [key, String(job[key] ?? '').trim()])
+  );
+}
+
+function jobsAreEqual(first, second) {
+  return JSON.stringify(normalizeJob(first)) === JSON.stringify(normalizeJob(second));
+}
+
 export default function Jobs({ token }) {
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(emptyJob);
+  const [originalForm, setOriginalForm] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
   const [filters, setFilters] = useState(emptyFilters);
@@ -82,10 +93,17 @@ export default function Jobs({ token }) {
 
   async function submit(e) {
     e.preventDefault();
+    if (editingId && originalForm && jobsAreEqual(form, originalForm)) {
+      setMessageType('info');
+      setMessage('No changes to update');
+      return;
+    }
+
     try {
       if (editingId) await apiService.updateJob(token, editingId, form);
       else await apiService.createJob(token, form);
       setForm(emptyJob);
+      setOriginalForm(null);
       setShowForm(false);
       setEditingId('');
       setMessageType('success');
@@ -98,7 +116,7 @@ export default function Jobs({ token }) {
   }
 
   function editJob(job) {
-    setForm({
+    const nextForm = {
       title: job.title,
       job_details: job.job_details,
       job_role: job.job_role,
@@ -106,13 +124,17 @@ export default function Jobs({ token }) {
       experience_required: job.experience_required,
       employment_type: job.employment_type,
       location: job.location
-    });
+    };
+
+    setForm(nextForm);
+    setOriginalForm(nextForm);
     setEditingId(job.id);
     setShowForm(true);
   }
 
   function closeForm() {
     setForm(emptyJob);
+    setOriginalForm(null);
     setEditingId('');
     setShowForm(false);
   }
