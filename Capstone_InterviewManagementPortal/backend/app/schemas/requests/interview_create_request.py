@@ -31,12 +31,20 @@ class InterviewCreateRequest(BaseModel):
             raise ValueError("Interview time must be in HH:MM format (e.g. 14:00)")
         return v
 
-    @field_validator("focus_areas", "job_title")
+    @field_validator("focus_areas")
     @classmethod
     def must_not_be_blank(cls, v: str) -> str:
         v = v.strip()
         if not v:
-            raise ValueError("This field cannot be blank")
+            raise ValueError("Focus Area field cannot be blank")
+        return v
+    
+    @field_validator("job_title")
+    @classmethod
+    def must_not_be_blank(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Job Title field cannot be blank")
         return v
 
     @field_validator("interviewer_email")
@@ -48,6 +56,8 @@ class InterviewCreateRequest(BaseModel):
     @classmethod
     def email_must_be_nucleusteq(cls, v: str) -> str:
         v = v.strip().lower()
+        if not v:
+            raise ValueError("Email cannot be blank")
         if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
             raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
         return v

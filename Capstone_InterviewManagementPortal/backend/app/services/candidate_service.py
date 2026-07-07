@@ -229,6 +229,8 @@ async def update_candidate(
     candidate_data: dict,
     current_user_email: str,
 ):
+    validate_candidate_id(candidate_id)
+
     existing = await candidate_repo.get_candidate_by_email_or_mobile_exclude(
         candidate_data["email"],
         candidate_data["mobile"],

@@ -7,6 +7,7 @@ from ..exceptions import (
 )
 from ..enums.candidate_status import CandidateStatus
 from ..utils.pagination import build_paginated_response
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,21 @@ SCHEDULEABLE_STATUSES = [
     CandidateStatus.PROFILE_CREATED.value,
     CandidateStatus.INTERVIEW_COMPLETED.value,
 ]
+
+
+def ensure_interview_time_has_started(interview: dict):
+    try:
+        scheduled_at = datetime.strptime(
+            f"{interview['interview_date']} {interview['interview_time']}",
+            "%Y-%m-%d %H:%M",
+        )
+    except (KeyError, TypeError, ValueError):
+        raise BadRequestException("Interview schedule is invalid")
+
+    if datetime.now() < scheduled_at:
+        raise BadRequestException(
+            "Feedback can only be submitted after the scheduled interview time"
+        )
 
 
 async def schedule_interview(interview_data: dict, current_user_email: str):
@@ -97,6 +113,8 @@ async def submit_feedback(interview_id: str, feedback_data: dict, current_user_e
         raise ConflictException(
             "Feedback has already been submitted for this interview"
         )
+
+    ensure_interview_time_has_started(interview)
 
     existing_feedback = await interview_repo.get_feedback_for_interview(interview_id)
     if existing_feedback:

@@ -30,7 +30,6 @@ from ..schemas import (
 )
 from ..services import candidate_service
 from ..validators import (
-    validate_mobile,
     validate_resume_extension,
 )
 from .auth import check_password_reset

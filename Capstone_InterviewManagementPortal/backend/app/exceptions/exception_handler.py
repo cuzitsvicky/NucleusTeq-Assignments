@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .custom_exceptions import AppException
@@ -32,6 +33,21 @@ def error_response(
     )
 
 
+def format_validation_errors(exc: RequestValidationError | ValidationError):
+    """
+    Return JSON-safe validation errors with user-readable messages.
+    """
+    return [
+        {
+            "field": ".".join(map(str, error["loc"][1:]))
+            if isinstance(exc, RequestValidationError)
+            else ".".join(map(str, error["loc"])),
+            "message": error["msg"],
+        }
+        for error in exc.errors()
+    ]
+
+
 def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(AppException)
@@ -59,19 +75,26 @@ def register_exception_handlers(app: FastAPI):
             request.url.path,
         )
 
-        # Convert validation errors into a JSON-serializable format
-        errors = [
-            {
-                "field": ".".join(map(str, error["loc"][1:])),
-                "message": error["msg"],
-            }
-            for error in exc.errors()
-        ]
+        return error_response(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            message="Validation failed",
+            errors=format_validation_errors(exc),
+        )
+
+    @app.exception_handler(ValidationError)
+    async def pydantic_validation_exception_handler(
+        request: Request,
+        exc: ValidationError,
+    ):
+        logger.warning(
+            "Validation error on %s",
+            request.url.path,
+        )
 
         return error_response(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             message="Validation failed",
-            errors=errors,
+            errors=format_validation_errors(exc),
         )
 
     @app.exception_handler(StarletteHTTPException)
