@@ -1,40 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
+import FeedbackDetails from '../components/interviews/FeedbackDetails.jsx';
+import FeedbackForm from '../components/interviews/FeedbackForm.jsx';
+import InterviewsTable from '../components/interviews/InterviewsTable.jsx';
+import InterviewScheduleForm from '../components/interviews/InterviewScheduleForm.jsx';
 import Pagination from '../components/Pagination.jsx';
-import { formatDateTime } from '../utils/dateFormat.js';
+import { canSubmitFeedback, emptyFeedback, emptyInterview } from '../utils/interviewHelpers.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
-import { Plus } from 'lucide-react';
-
-
-const emptyInterview = {
-  candidate_id: '',
-  job_id: '',
-  job_title: '',
-  interview_date: '',
-  interview_time: '',
-  interviewer_email: '',
-  focus_areas: ''
-};
-
-const emptyFeedback = {
-  technical_rating: 1,
-  communication_rating: 1,
-  problem_solving_rating: 1,
-  tech_areas_covered: '',
-  comments: '',
-  recommendation: 'NEXT_ROUND'
-};
-
-function getScheduledAt(item) {
-  const scheduledAt = new Date(`${item.interview_date}T${item.interview_time || '00:00'}`);
-  return Number.isNaN(scheduledAt.getTime()) ? null : scheduledAt;
-}
-
-function canSubmitFeedback(item) {
-  const scheduledAt = getScheduledAt(item);
-  return !scheduledAt || new Date() >= scheduledAt;
-}
 
 export default function Interviews({ token, user }) {
   const [interviews, setInterviews] = useState([]);
@@ -160,168 +134,30 @@ export default function Interviews({ token, user }) {
     setActiveId(item.id);
   }
 
+  function closeFeedbackForm() {
+    setActiveId('');
+    setFeedback(emptyFeedback);
+  }
+
   return (
     <section>
       <div className="page-head">
         <h1>Interviews</h1>
         {user?.role === 'HR' && (
-          <button
-            className="add-btn"
-            onClick={() => setShowForm(!showForm)}
-          >
-            {showForm ? (
-              'Close'
-            ) : (
-              <>
-                <Plus size={18} />
-                Schedule Interview
-              </>
-            )}
+          <button className="add-btn" onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Close' : <><Plus size={18} />Schedule Interview</>}
           </button>
         )}
       </div>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       {loading && <p>Loading...</p>}
       {user?.role !== 'Interviewer' && showForm && (
-        <form onSubmit={schedule} className="form">
-          <select name="candidate_id" value={form.candidate_id} onChange={candidateChange} required>
-            <option value="">Select candidate email</option>
-            {candidates.map(candidate => (
-              <option key={candidate.id} value={candidate.id}>
-                {candidate.email}
-              </option>
-            ))}
-          </select>
-          <input name="job_title" placeholder="Job title" value={form.job_title} readOnly required />
-          <input name="interview_date" type="date" min={minInterviewDate} value={form.interview_date} onChange={change} required />
-          <input name="interview_time" type="time" value={form.interview_time} onChange={change} required />
-          <select name="interviewer_email" value={form.interviewer_email} onChange={change} required>
-            <option value="">Select interviewer email</option>
-            {interviewers.map(interviewer => (
-              <option key={interviewer.id} value={interviewer.email}>
-                {interviewer.email}
-              </option>
-            ))}
-          </select>
-          <input name="focus_areas" placeholder="Focus areas" value={form.focus_areas} onChange={change} required />
-          <button>Schedule Interview</button>
-        </form>
+        <InterviewScheduleForm form={form} candidates={candidates} interviewers={interviewers} minInterviewDate={minInterviewDate} onCandidateChange={candidateChange} onChange={change} onSubmit={schedule} />
       )}
-      <table>
-        <thead><tr><th>Candidate</th><th>Job</th><th>Date</th><th>Interviewer</th><th>Status</th><th>Feedback</th></tr></thead>
-        <tbody>
-          {interviews.length === 0 ? (
-            <tr>
-              <td colSpan="6" style={{ textAlign: 'center' }}>
-                No interviews scheduled
-              </td>
-            </tr>
-          ) : (
-            interviews.map(item => (
-              <tr key={item.id}>
-                <td>{item.candidate_name}</td>
-                <td>{item.job_title}</td>
-                <td>{formatDateTime(item.interview_date, item.interview_time)}</td>
-                <td>{item.interviewer_email}</td>
-                <td>{item.status}</td>
-                <td>
-                  {item.feedback ? (
-                    <div className="actions">
-                      <button
-                        type="button"
-                        onClick={() => openFeedback(item)}
-                      >
-                        View
-                      </button>
-                    </div>
-                  ) : user?.role === 'Interviewer' ? (
-                    <div className="actions">
-                      <button
-                        type="button"
-                        disabled={!canSubmitFeedback(item)}
-                        title={!canSubmitFeedback(item) ? 'Available after scheduled time' : ''}
-                        onClick={() => startFeedback(item)}
-                      >
-                        Add
-                      </button>
-                    </div>
-                  ) : (
-                    'Pending'
-                  )}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      <Pagination
-        pagination={pagination}
-        loading={loading}
-        onPageChange={load}
-      />
-      {viewFeedback && (
-        <div className="box">
-          <div className="page-head">
-            <h2>Feedback</h2>
-            <button className="add-btn" type="button" onClick={closeFeedback}>Close</button>
-          </div>
-          <p><b>Interview:</b> {viewFeedbackTitle}</p>
-          <p><b>Interviewer:</b> {viewFeedback.interviewer_email}</p>
-          <p><b>Technical Rating:</b> {viewFeedback.technical_rating}</p>
-          <p><b>Communication Rating:</b> {viewFeedback.communication_rating}</p>
-          <p><b>Problem Solving Rating:</b> {viewFeedback.problem_solving_rating}</p>
-          <p><b>Tech Areas Covered:</b> {viewFeedback.tech_areas_covered}</p>
-          <p><b>Recommendation:</b> {viewFeedback.recommendation}</p>
-          <p><b>Comments:</b> {viewFeedback.comments}</p>
-        </div>
-      )}
-      {activeId && user?.role === 'Interviewer' && (
-        <div className="box">
-          <div className="page-head">
-            <h3>Feedback</h3>
-            <button
-              type="button"
-              className="add-btn"
-              onClick={() => {
-                setActiveId('');
-                setFeedback(emptyFeedback);
-              }}
-            >
-              Close
-            </button>
-          </div>
-
-          <form onSubmit={submitFeedback} className="form small">
-            <label>
-              Technical Rating
-              <input name="technical_rating" type="number" min="1" max="5" step="1" value={feedback.technical_rating} onChange={feedbackChange} required />
-            </label>
-            <label>
-              Communication Rating
-              <input name="communication_rating" type="number" min="1" max="5" step="1" value={feedback.communication_rating} onChange={feedbackChange} required />
-            </label>
-            <label>
-              Problem Solving Rating
-              <input name="problem_solving_rating" type="number" min="1" max="5" step="1" value={feedback.problem_solving_rating} onChange={feedbackChange} required />
-            </label>
-            <label>
-              Tech Areas Covered
-              <input name="tech_areas_covered" value={feedback.tech_areas_covered} onChange={feedbackChange} required />
-            </label>
-            <label>
-              Comments
-              <textarea name="comments" value={feedback.comments} onChange={feedbackChange} required />
-            </label>
-            <label>
-              Recommendation
-              <select name="recommendation" value={feedback.recommendation} onChange={feedbackChange} required>
-                <option>NEXT_ROUND</option><option>SELECT</option><option>REJECT</option>
-              </select>
-            </label>
-            <button>Submit Feedback</button>
-          </form>
-        </div>
-      )}
+      <InterviewsTable interviews={interviews} user={user} onViewFeedback={openFeedback} onStartFeedback={startFeedback} />
+      <Pagination pagination={pagination} loading={loading} onPageChange={load} />
+      <FeedbackDetails feedback={viewFeedback} title={viewFeedbackTitle} onClose={closeFeedback} />
+      <FeedbackForm activeId={activeId} user={user} feedback={feedback} onChange={feedbackChange} onSubmit={submitFeedback} onClose={closeFeedbackForm} />
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
+import { BarChart3 } from 'lucide-react';
 
 export default function Dashboard({ token }) {
   const [stats, setStats] = useState({});
@@ -17,6 +18,7 @@ export default function Dashboard({ token }) {
       <div className="grid">
         {Object.entries(stats).map(([key, value]) => (
           <div className="card" key={key}>
+            <BarChart3 className="card-icon" size={22} />
             <b>{key.replaceAll('_', ' ').toUpperCase()}</b>
             <span>{value}</span>
           </div>
