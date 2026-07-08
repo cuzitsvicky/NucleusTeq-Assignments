@@ -25,7 +25,7 @@ export default function Login({ onLogin }) {
         <h1>Interview Management Portal</h1>
         <Alert message={error} type="error" onClose={() => setError('')} />
         <label>Email</label>
-        <input value={email} onChange={e => setEmail(e.target.value)} />
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
         <label>Password</label>
 
         <div className="password-input">
@@ -33,6 +33,7 @@ export default function Login({ onLogin }) {
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={e => setPassword(e.target.value)}
+            required
           />
           <button
             type="button"

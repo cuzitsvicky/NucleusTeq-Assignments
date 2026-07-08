@@ -23,6 +23,8 @@ const emptyFilters = {
   experience: ''
 };
 
+const EXPERIENCE_PATTERN = '(\\d+(\\.\\d+)?(\\s*-\\s*\\d+(\\.\\d+)?)?\\s*(year|years|month|months)|\\d+\\s*(year|years)\\s+\\d+\\s*(month|months))';
+
 function normalizeJob(job) {
   return Object.fromEntries(
     Object.entries(emptyJob).map(([key]) => [key, String(job[key] ?? '').trim()])
@@ -193,16 +195,16 @@ export default function Jobs({ token, user }) {
       </div>
       {user?.role === 'HR' && showForm && (
         <form onSubmit={submit} className="form">
-          <input name="title" placeholder="Title" value={form.title} onChange={change} />
-          <input name="job_role" placeholder="Job role" value={form.job_role} onChange={change} />
-          <input name="required_skills" placeholder="Required skills" value={form.required_skills} onChange={change} />
-          <input name="experience_required" placeholder="2 years" value={form.experience_required} onChange={change} />
-          <select name="employment_type" value={form.employment_type} onChange={change}>
+          <input name="title" placeholder="Title" value={form.title} onChange={change} required maxLength="150" />
+          <input name="job_role" placeholder="Job role" value={form.job_role} onChange={change} required />
+          <input name="required_skills" placeholder="Required skills" value={form.required_skills} onChange={change} required />
+          <input name="experience_required" placeholder="2 years" value={form.experience_required} onChange={change} required pattern={EXPERIENCE_PATTERN} title='Use formats like "2 years", "2-4 years", "6 months", or "2 years 3 months"' />
+          <select name="employment_type" value={form.employment_type} onChange={change} required>
             <option>Full Time</option>
             <option>Internship</option>
           </select>
-          <input name="location" placeholder="Location" value={form.location} onChange={change} />
-          <textarea name="job_details" placeholder="Job details" value={form.job_details} onChange={change} />
+          <input name="location" placeholder="Location" value={form.location} onChange={change} required />
+          <textarea name="job_details" placeholder="Job details" value={form.job_details} onChange={change} required />
           <button>{editingId ? 'Update Job' : 'Create Job'}</button>
         </form>
       )}

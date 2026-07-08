@@ -25,6 +25,10 @@ const STATUS_OPTIONS = [
   'REJECTED'
 ];
 
+const NAME_PATTERN = '[A-Za-z ]+';
+const MOBILE_PATTERN = '[0-9\\s-]{7,12}';
+const EXPERIENCE_PATTERN = '(\\d+(\\.\\d+)?(\\s*-\\s*\\d+(\\.\\d+)?)?\\s*(year|years|month|months)|\\d+\\s*(year|years)\\s+\\d+\\s*(month|months))';
+
 function validateCandidateForm(form, resume, editingId) {
   const labels = {
     first_name: 'First name',
@@ -263,13 +267,13 @@ export default function Candidates({ token, user }) {
       </div>
       {user?.role === 'HR' && showForm && (
         <form onSubmit={submit} className="form">
-          <input name="first_name" placeholder="First name" value={form.first_name} onChange={change} />
-          <input name="last_name" placeholder="Last name" value={form.last_name} onChange={change} />
-          <input name="email" placeholder="Email" value={form.email} onChange={change} />
-          <input name="mobile" placeholder="Mobile" value={form.mobile} onChange={change} />
-          <input name="current_company" placeholder="Current company" value={form.current_company} onChange={change} />
-          <input name="total_experience" placeholder="2 years" value={form.total_experience} onChange={change} />
-          <select name="applied_job_id" value={form.applied_job_id} onChange={change}>
+          <input name="first_name" placeholder="First name" value={form.first_name} onChange={change} required maxLength="50" pattern={NAME_PATTERN} title="Only letters and spaces are allowed" />
+          <input name="last_name" placeholder="Last name" value={form.last_name} onChange={change} required maxLength="50" pattern={NAME_PATTERN} title="Only letters and spaces are allowed" />
+          <input name="email" type="email" placeholder="Email" value={form.email} onChange={change} required pattern="[A-Za-z0-9]+(\.[A-Za-z0-9]+)*@.+" title="Use a valid email. The local part can contain letters, numbers, and dots only" />
+          <input name="mobile" placeholder="Mobile" value={form.mobile} onChange={change} required inputMode="numeric" pattern={MOBILE_PATTERN} title="Enter 7 to 10 digits. Spaces and hyphens are allowed" />
+          <input name="current_company" placeholder="Current company" value={form.current_company} onChange={change} required />
+          <input name="total_experience" placeholder="2 years" value={form.total_experience} onChange={change} required pattern={EXPERIENCE_PATTERN} title='Use formats like "3 years", "6 months", or "2 years 3 months"' />
+          <select name="applied_job_id" value={form.applied_job_id} onChange={change} required>
             <option value="">Select applied job</option>
             {jobs.map(job => (
               <option key={job.id} value={job.id}>
@@ -277,7 +281,7 @@ export default function Candidates({ token, user }) {
               </option>
             ))}
           </select>
-          {!editingId && <input type="file" accept="application/pdf" onChange={e => setResume(e.target.files[0])} />}
+          {!editingId && <input type="file" accept="application/pdf" required onChange={e => setResume(e.target.files[0])} />}
           <button>{editingId ? 'Update Candidate' : 'Create Candidate'}</button>
         </form>
       )}
@@ -310,9 +314,9 @@ export default function Candidates({ token, user }) {
                         c.status === 'PROFILE_CREATED'
                           ? 'Schedule an interview to move this candidate forward'
                           :
-                        c.status === 'INTERVIEW_SCHEDULED'
-                          ? 'Available after interview feedback is submitted'
-                          : 'Change status'
+                          c.status === 'INTERVIEW_SCHEDULED'
+                            ? 'Available after interview feedback is submitted'
+                            : 'Change status'
                       }
                     >
                       <option value="" disabled>

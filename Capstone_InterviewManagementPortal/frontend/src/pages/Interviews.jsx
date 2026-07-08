@@ -51,6 +51,7 @@ export default function Interviews({ token, user }) {
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+  const minInterviewDate = new Date().toISOString().slice(0, 10);
 
   function load(nextPage = page) {
     setLoading(true);
@@ -183,7 +184,7 @@ export default function Interviews({ token, user }) {
       {loading && <p>Loading...</p>}
       {user?.role !== 'Interviewer' && showForm && (
         <form onSubmit={schedule} className="form">
-          <select name="candidate_id" value={form.candidate_id} onChange={candidateChange}>
+          <select name="candidate_id" value={form.candidate_id} onChange={candidateChange} required>
             <option value="">Select candidate email</option>
             {candidates.map(candidate => (
               <option key={candidate.id} value={candidate.id}>
@@ -191,10 +192,10 @@ export default function Interviews({ token, user }) {
               </option>
             ))}
           </select>
-          <input name="job_title" placeholder="Job title" value={form.job_title} readOnly />
-          <input name="interview_date" type="date" value={form.interview_date} onChange={change} />
-          <input name="interview_time" type="time" value={form.interview_time} onChange={change} />
-          <select name="interviewer_email" value={form.interviewer_email} onChange={change}>
+          <input name="job_title" placeholder="Job title" value={form.job_title} readOnly required />
+          <input name="interview_date" type="date" min={minInterviewDate} value={form.interview_date} onChange={change} required />
+          <input name="interview_time" type="time" value={form.interview_time} onChange={change} required />
+          <select name="interviewer_email" value={form.interviewer_email} onChange={change} required>
             <option value="">Select interviewer email</option>
             {interviewers.map(interviewer => (
               <option key={interviewer.id} value={interviewer.email}>
@@ -202,7 +203,7 @@ export default function Interviews({ token, user }) {
               </option>
             ))}
           </select>
-          <input name="focus_areas" placeholder="Focus areas" value={form.focus_areas} onChange={change} />
+          <input name="focus_areas" placeholder="Focus areas" value={form.focus_areas} onChange={change} required />
           <button>Schedule Interview</button>
         </form>
       )}
@@ -293,27 +294,27 @@ export default function Interviews({ token, user }) {
           <form onSubmit={submitFeedback} className="form small">
             <label>
               Technical Rating
-              <input name="technical_rating" type="number" min="1" max="5" value={feedback.technical_rating} onChange={feedbackChange} />
+              <input name="technical_rating" type="number" min="1" max="5" step="1" value={feedback.technical_rating} onChange={feedbackChange} required />
             </label>
             <label>
               Communication Rating
-              <input name="communication_rating" type="number" min="1" max="5" value={feedback.communication_rating} onChange={feedbackChange} />
+              <input name="communication_rating" type="number" min="1" max="5" step="1" value={feedback.communication_rating} onChange={feedbackChange} required />
             </label>
             <label>
               Problem Solving Rating
-              <input name="problem_solving_rating" type="number" min="1" max="5" value={feedback.problem_solving_rating} onChange={feedbackChange} />
+              <input name="problem_solving_rating" type="number" min="1" max="5" step="1" value={feedback.problem_solving_rating} onChange={feedbackChange} required />
             </label>
             <label>
               Tech Areas Covered
-              <input name="tech_areas_covered" value={feedback.tech_areas_covered} onChange={feedbackChange} />
+              <input name="tech_areas_covered" value={feedback.tech_areas_covered} onChange={feedbackChange} required />
             </label>
             <label>
               Comments
-              <textarea name="comments" value={feedback.comments} onChange={feedbackChange} />
+              <textarea name="comments" value={feedback.comments} onChange={feedbackChange} required />
             </label>
             <label>
               Recommendation
-              <select name="recommendation" value={feedback.recommendation} onChange={feedbackChange}>
+              <select name="recommendation" value={feedback.recommendation} onChange={feedbackChange} required>
                 <option>NEXT_ROUND</option><option>SELECT</option><option>REJECT</option>
               </select>
             </label>

@@ -10,6 +10,7 @@ export default function ResetPassword({ token, user, onReset }) {
   const [messageType, setMessageType] = useState('error');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const passwordPattern = '(?=.*[A-Za-z])(?=.*\\d).{6,12}';
 
   async function submit(e) {
     e.preventDefault();
@@ -41,6 +42,11 @@ export default function ResetPassword({ token, user, onReset }) {
             placeholder="New password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            required
+            minLength="6"
+            maxLength="12"
+            pattern={passwordPattern}
+            title="Password must be 6 to 12 characters and include at least one letter and one digit"
           />
           <button
             type="button"
@@ -56,6 +62,11 @@ export default function ResetPassword({ token, user, onReset }) {
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
+            required
+            minLength="6"
+            maxLength="12"
+            pattern={passwordPattern}
+            title="Password must be 6 to 12 characters and include at least one letter and one digit"
           />
           <button
             type="button"
