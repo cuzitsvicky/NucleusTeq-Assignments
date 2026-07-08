@@ -112,5 +112,6 @@ export const apiService = {
   submitFeedback: (token, id, data) => apiRequest(`/api/interviews/${id}/feedback`, {
     method: 'POST',
     body: JSON.stringify(data)
-  }, token)
+  }, token),
+  getDashboardStats: token => apiRequest('/api/dashboard/', {}, token)
 };
