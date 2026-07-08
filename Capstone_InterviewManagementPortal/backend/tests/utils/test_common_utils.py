@@ -1,6 +1,7 @@
 import pytest
 
-from app.exceptions import BadRequestException
+from app.exceptions import BadRequestException, ForbiddenException
+from app.utils import normalize_email, require_roles
 from app.utils.pagination import build_paginated_response, calculate_skip, paginate_collection
 from app.utils.security_utils import get_password_hash, verify_password
 from app.validators.validators import validate_resume_extension
@@ -8,6 +9,21 @@ from app.validators.validators import validate_resume_extension
 
 def test_calculate_skip():
     assert calculate_skip(page=3, limit=10) == 20
+
+
+def test_normalize_email_strips_and_lowercases():
+    assert normalize_email(" User@NucleusTeq.com ") == "user@nucleusteq.com"
+
+
+def test_require_roles_allows_matching_role():
+    assert require_roles({"role": "HR"}, {"Admin", "HR"}) is None
+
+
+def test_require_roles_blocks_wrong_role():
+    with pytest.raises(ForbiddenException) as exc:
+        require_roles({"role": "Interviewer"}, {"Admin", "HR"})
+
+    assert exc.value.detail == "Not authorized"
 
 
 def test_build_paginated_response_flags():

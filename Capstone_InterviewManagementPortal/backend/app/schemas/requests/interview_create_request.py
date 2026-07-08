@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator
 from datetime import date, datetime
 import re
 from ...constants.app_constants import REQUIRED_EMAIL_DOMAIN
+from ...utils import normalize_email
 
 
 class InterviewCreateRequest(BaseModel):
@@ -50,12 +51,12 @@ class InterviewCreateRequest(BaseModel):
     @field_validator("interviewer_email")
     @classmethod
     def email_lowercase(cls, v: str) -> str:
-        return v.strip().lower()
+        return normalize_email(v)
 
     @field_validator("interviewer_email")
     @classmethod
     def email_must_be_nucleusteq(cls, v: str) -> str:
-        v = v.strip().lower()
+        v = normalize_email(v)
         if not v:
             raise ValueError("Email cannot be blank")
         if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):

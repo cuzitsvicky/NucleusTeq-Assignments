@@ -19,7 +19,8 @@ async def test_schedule_interview_success(monkeypatch, hr_user, interview_payloa
 
     result = await interviews.schedule_interview(InterviewCreateRequest(**interview_payload), hr_user)
 
-    assert result == {"message": "Interview scheduled", "id": "interview-id"}
+    assert result.message == "Interview scheduled"
+    assert result.id == "interview-id"
     schedule.assert_awaited_once()
 
 
@@ -45,5 +46,5 @@ async def test_submit_feedback_success(monkeypatch, interviewer_user, object_ids
 
     result = await interviews.submit_feedback(object_ids.interview, FeedbackSubmitRequest(**feedback_payload), interviewer_user)
 
-    assert result == {"message": "Feedback submitted successfully"}
+    assert result.message == "Feedback submitted successfully"
     submit.assert_awaited_once()

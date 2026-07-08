@@ -6,4 +6,5 @@ from .job_response import JobResponse
 from .interview_response import InterviewResponse
 from .feedback_response import FeedbackResponse
 from .pagination_response import PaginatedResponse
+from .message_response import MessageResponse, MessageWithIdResponse
 

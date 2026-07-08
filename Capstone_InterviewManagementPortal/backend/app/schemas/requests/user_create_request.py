@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from ...constants.app_constants import REQUIRED_EMAIL_DOMAIN
 from ...enums.user_role import UserRole
+from ...utils import normalize_email
 import re
 
 
@@ -27,7 +28,7 @@ class UserCreateRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def email_must_be_nucleusteq(cls, v: str) -> str:
-        v = v.strip().lower()
+        v = normalize_email(v)
         if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
             raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
         return v

@@ -94,5 +94,5 @@ async def test_update_user_success(monkeypatch, admin_user):
 
     result = await users.update_user("target-id", UserUpdateRequest(name="Test User", role="HR", active=True), admin_user)
 
-    assert result == {"message": "User updated"}
+    assert result.message == "User updated"
     update.assert_awaited_once_with("target-id", {"name": "Test User", "role": "HR", "active": True})

@@ -9,7 +9,7 @@ from tests.conftest import async_return
 
 
 def test_build_user_response_defaults(object_ids):
-    response = auth.build_user_response({
+    response = auth.auth_service.build_user_response({
         "_id": ObjectId(object_ids.user),
         "email": "user@nucleusteq.com",
         "role": "HR",
@@ -75,5 +75,5 @@ async def test_reset_password(monkeypatch, hr_user):
 
     result = await auth.reset_password(PasswordResetRequest(new_password="pass12"), hr_user)
 
-    assert result == {"message": "Password reset successfully"}
+    assert result.message == "Password reset successfully"
     reset.assert_awaited_once_with(str(hr_user["_id"]), "pass12")

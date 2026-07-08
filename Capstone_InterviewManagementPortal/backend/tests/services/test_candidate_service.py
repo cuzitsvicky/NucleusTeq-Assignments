@@ -1,9 +1,41 @@
 import pytest
 from bson import ObjectId
 
-from app.exceptions import BadRequestException, ForbiddenException, NotFoundException
+from app.exceptions import BadRequestException, ForbiddenException, InternalServerException, NotFoundException
 from app.services import candidate_service
 from tests.conftest import async_return
+
+
+class FakeGridIn:
+    def __init__(self):
+        self._id = ObjectId()
+        self.writes = []
+        self.closed = False
+
+    async def write(self, data):
+        self.writes.append(data)
+
+    async def close(self):
+        self.closed = True
+
+
+class FakeBucket:
+    def __init__(self, grid_in=None, download_bytes=b"%PDF-1.4"):
+        self.grid_in = grid_in or FakeGridIn()
+        self.download_bytes = download_bytes
+        self.filename = None
+        self.metadata = None
+
+    def open_upload_stream(self, filename, metadata):
+        self.filename = filename
+        self.metadata = metadata
+        return self.grid_in
+
+    async def open_download_stream(self, resume_id):
+        return self
+
+    async def read(self):
+        return self.download_bytes
 
 
 def test_validate_candidate_id_rejects_invalid():
@@ -85,6 +117,61 @@ async def test_create_candidate_duplicate(monkeypatch, candidate_payload):
         await candidate_service.create_candidate(candidate_payload.copy(), "hr@nucleusteq.com")
 
     assert exc.value.detail == "Email or Mobile already registered"
+
+
+@pytest.mark.asyncio
+async def test_upload_resume_stores_pdf_in_gridfs(monkeypatch):
+    bucket = FakeBucket()
+    monkeypatch.setattr(candidate_service, "get_gridfs_bucket", lambda: bucket)
+
+    resume_id = await candidate_service.upload_resume("resume.pdf", b"%PDF-1.4")
+
+    assert ObjectId.is_valid(resume_id)
+    assert bucket.filename == "resume.pdf"
+    assert bucket.metadata == {"contentType": "application/pdf"}
+    assert bucket.grid_in.writes == [b"%PDF-1.4"]
+    assert bucket.grid_in.closed is True
+
+
+@pytest.mark.asyncio
+async def test_download_resume_for_user_reads_gridfs(monkeypatch, object_ids):
+    bucket = FakeBucket(download_bytes=b"%PDF-1.4 content")
+    monkeypatch.setattr(candidate_service, "get_gridfs_bucket", lambda: bucket)
+    monkeypatch.setattr(candidate_service, "get_resume_candidate_for_user", async_return({
+        "resume_id": object_ids.candidate,
+        "resume_filename": "resume.pdf",
+    }))
+
+    pdf, filename = await candidate_service.download_resume_for_user(
+        object_ids.candidate,
+        "HR",
+        "hr@nucleusteq.com",
+    )
+
+    assert pdf == b"%PDF-1.4 content"
+    assert filename == "resume.pdf"
+
+
+@pytest.mark.asyncio
+async def test_download_resume_for_user_wraps_gridfs_errors(monkeypatch, object_ids):
+    class BrokenBucket:
+        async def open_download_stream(self, resume_id):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(candidate_service, "get_gridfs_bucket", lambda: BrokenBucket())
+    monkeypatch.setattr(candidate_service, "get_resume_candidate_for_user", async_return({
+        "resume_id": object_ids.candidate,
+        "resume_filename": "resume.pdf",
+    }))
+
+    with pytest.raises(InternalServerException) as exc:
+        await candidate_service.download_resume_for_user(
+            object_ids.candidate,
+            "HR",
+            "hr@nucleusteq.com",
+        )
+
+    assert exc.value.detail == "Error downloading resume"
 
 
 @pytest.mark.asyncio

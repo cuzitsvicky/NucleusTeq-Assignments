@@ -19,5 +19,7 @@ from .responses import (
     InterviewResponse,
     FeedbackResponse,
     LoginResponse,
-    PaginatedResponse
+    PaginatedResponse,
+    MessageResponse,
+    MessageWithIdResponse
 )
