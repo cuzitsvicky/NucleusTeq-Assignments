@@ -7,6 +7,7 @@ import Candidates from './pages/Candidates.jsx';
 import Interviews from './pages/Interviews.jsx';
 import Users from './pages/Users.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
+import { BriefcaseBusiness, CalendarCheck, Gauge, KeyRound, UsersRound, UserRoundCog } from 'lucide-react';
 
 function ProtectedRoute({ user, roles, children }) {
   if (!roles.includes(user?.role)) {
@@ -64,12 +65,12 @@ export default function App() {
       <aside className="sidebar">
         <h2>Interview Portal</h2>
         <nav>
-          <Link to="/">Dashboard</Link>
-          {['Admin', 'HR', 'Interviewer'].includes(user?.role) && <Link to="/jobs">Jobs</Link>}
-          {['Admin', 'HR'].includes(user?.role) && <Link to="/candidates">Candidates</Link>}
-          <Link to="/interviews">Interviews</Link>
-          {user?.role === 'Admin' && <Link to="/users">Users</Link>}
-          <Link to="/reset-password">Reset Password</Link>
+          <Link to="/"><Gauge size={17} />Dashboard</Link>
+          {['Admin', 'HR', 'Interviewer'].includes(user?.role) && <Link to="/jobs"><BriefcaseBusiness size={17} />Jobs</Link>}
+          {['Admin', 'HR'].includes(user?.role) && <Link to="/candidates"><UsersRound size={17} />Candidates</Link>}
+          <Link to="/interviews"><CalendarCheck size={17} />Interviews</Link>
+          {user?.role === 'Admin' && <Link to="/users"><UserRoundCog size={17} />Users</Link>}
+          <Link to="/reset-password"><KeyRound size={17} />Reset Password</Link>
         </nav>
         <div className="account">
           <p>Logged in as {user?.role}</p>
