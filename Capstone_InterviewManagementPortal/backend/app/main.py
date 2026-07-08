@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .core.database import connect_to_mongo, close_mongo_connection
 from .core.logging_config import setup_logging
 from .exceptions import register_exception_handlers
-from .routers import auth, users, jobs, candidates, interviews
+from .routers import auth, users, jobs, candidates, interviews, dashboard
 
 # Setup logging configuration
 setup_logging()
@@ -65,3 +65,4 @@ app.include_router(users.router, prefix="/api/auth", tags=["Users"])
 app.include_router(jobs.router, prefix="/api/jobs", tags=["Jobs"])
 app.include_router(candidates.router, prefix="/api/candidates", tags=["Candidates"])
 app.include_router(interviews.router, prefix="/api/interviews", tags=["Interviews"])
+app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])

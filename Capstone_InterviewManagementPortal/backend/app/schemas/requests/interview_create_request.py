@@ -41,7 +41,7 @@ class InterviewCreateRequest(BaseModel):
 
     @field_validator("job_title")
     @classmethod
-    def must_not_be_blank(cls, v: str) -> str:
+    def validate_job_title(cls, v: str) -> str:
         v = v.strip()
         if not v:
             raise ValueError("Job Title field cannot be blank")

@@ -31,7 +31,7 @@ class FeedbackSubmitRequest(BaseModel):
 
     @field_validator("comments")
     @classmethod
-    def must_not_be_blank(cls, v: str) -> str:
+    def must_not_be_blank_comments(cls, v: str) -> str:
         v = v.strip()
         if not v:
             raise ValueError("Comments field cannot be blank")
