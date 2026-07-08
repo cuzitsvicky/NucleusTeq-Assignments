@@ -302,9 +302,28 @@ export default function Candidates({ token, user }) {
                 <td>{c.status}</td>
                 <td>
                   <div className="actions">
-                    <select onChange={e => changeStatus(c.id, e.target.value)} defaultValue="">
-                      <option value="" disabled>Status</option>
-                      <option>INTERVIEW_SCHEDULED</option>
+                    <select
+                      onChange={e => changeStatus(c.id, e.target.value)}
+                      defaultValue=""
+                      disabled={['PROFILE_CREATED', 'INTERVIEW_SCHEDULED'].includes(c.status)}
+                      title={
+                        c.status === 'PROFILE_CREATED'
+                          ? 'Schedule an interview to move this candidate forward'
+                          :
+                        c.status === 'INTERVIEW_SCHEDULED'
+                          ? 'Available after interview feedback is submitted'
+                          : 'Change status'
+                      }
+                    >
+                      <option value="" disabled>
+                        {
+                          c.status === 'PROFILE_CREATED'
+                            ? 'Schedule interview'
+                            : c.status === 'INTERVIEW_SCHEDULED'
+                              ? 'Awaiting feedback'
+                              : 'Status'
+                        }
+                      </option>
                       <option>INTERVIEW_COMPLETED</option>
                       <option>SELECTED</option>
                       <option>REJECTED</option>
