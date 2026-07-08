@@ -4,12 +4,15 @@ from ..exceptions import (
     NotFoundException,
 )
 from ..schemas import (
+    MessageResponse,
     UserCreateRequest,
     PaginatedResponse,
     UserResponse,
     UserUpdateRequest,
 )
+from ..enums import UserRole
 from ..services import user_service
+from ..utils import require_roles
 from .auth import check_password_reset
 
 router = APIRouter()
@@ -18,8 +21,7 @@ router = APIRouter()
 @router.post("/register", response_model=UserResponse)
 async def register(user: UserCreateRequest, current_user: dict = Depends(check_password_reset)):
 
-    if current_user["role"] != "Admin":
-        raise ForbiddenException("Only administrators can create users")
+    require_roles(current_user, {UserRole.ADMIN}, "Only administrators can create users")
 
     new_user = await user_service.register_user(user.model_dump())
 
@@ -35,8 +37,7 @@ async def get_users(
     current_user: dict = Depends(check_password_reset),
 ):
     
-    if current_user["role"] != "Admin":
-        raise ForbiddenException("Not authorized")
+    require_roles(current_user, {UserRole.ADMIN})
 
     return await user_service.get_users(page, limit, name, role)
 
@@ -47,20 +48,18 @@ async def get_interviewers(
     limit: int = Query(10, ge=1, le=100),
     current_user: dict = Depends(check_password_reset),
 ):
-    if current_user["role"] not in ("Admin", "HR"):
-        raise ForbiddenException("Not authorized")
+    require_roles(current_user, {UserRole.ADMIN, UserRole.HR})
 
     return await user_service.get_active_interviewers(page, limit)
 
 # Endpoint to update a specific user's information
-@router.put("/users/{user_id}")
+@router.put("/users/{user_id}", response_model=MessageResponse)
 async def update_user(
     user_id: str,
     user_update: UserUpdateRequest,
     current_user: dict = Depends(check_password_reset),
 ):
-    if current_user["role"] != "Admin":
-        raise ForbiddenException("Not authorized")
+    require_roles(current_user, {UserRole.ADMIN})
 
     if str(current_user["_id"]) == user_id:
         raise ForbiddenException("You cannot update your own account")
@@ -72,4 +71,4 @@ async def update_user(
 
     await user_service.update_user(user_id, user_update.model_dump())
 
-    return {"message": "User updated"}
+    return MessageResponse(message="User updated")

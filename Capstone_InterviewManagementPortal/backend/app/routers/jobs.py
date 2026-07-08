@@ -4,18 +4,18 @@ from fastapi import APIRouter, Depends, Query
 from .auth import check_password_reset
 from ..exceptions import (
     BadRequestException,
-    ForbiddenException,
 )
-from ..schemas import JobCreateRequest, JobResponse, PaginatedResponse
+from ..schemas import JobCreateRequest, JobResponse, MessageResponse, PaginatedResponse
+from ..enums import UserRole
 from ..services import job_service
+from ..utils import require_roles
 
 router = APIRouter()
 
 # Endpoint to create a new job posting
 @router.post("/", response_model=JobResponse)
 async def create_job(job: JobCreateRequest, current_user: dict = Depends(check_password_reset)):
-    if current_user["role"] not in ["HR"]:
-        raise ForbiddenException("Not authorized")
+    require_roles(current_user, {UserRole.HR})
 
     new_job = await job_service.create_job(job.model_dump())
 
@@ -52,14 +52,13 @@ async def get_job(job_id: str, current_user: dict = Depends(check_password_reset
     return JobResponse(**job)
 
 # Endpoint to update a specific job by ID
-@router.put("/{job_id}")
+@router.put("/{job_id}", response_model=MessageResponse)
 async def update_job(job_id: str, job: JobCreateRequest, current_user: dict = Depends(check_password_reset)):
-    if current_user["role"] not in ["HR"]:
-        raise ForbiddenException("Not authorized")
+    require_roles(current_user, {UserRole.HR})
 
     if not ObjectId.is_valid(job_id):
         raise BadRequestException("Invalid job ID format")
 
     await job_service.update_job(job_id, job.model_dump())
 
-    return {"message": "Job updated"}
+    return MessageResponse(message="Job updated")

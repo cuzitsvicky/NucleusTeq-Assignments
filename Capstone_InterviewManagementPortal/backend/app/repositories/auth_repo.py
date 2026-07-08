@@ -1,11 +1,12 @@
 from bson.objectid import ObjectId
 from ..core.database import db
+from ..utils import normalize_email
 
 
 # Get a user by email, ensuring the email is stripped of whitespace and converted to lowercase for consistency.
 async def get_user_by_email(email: str):
 
-    return await db.users.find_one({"email": email.strip().lower()})
+    return await db.users.find_one({"email": normalize_email(email)})
 
 # Update Password for a user by their unique ID, ensuring the ID is valid before updating the database.
 async def update_password(user_id: str, hashed_password: str) -> int:

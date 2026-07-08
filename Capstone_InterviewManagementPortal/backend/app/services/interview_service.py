@@ -5,7 +5,7 @@ from ..exceptions import (
     NotFoundException,
     ConflictException,
 )
-from ..enums.candidate_status import CandidateStatus
+from ..enums import CandidateStatus, InterviewStatus, UserRole
 from ..utils.pagination import build_paginated_response
 from datetime import datetime
 import logging
@@ -66,7 +66,7 @@ async def schedule_interview(interview_data: dict, current_user_email: str):
     if not interviewer:
         raise NotFoundException("Interviewer user not found")
     
-    if interviewer.get("role") != "Interviewer":
+    if interviewer.get("role") != UserRole.INTERVIEWER:
         raise BadRequestException("Assigned user must have the Interviewer role")
     
     if not interviewer.get("active", True):
@@ -89,13 +89,13 @@ async def schedule_interview(interview_data: dict, current_user_email: str):
             "An interview is already scheduled for this candidate with this interviewer on this date"
         )
 
-    interview_data["status"] = "SCHEDULED"
+    interview_data["status"] = InterviewStatus.SCHEDULED.value
 
     interview_id = await interview_repo.create_interview(interview_data)
 
-    await candidate_repo.update_candidate_status(interview_data["candidate_id"], "INTERVIEW_SCHEDULED")
+    await candidate_repo.update_candidate_status(interview_data["candidate_id"], CandidateStatus.INTERVIEW_SCHEDULED.value)
 
-    await candidate_repo.add_status_history(interview_data["candidate_id"], "INTERVIEW_SCHEDULED", current_user_email)
+    await candidate_repo.add_status_history(interview_data["candidate_id"], CandidateStatus.INTERVIEW_SCHEDULED.value, current_user_email)
 
     return interview_id
 
@@ -114,7 +114,7 @@ async def get_interviews(role: str, email: str, page: int = 1, limit: int = 10):
         dict: Paginated response with interviews including candidate names and feedback.
     """
 
-    query = {"interviewer_email": email} if role == "Interviewer" else {}
+    query = {"interviewer_email": email} if role == UserRole.INTERVIEWER else {}
 
     interviews, total = await interview_repo.get_all_interviews(query, page=page, limit=limit)
 
@@ -159,7 +159,7 @@ async def submit_feedback(interview_id: str, feedback_data: dict, current_user_e
     if interview["interviewer_email"] != current_user_email:
         raise ForbiddenException("Not authorized for this interview")
     
-    if interview.get("status") == "COMPLETED":
+    if interview.get("status") == InterviewStatus.COMPLETED.value:
         raise ConflictException("Feedback has already been submitted for this interview")
 
     ensure_interview_time_has_started(interview)
@@ -175,13 +175,13 @@ async def submit_feedback(interview_id: str, feedback_data: dict, current_user_e
 
     await interview_repo.create_feedback(feedback_data)
 
-    await interview_repo.update_interview_status(interview_id, "COMPLETED")
+    await interview_repo.update_interview_status(interview_id, InterviewStatus.COMPLETED.value)
 
     candidate_id = interview["candidate_id"]
 
-    await candidate_repo.update_candidate_status(candidate_id, "INTERVIEW_COMPLETED")
+    await candidate_repo.update_candidate_status(candidate_id, CandidateStatus.INTERVIEW_COMPLETED.value)
 
-    await candidate_repo.add_status_history(candidate_id, "INTERVIEW_COMPLETED", current_user_email)
+    await candidate_repo.add_status_history(candidate_id, CandidateStatus.INTERVIEW_COMPLETED.value, current_user_email)
     
     logger.info(
         f"Feedback submitted by {current_user_email} for interview {interview_id}. Candidate {candidate_id} status updated to INTERVIEW_COMPLETED."

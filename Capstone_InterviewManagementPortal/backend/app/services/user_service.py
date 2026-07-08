@@ -1,6 +1,7 @@
 import logging
 
 from ..exceptions import BadRequestException
+from ..enums import UserRole
 from ..repositories import interview_repo, user_repo
 from ..utils.pagination import build_paginated_response
 from ..utils import get_password_hash
@@ -102,7 +103,7 @@ async def update_user(user_id: str, user_data: dict):
 
         if (
             existing_user
-            and existing_user.get("role") == "Interviewer"
+            and existing_user.get("role") == UserRole.INTERVIEWER
             and await interview_repo.interviewer_has_pending_future_interview(existing_user["email"])
         ):
             raise BadRequestException(

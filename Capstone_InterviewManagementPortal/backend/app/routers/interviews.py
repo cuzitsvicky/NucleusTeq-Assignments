@@ -1,27 +1,33 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 from ..schemas import (
     FeedbackSubmitRequest,
     InterviewCreateRequest,
     InterviewResponse,
+    MessageResponse,
+    MessageWithIdResponse,
     PaginatedResponse,
 )
+from ..enums import UserRole
 from ..services import interview_service
+from ..utils import require_roles
 from .auth import check_password_reset
-from ..exceptions import ForbiddenException
 
 
 router = APIRouter()
 
 # Endpoint to schedule a new interview
-@router.post("/schedule")
+@router.post(
+    "/schedule",
+    response_model=MessageWithIdResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def schedule_interview(interview: InterviewCreateRequest, current_user: dict = Depends(check_password_reset)):
 
-    if current_user["role"] not in ["HR"]:
-        raise ForbiddenException("Not authorized")
+    require_roles(current_user, {UserRole.HR})
     
     interview_id = await interview_service.schedule_interview(interview.model_dump(), current_user["email"])
 
-    return {"message": "Interview scheduled", "id": interview_id}
+    return MessageWithIdResponse(message="Interview scheduled", id=interview_id)
 
 
 # Endpoint to get a list of interviews with optional filters and pagination
@@ -40,15 +46,14 @@ async def get_interviews(
 
 
 # Endpoint to submit feedback for a specific interview by an interviewer
-@router.post("/{interview_id}/feedback")
+@router.post("/{interview_id}/feedback", response_model=MessageResponse)
 async def submit_feedback(
     interview_id: str,
     feedback: FeedbackSubmitRequest,
     current_user: dict = Depends(check_password_reset),
 ):
-    if current_user["role"] != "Interviewer":
-        raise ForbiddenException("Only interviewers can submit feedback")
+    require_roles(current_user, {UserRole.INTERVIEWER}, "Only interviewers can submit feedback")
 
     await interview_service.submit_feedback(interview_id, feedback.model_dump(), current_user["email"])
 
-    return {"message": "Feedback submitted successfully"}
+    return MessageResponse(message="Feedback submitted successfully")

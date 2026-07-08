@@ -1,5 +1,8 @@
 from ..core.database import db
 
+"""
+Count the number of jobs, candidates, and interviews in the database based on the provided query.
+"""
 
 async def count_jobs(query={}):
     return await db.jobs.count_documents(query)

@@ -7,7 +7,8 @@ from ..exceptions import (
     UnauthorizedException,
 )
 from ..repositories import auth_repo
-from ..utils import get_password_hash, verify_password
+from ..schemas import UserResponse
+from ..utils import get_password_hash, normalize_email, verify_password
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +24,19 @@ def generate_basic_token(email: str, password: str) -> str:
     Returns:
         str: Base64-encoded token in format 'base64(email:password)'.
     """
-    auth_string = f"{email.strip().lower()}:{password}"
+    auth_string = f"{normalize_email(email)}:{password}"
     return base64.b64encode(auth_string.encode("utf-8")).decode("utf-8")
+
+
+def build_user_response(user: dict) -> UserResponse:
+    return UserResponse(
+        id=str(user["_id"]),
+        name=user.get("name", ""),
+        email=user["email"],
+        role=user["role"],
+        active=user.get("active", True),
+        reset_required=user.get("reset_required", False),
+    )
 
 
 async def authenticate_user(email: str, password: str, is_basic_auth: bool = False) -> dict:
@@ -46,7 +58,7 @@ async def authenticate_user(email: str, password: str, is_basic_auth: bool = Fal
         ForbiddenException: Account disabled or invalid role.
     """
 
-    email = email.strip().lower()
+    email = normalize_email(email)
 
     user = await auth_repo.get_user_by_email(email)
 

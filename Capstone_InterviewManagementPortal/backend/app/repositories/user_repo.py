@@ -1,10 +1,12 @@
 from bson.objectid import ObjectId
 from ..core.database import db
+from ..enums import UserRole
 from ..utils.pagination import paginate_collection
+from ..utils import normalize_email
 
 # Function to get a user by email, ensuring the email is stripped of whitespace and converted to lowercase for consistency.
 async def get_user_by_email(email: str):
-    return await db.users.find_one({"email": email.strip().lower()})
+    return await db.users.find_one({"email": normalize_email(email)})
 
 # Get a user by their unique ID, ensuring the ID is valid before querying the database.
 async def get_user_by_id(user_id: str):
@@ -51,6 +53,6 @@ async def update_user(user_id: str, user_data: dict):
 # Function to get active interviewers with pagination
 async def get_active_interviewers(page: int = 1, limit: int = 10):
 
-    query = {"role": "Interviewer", "active": True}
+    query = {"role": UserRole.INTERVIEWER.value, "active": True}
 
     return await paginate_collection(db.users, query, page, limit, sort=("_id", -1))

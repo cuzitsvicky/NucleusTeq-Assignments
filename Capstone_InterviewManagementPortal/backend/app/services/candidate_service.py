@@ -1,8 +1,10 @@
 import logging
 from bson.objectid import ObjectId
+from ..core.database import get_gridfs_bucket
 from ..exceptions import (
     BadRequestException,
     ForbiddenException,
+    InternalServerException,
     NotFoundException,
 )
 from ..repositories import (
@@ -11,12 +13,7 @@ from ..repositories import (
     job_repo,
 )
 from ..utils.pagination import build_paginated_response
-from ..exceptions import (
-    BadRequestException,
-    ForbiddenException,
-    NotFoundException,
-)
-from ..enums import CandidateStatus  
+from ..enums import CandidateStatus, UserRole
 
 logger = logging.getLogger(__name__)
 
@@ -105,19 +102,42 @@ async def create_candidate(candidate_data: dict, current_user_email: str):
     if existing:
         raise BadRequestException("Email or Mobile already registered")
 
-    candidate_data["status"] = "PROFILE_CREATED"
+    candidate_data["status"] = CandidateStatus.PROFILE_CREATED.value
 
     candidate_id = await candidate_repo.create_candidate(candidate_data)
 
     await candidate_repo.add_status_history(
         candidate_id,
-        "PROFILE_CREATED",
+        CandidateStatus.PROFILE_CREATED.value,
         current_user_email,
     )
 
     logger.info("Candidate %s created by %s", candidate_id, current_user_email)
 
     return candidate_id
+
+
+async def upload_resume(filename: str, resume_bytes: bytes) -> str:
+    fs = get_gridfs_bucket()
+    grid_in = fs.open_upload_stream(
+        filename=filename,
+        metadata={"contentType": "application/pdf"},
+    )
+    await grid_in.write(resume_bytes)
+    await grid_in.close()
+    return str(grid_in._id)
+
+
+async def download_resume_for_user(candidate_id: str, role: str, email: str) -> tuple[bytes, str]:
+    candidate = await get_resume_candidate_for_user(candidate_id, role, email)
+
+    try:
+        fs = get_gridfs_bucket()
+        grid_file = await fs.open_download_stream(ObjectId(candidate["resume_id"]))
+        return await grid_file.read(), candidate["resume_filename"]
+    except Exception:
+        logger.exception("Error downloading resume for %s", candidate_id)
+        raise InternalServerException("Error downloading resume")
 
 
 async def get_candidates(
@@ -201,7 +221,7 @@ async def get_candidates_for_user(
         dict: Paginated response with candidates based on role.
     """
 
-    if role == "Interviewer":
+    if role == UserRole.INTERVIEWER:
         candidate_ids = (await interview_repo.get_candidate_ids_by_interviewer_email(email_user))
         return await get_candidates_by_ids(candidate_ids, page, limit)
 
@@ -442,7 +462,7 @@ async def ensure_candidate_access(
 
     validate_candidate_id(candidate_id)
 
-    if role != "Interviewer":
+    if role != UserRole.INTERVIEWER:
         return
 
     has_access = await interview_repo.interviewer_has_candidate(email,candidate_id)

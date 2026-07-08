@@ -1,5 +1,6 @@
 from ..core.database import db
 from bson.objectid import ObjectId
+from ..enums import InterviewStatus
 from ..utils.pagination import paginate_collection
 from datetime import datetime
 
@@ -26,7 +27,7 @@ async def get_interview_by_candidate_and_date(candidate_id: str, interviewer_ema
             "candidate_id": candidate_id,
             "interviewer_email": interviewer_email,
             "interview_date": interview_date,
-            "status": "SCHEDULED",
+            "status": InterviewStatus.SCHEDULED.value,
         }
     )
 
@@ -53,7 +54,7 @@ async def interviewer_has_pending_future_interview(interviewer_email: str):
     interview = await db.interviews.find_one(
         {
             "interviewer_email": interviewer_email,
-            "status": "SCHEDULED",
+            "status": InterviewStatus.SCHEDULED.value,
             "$or": [
                 {"interview_date": {"$gt": today}},
                 {

@@ -1,6 +1,7 @@
 import datetime
 from bson.objectid import ObjectId
 from ..core.database import db
+from ..utils import normalize_email
 from ..utils.pagination import paginate_collection
 
 # To create a new candidate in the database
@@ -55,7 +56,7 @@ async def get_candidate_by_email_or_mobile(email: str,mobile: str):
     return await db.candidates.find_one(
         {
             "$or": [
-                {"email": email.strip().lower()},
+                {"email": normalize_email(email)},
                 {"mobile": mobile},
             ]
         }
@@ -68,7 +69,7 @@ async def get_candidate_by_email_or_mobile_exclude(email: str,mobile: str,exclud
         {
             "_id": {"$ne": ObjectId(exclude_id)},
             "$or": [
-                {"email": email.strip().lower()},
+                {"email": normalize_email(email)},
                 {"mobile": mobile},
             ],
         }
