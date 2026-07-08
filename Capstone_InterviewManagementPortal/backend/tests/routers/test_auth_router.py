@@ -1,142 +1,79 @@
 import pytest
-from app.core.config import settings
-from app.utils.security_utils import get_password_hash
+from bson import ObjectId
+from fastapi.security import HTTPBasicCredentials
 
-pytestmark = pytest.mark.asyncio
-
-
-@pytest.fixture(autouse=True)
-async def run_around_tests(async_client):
-    from app.core.database import db
-    await db.client.drop_database(settings.DB_NAME)
-    yield
-    await db.client.drop_database(settings.DB_NAME)
+from app.exceptions import ForbiddenException
+from app.routers import auth
+from app.schemas import LoginRequest, PasswordResetRequest
+from tests.conftest import async_return
 
 
-@pytest.fixture
-async def async_admin_headers(async_client):
-    from app.core.database import db
-    await db.users.insert_one({
-        "name": "Test Admin",
-        "email": "admin@nucleusteq.com",
-        "password": get_password_hash("admin123"),
-        "role": "Admin",
-        "active": True,
-        "reset_required": False
-    })
-    return {"Authorization": "Basic YWRtaW5AbnVjbGV1c3RlcS5jb206YWRtaW4xMjM="} # admin@nucleusteq.com:admin123
-
-
-async def insert_user(user_data: dict):
-    from app.core.database import db
-    return await db.users.insert_one(user_data)
-
-
-async def test_login_and_me(async_client, async_admin_headers):
-    response = await async_client.get("/api/auth/me", headers=async_admin_headers)
-    assert response.status_code == 200
-    assert response.json()["email"] == "admin@nucleusteq.com"
-    assert response.json()["role"] == "Admin"
-    assert response.json()["reset_required"] is False
-
-
-async def test_login_invalid_credentials(async_client):
-    response = await async_client.get("/api/auth/me", headers={"Authorization": "Basic YWRtaW5AbnVjbGV1c3RlcS5jb206d3JvbmdwYXNz"})
-    assert response.status_code == 401
-
-
-async def test_disabled_user_login(async_client):
-    await insert_user({
-        "name": "Test Disabled",
-        "email": "disabled@nucleusteq.com",
-        "password": get_password_hash("pass123"),
+def test_build_user_response_defaults(object_ids):
+    response = auth.build_user_response({
+        "_id": ObjectId(object_ids.user),
+        "email": "user@nucleusteq.com",
         "role": "HR",
-        "active": False,
-        "reset_required": False
     })
-    headers = {"Authorization": "Basic ZGlzYWJsZWRAbnVjbGV1c3RlcS5jb206cGFzczEyMw=="}
-    response = await async_client.get("/api/auth/me", headers=headers)
-    assert response.status_code == 403
-    assert response.json()["detail"] == "User account is disabled"
+
+    assert response.id == object_ids.user
+    assert response.name == ""
+    assert response.active is True
+    assert response.reset_required is False
 
 
-async def test_explicit_login_success(async_client):
-    await insert_user({
-        "name": "Explicit Login User",
-        "email": "explicit@nucleusteq.com",
-        "password": get_password_hash("loginPass123"),
+@pytest.mark.asyncio
+async def test_get_current_user_calls_auth_service(monkeypatch):
+    authenticate = async_return({"email": "user@nucleusteq.com"})
+    monkeypatch.setattr(auth.auth_service, "authenticate_user", authenticate)
+
+    result = await auth.get_current_user(HTTPBasicCredentials(username="user@nucleusteq.com", password="pass1"))
+
+    assert result == {"email": "user@nucleusteq.com"}
+    authenticate.assert_awaited_once_with("user@nucleusteq.com", "pass1", is_basic_auth=True)
+
+
+@pytest.mark.asyncio
+async def test_check_password_reset_blocks_reset_required():
+    with pytest.raises(ForbiddenException) as exc:
+        await auth.check_password_reset({"reset_required": True})
+
+    assert exc.value.detail == "Password reset required on first login"
+
+
+@pytest.mark.asyncio
+async def test_check_password_reset_allows_user(hr_user):
+    assert await auth.check_password_reset(hr_user) == hr_user
+
+
+@pytest.mark.asyncio
+async def test_login_returns_user_and_token(monkeypatch, object_ids):
+    monkeypatch.setattr(auth.auth_service, "authenticate_user", async_return({
+        "_id": ObjectId(object_ids.user),
+        "name": "Hr User",
+        "email": "hr@nucleusteq.com",
         "role": "HR",
-        "active": True,
-        "reset_required": False
-    })
-    payload = {
-        "email": "explicit@nucleusteq.com",
-        "password": "loginPass123"
-    }
-    response = await async_client.post("/api/auth/login", json=payload)
-    assert response.status_code == 200
-    res_data = response.json()
-    assert res_data["user"]["email"] == "explicit@nucleusteq.com"
-    assert res_data["user"]["role"] == "HR"
-    assert res_data["user"]["reset_required"] is False
-    assert res_data["token"] == "ZXhwbGljaXRAbnVjbGV1c3RlcS5jb206bG9naW5QYXNzMTIz"
+    }))
+    monkeypatch.setattr(auth.auth_service, "generate_basic_token", lambda email, password: "token")
+
+    result = await auth.login(LoginRequest(email="hr@nucleusteq.com", password="pass1"))
+
+    assert result.token == "token"
+    assert result.user.email == "hr@nucleusteq.com"
 
 
-async def test_explicit_login_invalid_credentials(async_client):
-    await insert_user({
-        "name": "Explicit Login User",
-        "email": "explicit@nucleusteq.com",
-        "password": get_password_hash("loginPass123"),
-        "role": "HR",
-        "active": True,
-        "reset_required": False
-    })
-    response = await async_client.post("/api/auth/login", json={"email": "explicit@nucleusteq.com", "password": "wrong"})
-    assert response.status_code == 401
-    
-    response2 = await async_client.post("/api/auth/login", json={"email": "nonexistent@nucleusteq.com", "password": "wrong"})
-    assert response2.status_code == 401
+@pytest.mark.asyncio
+async def test_get_me_returns_current_user(hr_user):
+    result = await auth.get_me(hr_user)
+
+    assert result.email == "hr@nucleusteq.com"
 
 
-async def test_explicit_login_disabled_user(async_client):
-    await insert_user({
-        "name": "Disabled User",
-        "email": "disabled_explicit@nucleusteq.com",
-        "password": get_password_hash("loginPass123"),
-        "role": "HR",
-        "active": False,
-        "reset_required": False
-    })
-    payload = {
-        "email": "disabled_explicit@nucleusteq.com",
-        "password": "loginPass123"
-    }
-    response = await async_client.post("/api/auth/login", json=payload)
-    assert response.status_code == 403
-    assert response.json()["detail"] == "User account is disabled"
+@pytest.mark.asyncio
+async def test_reset_password(monkeypatch, hr_user):
+    reset = async_return(None)
+    monkeypatch.setattr(auth.auth_service, "reset_password", reset)
 
+    result = await auth.reset_password(PasswordResetRequest(new_password="pass12"), hr_user)
 
-async def test_password_reset(async_client):
-    await insert_user({
-        "name": "First Login User",
-        "email": "first@nucleusteq.com",
-        "password": get_password_hash("temp123"),
-        "role": "Interviewer",
-        "active": True,
-        "reset_required": True
-    })
-    headers = {"Authorization": "Basic Zmlyc3RAbnVjbGV1c3RlcS5jb206dGVtcDEyMw=="}
-    
-    # Check that me endpoint shows reset_required: True
-    me_resp = await async_client.get("/api/auth/me", headers=headers)
-    assert me_resp.json()["reset_required"] is True
-    
-    # Change password
-    reset_resp = await async_client.post("/api/auth/reset-password", json={"new_password": "newPass12"}, headers=headers)
-    assert reset_resp.status_code == 200
-    
-    # Check that logging in with new password works and reset_required is now False
-    new_headers = {"Authorization": "Basic Zmlyc3RAbnVjbGV1c3RlcS5jb206bmV3UGFzczEy"}
-    me_resp2 = await async_client.get("/api/auth/me", headers=new_headers)
-    assert me_resp2.status_code == 200
-    assert me_resp2.json()["reset_required"] is False
+    assert result == {"message": "Password reset successfully"}
+    reset.assert_awaited_once_with(str(hr_user["_id"]), "pass12")

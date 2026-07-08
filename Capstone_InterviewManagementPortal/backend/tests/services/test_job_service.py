@@ -1,93 +1,65 @@
 import pytest
+from bson import ObjectId
+
+from app.exceptions import NotFoundException
 from app.services import job_service
-from app.core.database import db
-from bson.objectid import ObjectId
-
-pytestmark = pytest.mark.asyncio
+from tests.conftest import async_return
 
 
-async def test_service_create_job(async_client):
-    job_data = {
-        "title": "Service Job",
-        "job_details": "FastAPI service testing",
-        "job_role": "Architect",
-        "required_skills": "Python, Design Patterns",
-        "experience_required": "8 years",
-        "employment_type": "Full Time",
-        "location": "New York"
-    }
-    
-    # Create job via service
-    result = await job_service.create_job(job_data)
-    assert result["id"] is not None
-    assert ObjectId.is_valid(result["id"])
-    assert result["title"] == "Service Job"
+@pytest.mark.asyncio
+async def test_create_job_adds_id(monkeypatch, job_payload):
+    monkeypatch.setattr(job_service.job_repo, "create_job", async_return("job-id"))
+
+    result = await job_service.create_job(job_payload.copy())
+
+    assert result["id"] == "job-id"
 
 
-async def test_service_get_jobs_pagination(async_client):
-    # Create multiple jobs
-    for i in range(5):
-        await job_service.create_job({
-            "title": f"Service Job {i}",
-            "job_details": "Details",
-            "job_role": "Role",
-            "required_skills": "Skills",
-            "experience_required": "1 year",
-            "employment_type": "Full Time",
-            "location": "Remote"
-        })
-        
-    jobs = await job_service.get_jobs(page=1)
-    assert len(jobs) == 5
-    for job in jobs:
-        assert "id" in job
-        assert "_id" not in job
+@pytest.mark.asyncio
+async def test_get_jobs_formats_ids(monkeypatch, object_ids, job_payload):
+    job = {"_id": ObjectId(object_ids.job), **job_payload}
+    monkeypatch.setattr(job_service.job_repo, "get_all_jobs", async_return(([job], 1)))
+
+    result = await job_service.get_jobs(1, 10, "Python")
+
+    assert result["data"][0]["id"] == object_ids.job
+    assert "_id" not in result["data"][0]
+    assert result["total"] == 1
 
 
-async def test_service_get_job_by_id(async_client):
-    job_data = {
-        "title": "Single Job",
-        "job_details": "Single details",
-        "job_role": "Role",
-        "required_skills": "Skills",
-        "experience_required": "2 years",
-        "employment_type": "Full Time",
-        "location": "Boston"
-    }
-    created = await job_service.create_job(job_data)
-    job_id = created["id"]
-    
-    # Fetch job by ID
-    fetched = await job_service.get_job_by_id(job_id)
-    assert fetched is not None
-    assert fetched["id"] == job_id
-    assert fetched["title"] == "Single Job"
-    assert "_id" not in fetched
-    
-    # Fetch non-existent job
-    assert await job_service.get_job_by_id(str(ObjectId())) is None
+@pytest.mark.asyncio
+async def test_get_job_by_id_found(monkeypatch, object_ids, job_payload):
+    monkeypatch.setattr(job_service.job_repo, "get_job_by_id", async_return({"_id": ObjectId(object_ids.job), **job_payload}))
+
+    result = await job_service.get_job_by_id(object_ids.job)
+
+    assert result["id"] == object_ids.job
 
 
-async def test_service_update_job(async_client):
-    job_data = {
-        "title": "Original Job",
-        "job_details": "Details",
-        "job_role": "Role",
-        "required_skills": "Skills",
-        "experience_required": "2 years",
-        "employment_type": "Full Time",
-        "location": "Boston"
-    }
-    created = await job_service.create_job(job_data)
-    job_id = created["id"]
-    
-    update_data = {
-        "title": "Updated Job Title",
-        "job_details": "Updated details"
-    }
-    await job_service.update_job(job_id, update_data)
-    
-    # Verify updates
-    fetched = await job_service.get_job_by_id(job_id)
-    assert fetched["title"] == "Updated Job Title"
-    assert fetched["job_details"] == "Updated details"
+@pytest.mark.asyncio
+async def test_get_job_by_id_missing(monkeypatch):
+    monkeypatch.setattr(job_service.job_repo, "get_job_by_id", async_return(None))
+
+    with pytest.raises(NotFoundException) as exc:
+        await job_service.get_job_by_id("missing")
+
+    assert exc.value.detail == "Job not found"
+
+
+@pytest.mark.asyncio
+async def test_update_job_success(monkeypatch, object_ids):
+    monkeypatch.setattr(job_service.job_repo, "get_job_by_id", async_return({"_id": ObjectId(object_ids.job)}))
+    update_job = async_return(None)
+    monkeypatch.setattr(job_service.job_repo, "update_job", update_job)
+
+    await job_service.update_job(object_ids.job, {"title": "Updated"})
+
+    update_job.assert_awaited_once_with(object_ids.job, {"title": "Updated"})
+
+
+@pytest.mark.asyncio
+async def test_update_job_missing(monkeypatch):
+    monkeypatch.setattr(job_service.job_repo, "get_job_by_id", async_return(None))
+
+    with pytest.raises(NotFoundException):
+        await job_service.update_job("missing", {"title": "Updated"})

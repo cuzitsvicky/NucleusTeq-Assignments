@@ -1,86 +1,91 @@
+import base64
+
 import pytest
+
+from app.exceptions import BadRequestException, ForbiddenException, UnauthorizedException
 from app.services import auth_service
-from app.core.database import db
-from app.utils.security_utils import get_password_hash, verify_password
-from app.exceptions import UnauthorizedException, ForbiddenException
-
-# Configure all test functions in this module to run asynchronously under pytest-asyncio
-pytestmark = pytest.mark.asyncio
+from tests.conftest import async_return
 
 
-@pytest.fixture(autouse=True)
-async def run_around_tests(async_client):
-    """
-    Autouse fixture that runs database cleanup before and after each test case.
-    Explicitly requests the `async_client` fixture to ensure the database connection
-    has been initialized by FastAPI's lifespan handlers.
-    """
-    # Clean users collection before test
-    await db.users.delete_many({})
-    yield
-    # Clean users collection after test
-    await db.users.delete_many({})
+def test_generate_basic_token_normalizes_email():
+    token = auth_service.generate_basic_token(" User@NucleusTeq.com ", "pass1")
+
+    assert base64.b64decode(token).decode("utf-8") == "user@nucleusteq.com:pass1"
 
 
-async def test_service_authenticate_user_success(async_client):
-    await db.users.insert_one({
-        "name": "Auth Service User",
-        "email": "service_auth@nucleusteq.com",
-        "password": get_password_hash("password123"),
-        "role": "HR",
+@pytest.mark.asyncio
+async def test_authenticate_user_success(monkeypatch):
+    hashed = auth_service.get_password_hash("pass1")
+    monkeypatch.setattr(auth_service.auth_repo, "get_user_by_email", async_return({
+        "email": "user@nucleusteq.com",
+        "password": hashed,
         "active": True,
-        "reset_required": False
-    })
-    user = await auth_service.authenticate_user("service_auth@nucleusteq.com", "password123")
-    assert user is not None
-    assert user["email"] == "service_auth@nucleusteq.com"
-
-
-async def test_service_authenticate_user_invalid_credentials(async_client):
-    await db.users.insert_one({
-        "name": "Auth Service User",
-        "email": "service_auth@nucleusteq.com",
-        "password": get_password_hash("password123"),
         "role": "HR",
-        "active": True,
-        "reset_required": False
-    })
-    # Wrong password
-    with pytest.raises(UnauthorizedException):
-        await auth_service.authenticate_user("service_auth@nucleusteq.com", "wrong")
-        
-    # Non-existent email
-    with pytest.raises(UnauthorizedException):
-        await auth_service.authenticate_user("nonexistent@nucleusteq.com", "password123")
+    }))
+
+    user = await auth_service.authenticate_user(" USER@NucleusTeq.com ", "pass1")
+
+    assert user["email"] == "user@nucleusteq.com"
 
 
-async def test_service_authenticate_user_disabled(async_client):
-    await db.users.insert_one({
-        "name": "Disabled Service User",
-        "email": "disabled_service@nucleusteq.com",
-        "password": get_password_hash("password123"),
-        "role": "HR",
+@pytest.mark.asyncio
+async def test_authenticate_user_invalid_credentials_with_basic_header(monkeypatch):
+    monkeypatch.setattr(auth_service.auth_repo, "get_user_by_email", async_return(None))
+
+    with pytest.raises(UnauthorizedException) as exc:
+        await auth_service.authenticate_user("user@nucleusteq.com", "bad", is_basic_auth=True)
+
+    assert exc.value.detail == "Invalid email or password"
+    assert exc.value.headers == {"WWW-Authenticate": "Basic"}
+
+
+@pytest.mark.asyncio
+async def test_authenticate_user_disabled(monkeypatch):
+    monkeypatch.setattr(auth_service.auth_repo, "get_user_by_email", async_return({
+        "email": "user@nucleusteq.com",
+        "password": auth_service.get_password_hash("pass1"),
         "active": False,
-        "reset_required": False
-    })
-    with pytest.raises(ForbiddenException):
-        await auth_service.authenticate_user("disabled_service@nucleusteq.com", "password123")
+        "role": "HR",
+    }))
+
+    with pytest.raises(ForbiddenException) as exc:
+        await auth_service.authenticate_user("user@nucleusteq.com", "pass1")
+
+    assert exc.value.detail == "User account is disabled"
 
 
-async def test_service_reset_password(async_client):
-    result = await db.users.insert_one({
-        "name": "Reset Service User",
-        "email": "reset_service@nucleusteq.com",
-        "password": get_password_hash("tempPass123"),
-        "role": "Interviewer",
+@pytest.mark.asyncio
+async def test_authenticate_user_invalid_role(monkeypatch):
+    monkeypatch.setattr(auth_service.auth_repo, "get_user_by_email", async_return({
+        "email": "user@nucleusteq.com",
+        "password": auth_service.get_password_hash("pass1"),
         "active": True,
-        "reset_required": True
-    })
-    user_id = result.inserted_id
-    
-    await auth_service.reset_password(str(user_id), "newSecurePass1")
-    
-    # Fetch user directly from database and verify
-    user = await db.users.find_one({"_id": user_id})
-    assert user["reset_required"] is False
-    assert verify_password("newSecurePass1", user["password"]) is True
+        "role": "Wrong",
+    }))
+
+    with pytest.raises(ForbiddenException) as exc:
+        await auth_service.authenticate_user("user@nucleusteq.com", "pass1")
+
+    assert exc.value.detail == "Invalid user role configuration"
+
+
+@pytest.mark.asyncio
+async def test_reset_password_success(monkeypatch):
+    update_password = async_return(1)
+    monkeypatch.setattr(auth_service.auth_repo, "update_password", update_password)
+
+    await auth_service.reset_password("user-id", "newpass1")
+
+    update_password.assert_awaited_once()
+    assert update_password.await_args.args[0] == "user-id"
+    assert update_password.await_args.args[1] == auth_service.get_password_hash("newpass1")
+
+
+@pytest.mark.asyncio
+async def test_reset_password_failure(monkeypatch):
+    monkeypatch.setattr(auth_service.auth_repo, "update_password", async_return(0))
+
+    with pytest.raises(BadRequestException) as exc:
+        await auth_service.reset_password("user-id", "newpass1")
+
+    assert exc.value.detail == "Password could not be updated"

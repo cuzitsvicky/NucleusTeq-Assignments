@@ -57,6 +57,21 @@ def validate_status_transition(current_status: str, new_status: str):
     if current in TERMINAL_STATUSES:
         raise BadRequestException(f"Cannot change status once candidate is '{current.value}'")
 
+    if target == CandidateStatus.INTERVIEW_SCHEDULED:
+        raise BadRequestException(
+            "Interview scheduled status can only be set by scheduling an interview"
+        )
+
+    if current == CandidateStatus.PROFILE_CREATED:
+        raise BadRequestException(
+            "Candidate status can only move from PROFILE_CREATED when an interview is scheduled"
+        )
+
+    if current == CandidateStatus.INTERVIEW_SCHEDULED:
+        raise BadRequestException(
+            "Cannot change candidate status until the scheduled interview is completed"
+        )
+
     if _status_rank(target) < _status_rank(current):
         raise BadRequestException(f"Cannot revert status from '{current.value}' to '{target.value}'")
 
