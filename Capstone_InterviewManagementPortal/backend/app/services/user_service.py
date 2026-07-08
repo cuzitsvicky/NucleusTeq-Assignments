@@ -1,7 +1,7 @@
 import logging
 
 from ..exceptions import BadRequestException
-from ..repositories import user_repo
+from ..repositories import interview_repo, user_repo
 from ..utils.pagination import build_paginated_response
 from ..utils import get_password_hash
 
@@ -96,6 +96,18 @@ async def update_user(user_id: str, user_data: dict):
     Raises:
         BadRequestException: If no changes made or update fails.
     """
+
+    if user_data.get("active") is False:
+        existing_user = await user_repo.get_user_by_id(user_id)
+
+        if (
+            existing_user
+            and existing_user.get("role") == "Interviewer"
+            and await interview_repo.interviewer_has_pending_future_interview(existing_user["email"])
+        ):
+            raise BadRequestException(
+                "Interviewer cannot be disabled while a future scheduled interview is pending"
+            )
 
     updated = await user_repo.update_user(user_id, user_data)
 

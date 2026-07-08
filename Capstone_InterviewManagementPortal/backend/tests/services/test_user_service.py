@@ -87,13 +87,59 @@ async def test_get_user_by_id_missing(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_update_user_success(monkeypatch):
+    monkeypatch.setattr(user_service.user_repo, "get_user_by_id", async_return({
+        "email": "i@nucleusteq.com",
+        "role": "Interviewer",
+    }))
+    monkeypatch.setattr(user_service.interview_repo, "interviewer_has_pending_future_interview", async_return(False))
     monkeypatch.setattr(user_service.user_repo, "update_user", async_return(1))
 
     assert await user_service.update_user("user-id", {"active": False}) is None
 
 
 @pytest.mark.asyncio
+async def test_update_user_blocks_disabling_interviewer_with_pending_future_interview(monkeypatch):
+    monkeypatch.setattr(user_service.user_repo, "get_user_by_id", async_return({
+        "email": "i@nucleusteq.com",
+        "role": "Interviewer",
+    }))
+    monkeypatch.setattr(user_service.interview_repo, "interviewer_has_pending_future_interview", async_return(True))
+
+    with pytest.raises(BadRequestException) as exc:
+        await user_service.update_user("user-id", {"active": False})
+
+    assert exc.value.detail == "Interviewer cannot be disabled while a future scheduled interview is pending"
+
+
+@pytest.mark.asyncio
+async def test_update_user_does_not_check_pending_interviews_when_user_stays_active(monkeypatch):
+    check_pending = async_return(True)
+    monkeypatch.setattr(user_service.interview_repo, "interviewer_has_pending_future_interview", check_pending)
+    monkeypatch.setattr(user_service.user_repo, "update_user", async_return(1))
+
+    await user_service.update_user("user-id", {"active": True})
+
+    check_pending.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_update_user_allows_disabling_non_interviewer(monkeypatch):
+    check_pending = async_return(True)
+    monkeypatch.setattr(user_service.user_repo, "get_user_by_id", async_return({
+        "email": "hr@nucleusteq.com",
+        "role": "HR",
+    }))
+    monkeypatch.setattr(user_service.interview_repo, "interviewer_has_pending_future_interview", check_pending)
+    monkeypatch.setattr(user_service.user_repo, "update_user", async_return(1))
+
+    await user_service.update_user("user-id", {"active": False})
+
+    check_pending.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_update_user_no_changes(monkeypatch):
+    monkeypatch.setattr(user_service.user_repo, "get_user_by_id", async_return(None))
     monkeypatch.setattr(user_service.user_repo, "update_user", async_return(0))
 
     with pytest.raises(BadRequestException) as exc:

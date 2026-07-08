@@ -1,6 +1,7 @@
 from ..core.database import db
 from bson.objectid import ObjectId
 from ..utils.pagination import paginate_collection
+from datetime import datetime
 
 # To create a new interview in the database
 async def create_interview(interview_data: dict):
@@ -41,6 +42,28 @@ async def interviewer_has_candidate(interviewer_email: str, candidate_id: str):
     interview = await db.interviews.find_one(
         {"interviewer_email": interviewer_email, "candidate_id": candidate_id}
     )
+    return interview is not None
+
+# Function to check if an interviewer has a future scheduled interview that is not completed
+async def interviewer_has_pending_future_interview(interviewer_email: str):
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    current_time = now.strftime("%H:%M")
+
+    interview = await db.interviews.find_one(
+        {
+            "interviewer_email": interviewer_email,
+            "status": "SCHEDULED",
+            "$or": [
+                {"interview_date": {"$gt": today}},
+                {
+                    "interview_date": today,
+                    "interview_time": {"$gt": current_time},
+                },
+            ],
+        }
+    )
+
     return interview is not None
 
 ## To update the status of an interview

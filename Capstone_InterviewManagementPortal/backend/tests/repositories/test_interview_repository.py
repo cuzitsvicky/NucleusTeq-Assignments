@@ -97,6 +97,26 @@ async def test_interviewer_has_candidate_false(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_interviewer_has_pending_future_interview_true(monkeypatch):
+    interviews = FakeCollection(find_one_result={"status": "SCHEDULED"})
+    monkeypatch.setattr(interview_repo, "db", SimpleNamespace(interviews=interviews))
+
+    assert await interview_repo.interviewer_has_pending_future_interview("i@nucleusteq.com") is True
+    query = interviews.find_one_calls[0]
+    assert query["interviewer_email"] == "i@nucleusteq.com"
+    assert query["status"] == "SCHEDULED"
+    assert "$or" in query
+
+
+@pytest.mark.asyncio
+async def test_interviewer_has_pending_future_interview_false(monkeypatch):
+    interviews = FakeCollection(find_one_result=None)
+    monkeypatch.setattr(interview_repo, "db", SimpleNamespace(interviews=interviews))
+
+    assert await interview_repo.interviewer_has_pending_future_interview("i@nucleusteq.com") is False
+
+
+@pytest.mark.asyncio
 async def test_update_interview_status(monkeypatch, object_ids):
     interviews = FakeCollection()
     monkeypatch.setattr(interview_repo, "db", SimpleNamespace(interviews=interviews))
