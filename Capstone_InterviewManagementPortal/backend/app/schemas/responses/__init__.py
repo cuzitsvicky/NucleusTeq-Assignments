@@ -5,4 +5,5 @@ from .status_history_response import StatusHistoryResponse
 from .job_response import JobResponse
 from .interview_response import InterviewResponse
 from .feedback_response import FeedbackResponse
+from .pagination_response import PaginatedResponse
 

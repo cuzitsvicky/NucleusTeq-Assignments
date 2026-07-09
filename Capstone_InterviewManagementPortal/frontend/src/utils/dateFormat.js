@@ -1,0 +1,48 @@
+function pad(value) {
+  return String(value).padStart(2, '0');
+}
+
+function meridiemForHour(hour) {
+  return hour >= 12 ? 'PM' : 'AM';
+}
+
+export function formatDate(value) {
+  if (!value) return '';
+
+  const text = String(value).trim();
+  const isoDateMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    return `${day}/${month}/${year}`;
+  }
+
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return text;
+
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+}
+
+export function formatDateTime(dateValue, timeValue = '') {
+  const date = formatDate(dateValue);
+  const time = String(timeValue || '').trim();
+  const hour = Number(time.split(':')[0]);
+  const displayTime = time && Number.isInteger(hour)
+    ? `${time} ${meridiemForHour(hour)}`
+    : time;
+
+  return [date, displayTime].filter(Boolean).join(' ');
+}
+
+export function formatTimestamp(value) {
+  if (!value) return '';
+
+  const text = String(value).trim();
+  const date = formatDate(text);
+  const parsed = new Date(text);
+
+  if (Number.isNaN(parsed.getTime())) return date;
+
+  const hours = parsed.getHours();
+  return `${date} ${pad(hours)}:${pad(parsed.getMinutes())} ${meridiemForHour(hours)}`;
+}

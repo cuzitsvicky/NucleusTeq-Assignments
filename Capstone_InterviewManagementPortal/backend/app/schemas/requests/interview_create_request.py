@@ -1,6 +1,8 @@
 from pydantic import BaseModel, field_validator
 from datetime import date, datetime
 import re
+from ...constants.app_constants import REQUIRED_EMAIL_DOMAIN
+
 
 class InterviewCreateRequest(BaseModel):
     candidate_id: str
@@ -29,15 +31,42 @@ class InterviewCreateRequest(BaseModel):
             raise ValueError("Interview time must be in HH:MM format (e.g. 14:00)")
         return v
 
-    @field_validator("focus_areas", "job_title")
+    @field_validator("focus_areas")
     @classmethod
     def must_not_be_blank(cls, v: str) -> str:
         v = v.strip()
         if not v:
-            raise ValueError("This field cannot be blank")
+            raise ValueError("Focus Area field cannot be blank")
+        return v
+
+    @field_validator("job_title")
+    @classmethod
+    def validate_job_title(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Job Title field cannot be blank")
         return v
 
     @field_validator("interviewer_email")
     @classmethod
     def email_lowercase(cls, v: str) -> str:
         return v.strip().lower()
+
+    @field_validator("interviewer_email")
+    @classmethod
+    def email_must_be_nucleusteq(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not v:
+            raise ValueError("Email cannot be blank")
+        if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
+            raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
+        return v
+
+    @field_validator("interviewer_email")
+    @classmethod
+    def reject_strange_characters(cls, v: str) -> str:
+        # Enforce that the local part only contains normal letters, numbers, dots
+        local_part = v.split("@")[0]
+        if not re.match(r"^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$", local_part):
+            raise ValueError("Email contains unaccepted special characters")
+        return v

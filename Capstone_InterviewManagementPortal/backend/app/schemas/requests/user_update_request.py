@@ -1,5 +1,7 @@
 from pydantic import BaseModel, field_validator
 from ...enums.user_role import UserRole
+import re
+
 
 class UserUpdateRequest(BaseModel):
     name: str
@@ -12,6 +14,10 @@ class UserUpdateRequest(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("Name cannot be blank")
-        if len(v) > 100:
-            raise ValueError("Name must not exceed 100 characters")
+        if len(v) <= 3:
+            raise ValueError("Name must be greater than 3 characters")
+        if len(v) >= 100:
+            raise ValueError("Name must be less than 100 characters")
+        if not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Name can only contain letters and spaces")
         return v

@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function ResetPassword({ token, user, onReset }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const passwordPattern = '(?=.*[A-Za-z])(?=.*\\d).{6,12}';
 
   async function submit(e) {
     e.preventDefault();
@@ -32,18 +36,46 @@ export default function ResetPassword({ token, user, onReset }) {
     <section>
       <h1>Reset Password</h1>
       <form className="row" onSubmit={submit}>
-        <input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Confirm password"
-          value={confirmPassword}
-          onChange={e => setConfirmPassword(e.target.value)}
-        />
+        <div className="password-input">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="New password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            minLength="6"
+            maxLength="12"
+            pattern={passwordPattern}
+            title="Password must be 6 to 12 characters and include at least one letter and one digit"
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        <div className="password-input">
+          <input
+            type={showConfirmPassword ? 'text' : 'password'}
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            required
+            minLength="6"
+            maxLength="12"
+            pattern={passwordPattern}
+            title="Password must be 6 to 12 characters and include at least one letter and one digit"
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         <button>Update</button>
       </form>
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />

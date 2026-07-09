@@ -4,7 +4,7 @@ export default function Alert({ message, type = 'error', onClose }) {
   useEffect(() => {
     if (!message || !onClose) return undefined;
 
-    const timer = window.setTimeout(onClose, 5000);
+    const timer = window.setTimeout(onClose, 4000);
     return () => window.clearTimeout(timer);
   }, [message, onClose]);
 
@@ -12,7 +12,7 @@ export default function Alert({ message, type = 'error', onClose }) {
 
   return (
     <div className={`alert alert-${type}`} role="alert">
-      <strong>{type === 'error' ? 'Error' : 'Success'}</strong>
+      <strong>{type === 'error' ? 'Error' : type === 'info' ? 'Info' : 'Success'}</strong>
       <span>{message}</span>
     </div>
   );

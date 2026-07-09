@@ -1,6 +1,7 @@
 from pydantic import BaseModel, field_validator
 from ...enums.recommendation import Recommendation
 
+
 class FeedbackSubmitRequest(BaseModel):
     technical_rating: int
     communication_rating: int
@@ -20,10 +21,18 @@ class FeedbackSubmitRequest(BaseModel):
             raise ValueError("Rating must be between 1 and 5")
         return v
 
-    @field_validator("tech_areas_covered", "comments")
+    @field_validator("tech_areas_covered")
     @classmethod
     def must_not_be_blank(cls, v: str) -> str:
         v = v.strip()
         if not v:
-            raise ValueError("This field cannot be blank")
+            raise ValueError("Tech Ares Covered field cannot be blank")
+        return v
+
+    @field_validator("comments")
+    @classmethod
+    def must_not_be_blank_comments(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Comments field cannot be blank")
         return v

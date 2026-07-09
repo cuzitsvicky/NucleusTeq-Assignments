@@ -65,7 +65,7 @@ export default function App() {
         <h2>Interview Portal</h2>
         <nav>
           <Link to="/">Dashboard</Link>
-          {['Admin', 'HR'].includes(user?.role) && <Link to="/jobs">Jobs</Link>}
+          {['Admin', 'HR', 'Interviewer'].includes(user?.role) && <Link to="/jobs">Jobs</Link>}
           {['Admin', 'HR'].includes(user?.role) && <Link to="/candidates">Candidates</Link>}
           <Link to="/interviews">Interviews</Link>
           {user?.role === 'Admin' && <Link to="/users">Users</Link>}
@@ -82,13 +82,16 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Dashboard token={token} />} />
           <Route path="/jobs" element={
-            <ProtectedRoute user={user} roles={['Admin', 'HR']}>
-              <Jobs token={token} />
+            <ProtectedRoute user={user} roles={['Admin', 'HR', 'Interviewer']}>
+              <Jobs
+                token={token}
+                user={user}
+              />
             </ProtectedRoute>
           } />
           <Route path="/candidates" element={
-            <ProtectedRoute user={user} roles={['Admin', 'HR']}>
-              <Candidates token={token} />
+            <ProtectedRoute user={user} roles={['Admin', 'HR', 'Interviewer']}>
+              <Candidates token={token} user={user} />
             </ProtectedRoute>
           } />
           <Route path="/interviews" element={<Interviews token={token} user={user} />} />
