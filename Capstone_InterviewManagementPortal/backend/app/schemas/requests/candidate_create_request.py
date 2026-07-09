@@ -33,6 +33,9 @@ class CandidateCreateRequest(BaseModel):
     @classmethod
     def reject_strange_characters(cls, v: str) -> str:
         # Enforce that the local part only contains normal letters, numbers, dots
+        v = v.strip()
+        if not v:
+            raise ValueError("Email cannot be blank")
         local_part = v.split("@")[0]
         if not re.match(r"^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$", local_part):
             raise ValueError(
@@ -43,6 +46,9 @@ class CandidateCreateRequest(BaseModel):
     @field_validator("mobile")
     @classmethod
     def mobile_must_be_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Mobile number cannot be blank")
         # Remove spaces and hyphens
         digits = re.sub(r"[\s\-]", "", v)
 

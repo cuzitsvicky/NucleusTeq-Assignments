@@ -6,6 +6,7 @@ from .requests import (
     CandidateUpdateRequest,
     JobCreateRequest,
     InterviewCreateRequest,
+    InterviewUpdateRequest,
     FeedbackSubmitRequest,
     LoginRequest,
     CandidateCreateRequest

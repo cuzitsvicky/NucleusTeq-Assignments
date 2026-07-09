@@ -27,7 +27,7 @@ from ..schemas import (
 from ..enums import UserRole
 from ..services import candidate_service
 from ..utils import require_roles
-from ..validators import (validate_resume_extension)
+from ..validators import validate_resume_extension
 from .auth import check_password_reset
 
 router = APIRouter()
@@ -35,7 +35,9 @@ logger = logging.getLogger(__name__)
 
 
 # Endpoint to create a new candidate with resume upload
-@router.post("/", response_model=MessageWithIdResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=MessageWithIdResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_candidate(
     first_name: str = Form(...),
     last_name: str = Form(...),
@@ -47,18 +49,18 @@ async def create_candidate(
     resume: UploadFile = File(...),
     current_user: dict = Depends(check_password_reset),
 ):
-    
+
     require_roles(current_user, {UserRole.HR})
 
     candidate_request = CandidateCreateRequest(
-    first_name=first_name,
-    last_name=last_name,
-    email=email,
-    mobile=mobile,
-    current_company=current_company,
-    total_experience=total_experience,
-    applied_job_id=applied_job_id,
-)
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        mobile=mobile,
+        current_company=current_company,
+        total_experience=total_experience,
+        applied_job_id=applied_job_id,
+    )
 
     validate_resume_extension(resume.filename)
 
@@ -73,18 +75,20 @@ async def create_candidate(
     resume_id = await candidate_service.upload_resume(resume.filename, resume_bytes)
 
     candidate = {
-       "first_name": candidate_request.first_name,
-       "last_name": candidate_request.last_name,
-       "email": candidate_request.email,
-       "mobile": candidate_request.mobile,
-       "current_company": candidate_request.current_company,
-       "total_experience": candidate_request.total_experience,
-       "applied_job_id": candidate_request.applied_job_id,
-       "resume_id": resume_id,
-       "resume_filename": resume.filename,
+        "first_name": candidate_request.first_name,
+        "last_name": candidate_request.last_name,
+        "email": candidate_request.email,
+        "mobile": candidate_request.mobile,
+        "current_company": candidate_request.current_company,
+        "total_experience": candidate_request.total_experience,
+        "applied_job_id": candidate_request.applied_job_id,
+        "resume_id": resume_id,
+        "resume_filename": resume.filename,
     }
 
-    candidate_id = await candidate_service.create_candidate(candidate, current_user["email"])
+    candidate_id = await candidate_service.create_candidate(
+        candidate, current_user["email"]
+    )
 
     return MessageWithIdResponse(
         message="Candidate created successfully",
@@ -183,7 +187,9 @@ async def update_status(
 
 
 # Get the status history for a specific candidate with pagination
-@router.get("/{candidate_id}/history", response_model=PaginatedResponse[StatusHistoryResponse])
+@router.get(
+    "/{candidate_id}/history", response_model=PaginatedResponse[StatusHistoryResponse]
+)
 async def get_history(
     candidate_id: str,
     page: int = Query(1, ge=1),

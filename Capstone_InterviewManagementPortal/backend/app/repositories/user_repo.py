@@ -4,45 +4,41 @@ from ..enums import UserRole
 from ..utils.pagination import paginate_collection
 from ..utils import normalize_email
 
+
 # Function to get a user by email, ensuring the email is stripped of whitespace and converted to lowercase for consistency.
 async def get_user_by_email(email: str):
     return await db.users.find_one({"email": normalize_email(email)})
+
 
 # Get a user by their unique ID, ensuring the ID is valid before querying the database.
 async def get_user_by_id(user_id: str):
     if not ObjectId.is_valid(user_id):
         return None
-
     return await db.users.find_one({"_id": ObjectId(user_id)})
+
 
 # Function to create a new user in the database
 async def create_user(user_data: dict):
     user_data.setdefault("reset_required", True)
-
     result = await db.users.insert_one(user_data)
-
     return str(result.inserted_id)
 
 
 # Function to get all users with optional filters and pagination
 async def get_all_users(page: int = 1, limit: int = 10, name: str = "", role: str = ""):
-
     query = {}
-
     if name:
         query["name"] = {
             "$regex": name.strip(),
             "$options": "i",
         }
-
     if role:
         query["role"] = role
-
     return await paginate_collection(db.users, query, page, limit, sort=("_id", -1))
+
 
 # Function to update a user's information in the database
 async def update_user(user_id: str, user_data: dict):
-    
     result = await db.users.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": user_data},
@@ -50,9 +46,8 @@ async def update_user(user_id: str, user_data: dict):
 
     return result.modified_count
 
+
 # Function to get active interviewers with pagination
 async def get_active_interviewers(page: int = 1, limit: int = 10):
-
     query = {"role": UserRole.INTERVIEWER.value, "active": True}
-
     return await paginate_collection(db.users, query, page, limit, sort=("_id", -1))

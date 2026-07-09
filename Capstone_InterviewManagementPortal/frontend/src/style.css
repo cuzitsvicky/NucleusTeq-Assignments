@@ -407,6 +407,31 @@ button:disabled {
   min-height: 38px;
 }
 
+.interview-action-cell {
+  vertical-align: middle;
+}
+
+.interview-actions {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  min-height: 38px;
+}
+
+.interview-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 8px 12px;
+}
+
+.interview-actions span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+}
+
 .pagination {
   display: flex;
   justify-content: center;

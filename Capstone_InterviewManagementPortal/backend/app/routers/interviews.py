@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query, status
 from ..schemas import (
     FeedbackSubmitRequest,
     InterviewCreateRequest,
+    InterviewUpdateRequest,
     InterviewResponse,
     MessageResponse,
     MessageWithIdResponse,
@@ -22,12 +23,24 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def schedule_interview(interview: InterviewCreateRequest, current_user: dict = Depends(check_password_reset)):
-
     require_roles(current_user, {UserRole.HR})
-    
     interview_id = await interview_service.schedule_interview(interview.model_dump(), current_user["email"])
-
     return MessageWithIdResponse(message="Interview scheduled", id=interview_id)
+
+
+@router.put(
+    "/{interview_id}",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def update_interview_schedule(
+    interview_id: str,
+    interview: InterviewUpdateRequest,
+    current_user: dict = Depends(check_password_reset),
+):
+    require_roles(current_user, {UserRole.HR})
+    await interview_service.update_interview_schedule(interview_id, interview.model_dump())
+    return MessageResponse(message="Interview updated")
 
 
 # Endpoint to get a list of interviews with optional filters and pagination
@@ -53,7 +66,5 @@ async def submit_feedback(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.INTERVIEWER}, "Only interviewers can submit feedback")
-
     await interview_service.submit_feedback(interview_id, feedback.model_dump(), current_user["email"])
-
     return MessageResponse(message="Feedback submitted successfully")

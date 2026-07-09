@@ -1,7 +1,8 @@
+import { Pencil } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateFormat.js';
 import { canSubmitFeedback } from '../../utils/interviewHelpers.js';
 
-export default function InterviewsTable({ interviews, user, onViewFeedback, onStartFeedback }) {
+export default function InterviewsTable({ interviews, user, onViewFeedback, onStartFeedback, onEdit }) {
   return (
     <table>
       <thead><tr><th>Candidate</th><th>Job</th><th>Date</th><th>Interviewer</th><th>Status</th><th>Feedback</th></tr></thead>
@@ -16,16 +17,19 @@ export default function InterviewsTable({ interviews, user, onViewFeedback, onSt
               <td>{formatDateTime(item.interview_date, item.interview_time)}</td>
               <td>{item.interviewer_email}</td>
               <td>{item.status}</td>
-              <td>
-                {item.feedback ? (
-                  <div className="actions"><button type="button" onClick={() => onViewFeedback(item)}>View</button></div>
-                ) : user?.role === 'Interviewer' ? (
-                  <div className="actions">
+              <td className="interview-action-cell">
+                <div className="actions interview-actions">
+                  {item.feedback ? (
+                    <button type="button" onClick={() => onViewFeedback(item)}>View</button>
+                  ) : user?.role === 'Interviewer' ? (
                     <button type="button" disabled={!canSubmitFeedback(item)} title={!canSubmitFeedback(item) ? 'Available after scheduled time' : ''} onClick={() => onStartFeedback(item)}>Add</button>
-                  </div>
-                ) : (
-                  'Pending'
-                )}
+                  ) : (
+                    <span>Pending</span>
+                  )}
+                  {user?.role === 'HR' && item.status !== 'COMPLETED' && (
+                    <button type="button" title="Edit interview" onClick={() => onEdit(item)}><Pencil size={16} />Edit</button>
+                  )}
+                </div>
               </td>
             </tr>
           ))

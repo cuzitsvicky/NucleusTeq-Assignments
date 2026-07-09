@@ -2,7 +2,7 @@ import pytest
 
 from app.exceptions import ForbiddenException
 from app.routers import interviews
-from app.schemas import FeedbackSubmitRequest, InterviewCreateRequest
+from app.schemas import FeedbackSubmitRequest, InterviewCreateRequest, InterviewUpdateRequest
 from tests.conftest import async_return
 
 
@@ -31,6 +31,34 @@ async def test_get_interviews(monkeypatch, interviewer_user):
     result = await interviews.get_interviews(current_user=interviewer_user)
 
     assert result == {"data": []}
+
+
+@pytest.mark.asyncio
+async def test_update_interview_schedule_requires_hr(admin_user, object_ids, interview_payload):
+    payload = InterviewUpdateRequest(**{
+        "interview_date": interview_payload["interview_date"],
+        "interview_time": interview_payload["interview_time"],
+        "focus_areas": "Python",
+    })
+
+    with pytest.raises(ForbiddenException):
+        await interviews.update_interview_schedule(object_ids.interview, payload, admin_user)
+
+
+@pytest.mark.asyncio
+async def test_update_interview_schedule_success(monkeypatch, hr_user, object_ids, interview_payload):
+    update = async_return(None)
+    monkeypatch.setattr(interviews.interview_service, "update_interview_schedule", update)
+    payload = InterviewUpdateRequest(**{
+        "interview_date": interview_payload["interview_date"],
+        "interview_time": interview_payload["interview_time"],
+        "focus_areas": "Python",
+    })
+
+    result = await interviews.update_interview_schedule(object_ids.interview, payload, hr_user)
+
+    assert result.message == "Interview updated"
+    update.assert_awaited_once()
 
 
 @pytest.mark.asyncio

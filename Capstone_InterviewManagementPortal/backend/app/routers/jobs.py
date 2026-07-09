@@ -12,14 +12,16 @@ from ..utils import require_roles
 
 router = APIRouter()
 
+
 # Endpoint to create a new job posting
 @router.post("/", response_model=JobResponse)
-async def create_job(job: JobCreateRequest, current_user: dict = Depends(check_password_reset)):
+async def create_job(
+    job: JobCreateRequest, current_user: dict = Depends(check_password_reset)
+):
     require_roles(current_user, {UserRole.HR})
-
     new_job = await job_service.create_job(job.model_dump())
-
     return JobResponse(**new_job)
+
 
 # Endpoint to get a list of jobs with optional filters and pagination
 @router.get("/", response_model=PaginatedResponse[JobResponse])
@@ -41,24 +43,25 @@ async def get_jobs(
         experience=experience,
     )
 
+
 # Endpoint to get a specific job by ID
 @router.get("/{job_id}", response_model=JobResponse)
 async def get_job(job_id: str, current_user: dict = Depends(check_password_reset)):
     if not ObjectId.is_valid(job_id):
         raise BadRequestException("Invalid job ID format")
-
     job = await job_service.get_job_by_id(job_id)
-
     return JobResponse(**job)
+
 
 # Endpoint to update a specific job by ID
 @router.put("/{job_id}", response_model=MessageResponse)
-async def update_job(job_id: str, job: JobCreateRequest, current_user: dict = Depends(check_password_reset)):
+async def update_job(
+    job_id: str,
+    job: JobCreateRequest,
+    current_user: dict = Depends(check_password_reset),
+):
     require_roles(current_user, {UserRole.HR})
-
     if not ObjectId.is_valid(job_id):
         raise BadRequestException("Invalid job ID format")
-
     await job_service.update_job(job_id, job.model_dump())
-
     return MessageResponse(message="Job updated")

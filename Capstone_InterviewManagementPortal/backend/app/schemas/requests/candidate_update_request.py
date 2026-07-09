@@ -27,11 +27,17 @@ class CandidateUpdateRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def email_lowercase(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Email cannot be blank")
         return normalize_email(v)
 
     @field_validator("mobile")
     @classmethod
     def mobile_must_be_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Mobile number cannot be blank")
         # Remove spaces and hyphens
         digits = re.sub(r"[\s\-]", "", v)
 

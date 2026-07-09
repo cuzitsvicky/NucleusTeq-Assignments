@@ -36,6 +36,18 @@ def test_ensure_interview_time_has_started_rejects_invalid_schedule():
     assert exc.value.detail == "Interview schedule is invalid"
 
 
+def test_ensure_schedule_is_future_blocks_past_time():
+    past = datetime.now() - timedelta(minutes=5)
+
+    with pytest.raises(BadRequestException) as exc:
+        interview_service.ensure_schedule_is_future({
+            "interview_date": past.strftime("%Y-%m-%d"),
+            "interview_time": past.strftime("%H:%M"),
+        })
+
+    assert exc.value.detail == "Interview date and time must be in the future"
+
+
 @pytest.mark.asyncio
 async def test_schedule_interview_success(monkeypatch, interview_payload):
     monkeypatch.setattr(interview_service.candidate_repo, "get_candidate_by_id", async_return({"status": "PROFILE_CREATED"}))
@@ -167,6 +179,36 @@ async def test_get_interviews_handles_missing_related_data(monkeypatch, object_i
     assert result["data"][0]["candidate_name"] == "Unknown"
     assert result["data"][0]["job_title"] == "Unknown"
     assert result["data"][0]["feedback"] is None
+
+
+@pytest.mark.asyncio
+async def test_update_interview_schedule_success(monkeypatch, object_ids):
+    future = datetime.now() + timedelta(days=1)
+    update = async_return(1)
+    monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_id", async_return({"status": "SCHEDULED"}))
+    monkeypatch.setattr(interview_service.interview_repo, "update_interview_schedule", update)
+    payload = {
+        "interview_date": future.strftime("%Y-%m-%d"),
+        "interview_time": future.strftime("%H:%M"),
+        "focus_areas": "React",
+    }
+
+    await interview_service.update_interview_schedule(object_ids.interview, payload)
+
+    update.assert_awaited_once_with(object_ids.interview, payload)
+
+
+@pytest.mark.asyncio
+async def test_update_interview_schedule_rejects_completed(monkeypatch, object_ids):
+    future = datetime.now() + timedelta(days=1)
+    monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_id", async_return({"status": "COMPLETED"}))
+
+    with pytest.raises(ConflictException):
+        await interview_service.update_interview_schedule(object_ids.interview, {
+            "interview_date": future.strftime("%Y-%m-%d"),
+            "interview_time": future.strftime("%H:%M"),
+            "focus_areas": "React",
+        })
 
 
 @pytest.mark.asyncio

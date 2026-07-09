@@ -109,6 +109,10 @@ export const apiService = {
     method: 'POST',
     body: JSON.stringify(data)
   }, token),
+  updateInterview: (token, id, data) => apiRequest(`/api/interviews/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }, token),
   submitFeedback: (token, id, data) => apiRequest(`/api/interviews/${id}/feedback`, {
     method: 'POST',
     body: JSON.stringify(data)

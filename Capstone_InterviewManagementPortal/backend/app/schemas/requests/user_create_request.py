@@ -29,6 +29,8 @@ class UserCreateRequest(BaseModel):
     @classmethod
     def email_must_be_nucleusteq(cls, v: str) -> str:
         v = normalize_email(v)
+        if not v:
+            raise ValueError("Email cannot be blank")
         if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
             raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
         return v
@@ -47,6 +49,9 @@ class UserCreateRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def password_must_be_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Password cannot be blank")
         if not (6 <= len(v) <= 12):
             raise ValueError("Password must be between 6 and 12 characters")
         if not re.search(r"[A-Za-z]", v):

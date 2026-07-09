@@ -129,6 +129,20 @@ async def test_update_interview_status(monkeypatch, object_ids):
 
 
 @pytest.mark.asyncio
+async def test_update_interview_schedule(monkeypatch, object_ids):
+    interviews = FakeCollection()
+    monkeypatch.setattr(interview_repo, "db", SimpleNamespace(interviews=interviews))
+    data = {"interview_time": "14:00", "focus_areas": "React"}
+
+    result = await interview_repo.update_interview_schedule(object_ids.interview, data)
+
+    assert result == 1
+    assert interviews.update_calls == [
+        ({"_id": ObjectId(object_ids.interview)}, {"$set": data})
+    ]
+
+
+@pytest.mark.asyncio
 async def test_create_and_get_feedback(monkeypatch):
     feedback = FakeCollection(find_one_result={"interview_id": "i1"})
     monkeypatch.setattr(interview_repo, "db", SimpleNamespace(feedback=feedback))
