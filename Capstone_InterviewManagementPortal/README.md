@@ -13,7 +13,7 @@ The **Interview Management Portal** is a secure, role-restricted, end-to-end rec
 *   **Stateful Candidate Validation**: Enforces candidate state transitions through a logical pipeline:
     $$\text{PROFILE\_CREATED} \rightarrow \text{INTERVIEW\_SCHEDULED} \rightarrow \text{INTERVIEW\_COMPLETED} \rightarrow \text{SELECTED / REJECTED}$$
     Reversions and illegal status jumps are blocked by the backend validator.
-*   **Scheduling System**: HR can schedule and reschedule interviews with active interviewers at future date/times. The system prevents double-booking an interviewer on the same date for the same candidate.
+*   **Scheduling System**: HR can schedule and reschedule interviews with active interviewers at future date/times. The system prevents double-booking an interviewer at the same date and time.
 *   **Evaluation & Ratings**: Interviewers submit scored feedback (Technical, Communication, and Problem Solving on a 1-5 scale), tech topics covered, comments, and a selection recommendation after the scheduled interview time starts.
 *   **Deactivation Safeguards**: Admins cannot deactivate Interviewers who have pending future interviews.
 
