@@ -240,10 +240,21 @@ p {
 }
 
 .form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;
+  width: min(520px, 90vw); padding: 30px; border-radius: 12px;
+  box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 14px;
+  max-height: 90vh; overflow-y: auto;
 }
+section:has(.form)::before {
+  content: ""; position: fixed; inset: 0; z-index: 999;
+  background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px);
+}
+.close-mode, .form .add-btn {
+  position: fixed; top: 24px; right: 24px; z-index: 1001;
+  background: var(--danger); border-color: var(--danger);
+  width: auto !important;
+}
+.form > div, .form > label { display: flex; flex-direction: column; gap: 4px; }
 
 form.row {
   margin-top: 18px;

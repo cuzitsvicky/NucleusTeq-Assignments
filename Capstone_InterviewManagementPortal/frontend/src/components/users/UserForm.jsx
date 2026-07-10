@@ -13,7 +13,7 @@ export default function UserForm({ form, editingId, active, setActive, onChange,
   return (
     <form onSubmit={onSubmit} className="form">
       {/* Full Name input field with text formatting pattern */}
-      <input 
+      <div><label>Full Name</label><input 
         name="name" 
         placeholder="Name" 
         value={form.name} 
@@ -23,11 +23,11 @@ export default function UserForm({ form, editingId, active, setActive, onChange,
         maxLength="99" 
         pattern={NAME_PATTERN} 
         title="Only letters and spaces are allowed" 
-      />
+      /></div>
 
       {/* Email input field (visible only when creating a new user) */}
       {!editingId && (
-        <input 
+        <div><label>Email</label><input 
           name="email" 
           type="email" 
           placeholder="email@nucleusteq.com" 
@@ -36,12 +36,12 @@ export default function UserForm({ form, editingId, active, setActive, onChange,
           required 
           pattern={NUCLEUSTEQ_EMAIL_PATTERN} 
           title="Use a valid nucleusteq.com email. The local part can contain letters, numbers, and dots only" 
-        />
+        /></div>
       )}
 
       {/* Password input field (visible only when creating a new user) */}
       {!editingId && (
-        <div className="password-input">
+        <div><label>Password</label><div className="password-input">
           <input 
             name="password" 
             type={showPassword ? 'text' : 'password'} 
@@ -61,22 +61,22 @@ export default function UserForm({ form, editingId, active, setActive, onChange,
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
-        </div>
+        </div></div>
       )}
 
       {/* User Role dropdown selector */}
-      <select name="role" value={form.role} onChange={onChange} required>
+      <div><label>User Role</label><select name="role" value={form.role} onChange={onChange} required>
         <option>Admin</option>
         <option>HR</option>
         <option>Interviewer</option>
-      </select>
+      </select></div>
 
       {/* Account status dropdown selector (visible only when updating an existing user) */}
       {editingId && (
-        <select value={String(active)} onChange={e => setActive(e.target.value === 'true')} required>
+        <div><label>Account Status</label><select value={String(active)} onChange={e => setActive(e.target.value === 'true')} required>
           <option value="true">Active</option>
           <option value="false">Inactive</option>
-        </select>
+        </select></div>
       )}
 
       {/* Dynamic button labels based on create/edit modes */}

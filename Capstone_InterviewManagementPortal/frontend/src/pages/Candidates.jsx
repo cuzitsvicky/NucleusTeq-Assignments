@@ -208,7 +208,7 @@ export default function Candidates({ token, user }) {
       <div className="page-head">
         <h1>Candidates</h1>
         {user?.role === 'HR' && (
-          <button className="add-btn" onClick={showForm ? closeForm : () => setShowForm(true)}>
+          <button className={`add-btn ${showForm ? 'close-mode' : ''}`} onClick={showForm ? closeForm : () => setShowForm(true)}>
             {showForm ? 'Close' : <><Plus size={18} />Add Candidate</>}
           </button>
         )}

@@ -144,7 +144,7 @@ export default function Jobs({ token, user }) {
       <div className="page-head">
         <h1>Jobs</h1>
         {user?.role === 'HR' && (
-          <button className="add-btn" onClick={showForm ? closeForm : () => setShowForm(true)}>
+          <button className={`add-btn ${showForm ? 'close-mode' : ''}`} onClick={showForm ? closeForm : () => setShowForm(true)}>
             {showForm ? 'Close' : <><Plus size={18} />Add Job</>}
           </button>
         )}

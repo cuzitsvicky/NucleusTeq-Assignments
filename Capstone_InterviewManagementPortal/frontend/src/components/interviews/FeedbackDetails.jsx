@@ -7,7 +7,7 @@ export default function FeedbackDetails({ feedback, title, onClose }) {
   if (!feedback) return null;
 
   return (
-    <div className="box">
+    <div className="form">
       <div className="page-head">
         <h2>Feedback</h2>
         <button className="add-btn" type="button" onClick={onClose}>Close</button>
