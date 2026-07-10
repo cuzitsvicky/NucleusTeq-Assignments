@@ -1,13 +1,25 @@
+/**
+ * JobsTable component.
+ * Renders a tabular list of job postings, showing job details, roles, skills,
+ * experience, type, and location. Provides edit controls for HR users.
+ */
 export default function JobsTable({ jobs, user, onEdit }) {
   return (
     <table>
       <thead>
         <tr>
-          <th>Title</th><th>Details</th><th>Role</th><th>Skills</th>
-          <th>Experience</th><th>Type</th><th>Location</th><th>Actions</th>
+          <th>Title</th>
+          <th>Details</th>
+          <th>Role</th>
+          <th>Skills</th>
+          <th>Experience</th>
+          <th>Type</th>
+          <th>Location</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
+        {/* Render fallback empty state if no job records are present */}
         {jobs.length === 0 ? (
           <tr>
             <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
@@ -25,6 +37,7 @@ export default function JobsTable({ jobs, user, onEdit }) {
               <td>{job.employment_type}</td>
               <td>{job.location}</td>
               <td>
+                {/* Omit edit action controls unless the authenticated user is an HR staff */}
                 {user?.role === 'HR' ? (
                   <div className="actions">
                     <button type="button" onClick={() => onEdit(job)}>Edit</button>

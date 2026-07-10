@@ -10,22 +10,39 @@ import useDebouncedValue from '../hooks/useDebouncedValue.js';
 import { emptyJob, emptyJobFilters, jobsAreEqual } from '../utils/jobHelpers.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
 
+/**
+ * Jobs management page component.
+ * Allows HR users to create, modify, and search jobs,
+ * while allowing other authenticated roles to view available jobs.
+ */
 export default function Jobs({ token, user }) {
+  // Main job list and pagination states
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
   const [loading, setLoading] = useState(false);
+
+  // Form inputs and unmodified backups (to track unsaved changes)
   const [form, setForm] = useState(emptyJob);
   const [originalForm, setOriginalForm] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState('');
+  const [editingId, setEditingId] = useState(''); // ID of the job listing currently being edited
+
+  // Search filter options state
   const [filters, setFilters] = useState(emptyJobFilters);
+
+  // Alerts feedback messaging states
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+
+  // Debounce search filters to minimize heavy API calls on rapid keyboard inputs
   const debouncedName = useDebouncedValue(filters.name);
   const debouncedLocation = useDebouncedValue(filters.location);
   const debouncedExperience = useDebouncedValue(filters.experience);
 
+  /**
+   * Fetches job listings from the backend based on query filters and page details.
+   */
   function load(nextPage = page) {
     setLoading(true);
     apiService.getJobs(token, nextPage, pagination.limit, {
@@ -45,19 +62,29 @@ export default function Jobs({ token, user }) {
     });
   }
 
+  // Refresh data whenever search filters or pagination settings change
   useEffect(() => {
     setPage(1);
     load(1);
   }, [token, debouncedName, filters.employment_type, debouncedLocation, debouncedExperience]);
 
+  /**
+   * Event handler for form input changes.
+   */
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  /**
+   * Event handler for search filter input changes.
+   */
   function changeFilter(e) {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   }
 
+  /**
+   * Clears form states and hides the creation/editing form view.
+   */
   function closeForm() {
     setForm(emptyJob);
     setOriginalForm(null);
@@ -65,8 +92,13 @@ export default function Jobs({ token, user }) {
     setShowForm(false);
   }
 
+  /**
+   * Handles form submit for creating or updating a job posting.
+   */
   async function submit(e) {
     e.preventDefault();
+    
+    // Prevent submissions if no field values were modified in edit mode
     if (editingId && originalForm && jobsAreEqual(form, originalForm)) {
       setMessageType('info');
       setMessage('No changes to update');
@@ -86,6 +118,9 @@ export default function Jobs({ token, user }) {
     }
   }
 
+  /**
+   * Populates the form inputs with details of a job to enable update mode.
+   */
   function editJob(job) {
     const nextForm = {
       title: job.title,
@@ -105,6 +140,7 @@ export default function Jobs({ token, user }) {
 
   return (
     <section>
+      {/* Page Header */}
       <div className="page-head">
         <h1>Jobs</h1>
         {user?.role === 'HR' && (
@@ -113,11 +149,23 @@ export default function Jobs({ token, user }) {
           </button>
         )}
       </div>
+
+      {/* Global alert feedback messages */}
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       {loading && <p>Loading...</p>}
+
+      {/* Search filters options bar */}
       <JobFilters filters={filters} onChange={changeFilter} onClear={() => setFilters(emptyJobFilters)} />
-      {user?.role === 'HR' && showForm && <JobForm form={form} editingId={editingId} onChange={change} onSubmit={submit} />}
+
+      {/* Creation/Editing form (available to HR only) */}
+      {user?.role === 'HR' && showForm && (
+        <JobForm form={form} editingId={editingId} onChange={change} onSubmit={submit} />
+      )}
+
+      {/* Primary job details table */}
       <JobsTable jobs={jobs} user={user} onEdit={editJob} />
+
+      {/* Pagination control footer */}
       <Pagination pagination={pagination} loading={loading} onPageChange={load} />
     </section>
   );

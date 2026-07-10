@@ -10,24 +10,43 @@ import Pagination from '../components/Pagination.jsx';
 import { canSubmitFeedback, emptyFeedback, emptyInterview } from '../utils/interviewHelpers.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
 
+/**
+ * Interviews management container page.
+ * Manages states and actions for scheduling interviews, editing schedules, 
+ * submitting evaluation feedback (Interviewers only), and viewing feedback details.
+ */
 export default function Interviews({ token, user }) {
+  // Main interview logs list and pagination state
   const [interviews, setInterviews] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
   const [loading, setLoading] = useState(false);
+
+  // Lists of options needed for scheduling forms
   const [candidates, setCandidates] = useState([]);
   const [interviewers, setInterviewers] = useState([]);
+
+  // Form states for scheduling & feedback
   const [form, setForm] = useState(emptyInterview);
   const [feedback, setFeedback] = useState(emptyFeedback);
-  const [activeId, setActiveId] = useState('');
+  const [activeId, setActiveId] = useState(''); // ID of the interview currently being graded
+
+  // Modal display states for existing feedback details
   const [viewFeedback, setViewFeedback] = useState(null);
   const [viewFeedbackTitle, setViewFeedbackTitle] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState('');
+  const [editingId, setEditingId] = useState(''); // ID of the interview schedule being updated
+
+  // Alerts feedback messaging states
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+
+  // Prevent selecting dates in the past when scheduling interviews
   const minInterviewDate = new Date().toISOString().slice(0, 10);
 
+  /**
+   * Fetches interviews list with pagination.
+   */
   function load(nextPage = page) {
     setLoading(true);
     apiService.getInterviews(token, nextPage, pagination.limit).then(response => {
@@ -42,8 +61,10 @@ export default function Interviews({ token, user }) {
     });
   }
 
+  // Load interviews log list on mount or auth token updates
   useEffect(load, [token]);
 
+  // Load selection details (candidates & active interviewers list) for Admin and HR users only
   useEffect(() => {
     if (user?.role === 'Interviewer') return;
 
@@ -57,10 +78,16 @@ export default function Interviews({ token, user }) {
     });
   }, [token, user?.role]);
 
+  /**
+   * Event handler for scheduling form text and option changes.
+   */
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  /**
+   * Event handler that autofills job title and job ID when a candidate is chosen.
+   */
   function candidateChange(e) {
     const candidate = candidates.find(item => item.id === e.target.value);
     setForm({
@@ -71,20 +98,30 @@ export default function Interviews({ token, user }) {
     });
   }
 
+  /**
+   * Resets and hides the scheduling form.
+   */
   function closeForm() {
     setEditingId('');
     setForm(emptyInterview);
     setShowForm(false);
   }
 
+  /**
+   * Event handler for feedback form rating values and textual feedback.
+   */
   function feedbackChange(e) {
     const value = e.target.type === 'number' ? Number(e.target.value) : e.target.value;
     setFeedback({ ...feedback, [e.target.name]: value });
   }
 
+  /**
+   * Submits scheduled or updated interview details to backend.
+   */
   async function schedule(e) {
     e.preventDefault();
     const isEditing = Boolean(editingId);
+    // Limit request body keys when modifying an existing schedule
     const updateData = {
       interview_date: form.interview_date,
       interview_time: form.interview_time,
@@ -104,6 +141,9 @@ export default function Interviews({ token, user }) {
     }
   }
 
+  /**
+   * Submits candidate feedback to the backend (Interviewer authorization required).
+   */
   async function submitFeedback(e) {
     e.preventDefault();
     if (user?.role !== 'Interviewer') {
@@ -126,17 +166,27 @@ export default function Interviews({ token, user }) {
     }
   }
 
+  /**
+   * Opens the feedback details view model for a scheduled interview.
+   */
   function openFeedback(item) {
     setActiveId('');
     setViewFeedback(item.feedback);
     setViewFeedbackTitle(`${item.candidate_name} - ${item.job_title}`);
   }
 
+  /**
+   * Closes the feedback details view model.
+   */
   function closeFeedback() {
     setViewFeedback(null);
     setViewFeedbackTitle('');
   }
 
+  /**
+   * Initializes evaluation mode by opening the feedback submission form
+   * once the scheduled time has arrived.
+   */
   function startFeedback(item) {
     if (!canSubmitFeedback(item)) {
       setMessageType('error');
@@ -148,6 +198,9 @@ export default function Interviews({ token, user }) {
     setActiveId(item.id);
   }
 
+  /**
+   * Populates form and enables update mode for a scheduled interview.
+   */
   function editInterview(item) {
     closeFeedback();
     closeFeedbackForm();
@@ -164,11 +217,17 @@ export default function Interviews({ token, user }) {
     setShowForm(true);
   }
 
+  /**
+   * Hides the evaluation form and resets grading criteria state.
+   */
   function closeFeedbackForm() {
     setActiveId('');
     setFeedback(emptyFeedback);
   }
 
+  /**
+   * Retrieves resume blob and triggers a browser window download.
+   */
   async function openResume(candidateId) {
     try {
       window.open(await apiService.downloadResume(token, candidateId), '_blank');
@@ -180,6 +239,7 @@ export default function Interviews({ token, user }) {
 
   return (
     <section>
+      {/* Page Header */}
       <div className="page-head">
         <h1>Interviews</h1>
         {user?.role === 'HR' && (
@@ -188,14 +248,26 @@ export default function Interviews({ token, user }) {
           </button>
         )}
       </div>
+
+      {/* Dynamic system notifications */}
       <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       {loading && <p>Loading...</p>}
+
+      {/* Scheduling form (visible to HR when scheduling or rescheduling) */}
       {user?.role !== 'Interviewer' && showForm && (
         <InterviewScheduleForm form={form} candidates={candidates} interviewers={interviewers} minInterviewDate={minInterviewDate} isEditing={Boolean(editingId)} onCandidateChange={candidateChange} onChange={change} onSubmit={schedule} />
       )}
+
+      {/* Scheduled interviews listings table */}
       <InterviewsTable interviews={interviews} user={user} onViewFeedback={openFeedback} onStartFeedback={startFeedback} onOpenResume={openResume} onEdit={editInterview} />
+
+      {/* Pagination control footer */}
       <Pagination pagination={pagination} loading={loading} onPageChange={load} />
+
+      {/* Detailed Modal/Panel displaying submitted candidate feedback */}
       <FeedbackDetails feedback={viewFeedback} title={viewFeedbackTitle} onClose={closeFeedback} />
+
+      {/* Feedback entry form modal/panel */}
       <FeedbackForm activeId={activeId} user={user} feedback={feedback} onChange={feedbackChange} onSubmit={submitFeedback} onClose={closeFeedbackForm} />
     </section>
   );

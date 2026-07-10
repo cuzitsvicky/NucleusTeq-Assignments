@@ -3,12 +3,22 @@ import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
 import { BriefcaseBusiness, Eye, EyeOff } from 'lucide-react';
 
+/**
+ * Login screen component.
+ * Collects email and password inputs, performs user validation against backend API,
+ * and calls the authentication callback upon success.
+ */
 export default function Login({ onLogin }) {
+  // Input fields, validation errors, and toggle states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Controls password visibility mask
 
+  /**
+   * Submits credentials to the backend login service.
+   * Invokes the successful login callback upon receiving a valid response.
+   */
   async function submit(e) {
     e.preventDefault();
     setError('');
@@ -22,18 +32,24 @@ export default function Login({ onLogin }) {
   return (
     <main className="center">
       <div className="login-panel">
+        {/* Workspace details side panel */}
         <div className="login-copy">
           <BriefcaseBusiness size={42} />
           <h1>Talent Flow</h1>
           <p>Manage jobs, candidates, interviews, and feedback from one focused workspace.</p>
         </div>
+
+        {/* Credentials Form */}
         <form className="box" onSubmit={submit}>
           <h2>Sign in</h2>
+          
+          {/* Dynamic validation error display */}
           <Alert message={error} type="error" onClose={() => setError('')} />
+          
           <label>Email</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+          
           <label>Password</label>
-
           <div className="password-input">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -41,6 +57,7 @@ export default function Login({ onLogin }) {
               onChange={e => setPassword(e.target.value)}
               required
             />
+            {/* Toggle button to switch password visibility between masked and plaintext */}
             <button
               type="button"
               className="password-toggle"

@@ -1,4 +1,9 @@
+/**
+ * FeedbackDetails component.
+ * Renders the evaluation details and feedback submitted for a candidate.
+ */
 export default function FeedbackDetails({ feedback, title, onClose }) {
+  // Render nothing if no feedback data is provided
   if (!feedback) return null;
 
   return (
@@ -7,6 +12,8 @@ export default function FeedbackDetails({ feedback, title, onClose }) {
         <h2>Feedback</h2>
         <button className="add-btn" type="button" onClick={onClose}>Close</button>
       </div>
+      
+      {/* Feedback metrics and textual notes display */}
       <p><b>Interview:</b> {title}</p>
       <p><b>Interviewer:</b> {feedback.interviewer_email}</p>
       <p><b>Technical Rating:</b> {feedback.technical_rating}</p>
