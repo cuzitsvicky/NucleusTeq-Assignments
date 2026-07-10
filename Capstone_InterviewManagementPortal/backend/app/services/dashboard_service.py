@@ -1,8 +1,12 @@
+import logging
 from ..repositories import dashboard_repo
 from ..enums import CandidateStatus, InterviewStatus, UserRole
 
+logger = logging.getLogger(__name__)
+
 
 async def get_stats(role: str, email: str):
+    logger.info("Fetching dashboard statistics for role: %s, user: %s", role, email)
     if role in {UserRole.ADMIN, UserRole.HR}:
         return {
             "role": role,

@@ -153,3 +153,29 @@ async def test_create_and_get_feedback(monkeypatch):
     assert feedback.inserted == [{"interview_id": "i1"}]
     assert result == {"interview_id": "i1"}
     assert feedback.find_one_calls == [{"interview_id": "i1"}]
+
+
+@pytest.mark.asyncio
+async def test_has_interviewer_conflict(monkeypatch, object_ids):
+    interviews = FakeCollection(find_one_result={"_id": ObjectId(object_ids.interview)})
+    monkeypatch.setattr(interview_repo, "db", SimpleNamespace(interviews=interviews))
+
+    # Test conflict found
+    result = await interview_repo.has_interviewer_conflict(
+        "interviewer@example.com", "2026-07-11", "14:30", exclude_interview_id=object_ids.interview
+    )
+    assert result is True
+    assert interviews.find_one_calls[0] == {
+        "interviewer_email": "interviewer@example.com",
+        "interview_date": "2026-07-11",
+        "interview_time": "14:30",
+        "status": interview_repo.InterviewStatus.SCHEDULED.value,
+        "_id": {"$ne": ObjectId(object_ids.interview)},
+    }
+
+    # Test conflict not found (no result returned)
+    interviews.find_one_result = None
+    result_no_conflict = await interview_repo.has_interviewer_conflict(
+        "interviewer@example.com", "2026-07-11", "14:30"
+    )
+    assert result_no_conflict is False

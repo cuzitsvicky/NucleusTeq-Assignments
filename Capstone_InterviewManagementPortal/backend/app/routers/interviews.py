@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, Query, status
 from ..schemas import (
     FeedbackSubmitRequest,
@@ -15,6 +16,7 @@ from .auth import check_password_reset
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Endpoint to schedule a new interview
 @router.post(
@@ -24,7 +26,9 @@ router = APIRouter()
 )
 async def schedule_interview(interview: InterviewCreateRequest, current_user: dict = Depends(check_password_reset)):
     require_roles(current_user, {UserRole.HR})
+    logger.info("API request to schedule interview for candidate ID: %s by HR user: %s", interview.candidate_id, current_user["email"])
     interview_id = await interview_service.schedule_interview(interview.model_dump(), current_user["email"])
+    logger.info("Interview scheduled successfully with ID: %s", interview_id)
     return MessageWithIdResponse(message="Interview scheduled", id=interview_id)
 
 
@@ -39,7 +43,9 @@ async def update_interview_schedule(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.HR})
+    logger.info("API request to update interview schedule for ID: %s by HR user: %s", interview_id, current_user["email"])
     await interview_service.update_interview_schedule(interview_id, interview.model_dump())
+    logger.info("Interview ID: %s schedule updated successfully", interview_id)
     return MessageResponse(message="Interview updated")
 
 
@@ -50,6 +56,7 @@ async def get_interviews(
     limit: int = Query(10, ge=1, le=100),
     current_user: dict = Depends(check_password_reset),
 ):
+    logger.info("API request to fetch interviews by user: %s (role: %s), page: %d, limit: %d", current_user["email"], current_user["role"], page, limit)
     return await interview_service.get_interviews(
         current_user["role"],
         current_user["email"],
@@ -66,5 +73,7 @@ async def submit_feedback(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.INTERVIEWER}, "Only interviewers can submit feedback")
+    logger.info("API request to submit feedback for interview ID: %s by interviewer: %s", interview_id, current_user["email"])
     await interview_service.submit_feedback(interview_id, feedback.model_dump(), current_user["email"])
+    logger.info("Feedback submitted successfully for interview ID: %s", interview_id)
     return MessageResponse(message="Feedback submitted successfully")

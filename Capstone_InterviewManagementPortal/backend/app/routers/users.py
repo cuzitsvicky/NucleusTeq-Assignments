@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, Query
 from ..exceptions import (
     ForbiddenException,
@@ -16,6 +17,7 @@ from ..utils import require_roles
 from .auth import check_password_reset
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 # Helper function to check if the user has Admin role
@@ -26,7 +28,9 @@ async def register(
     require_roles(
         current_user, {UserRole.ADMIN}, "Only admin can create users"
     )
+    logger.info("API request to register user: %s by Admin user: %s", user.email, current_user["email"])
     new_user = await user_service.register_user(user.model_dump())
+    logger.info("User %s registered successfully", user.email)
     return UserResponse(**new_user)
 
 
@@ -40,6 +44,7 @@ async def get_users(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.ADMIN})
+    logger.info("API request to fetch users by user: %s, page: %d, limit: %d", current_user["email"], page, limit)
     return await user_service.get_users(page, limit, name, role)
 
 
@@ -51,6 +56,7 @@ async def get_interviewers(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.ADMIN, UserRole.HR})
+    logger.info("API request to fetch active interviewers by user: %s, page: %d, limit: %d", current_user["email"], page, limit)
     return await user_service.get_active_interviewers(page, limit)
 
 
@@ -62,10 +68,14 @@ async def update_user(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.ADMIN})
+    logger.info("API request to update user ID: %s by Admin user: %s", user_id, current_user["email"])
     if str(current_user["_id"]) == user_id:
+        logger.warning("Admin user %s attempted to update their own account", current_user["email"])
         raise ForbiddenException("You cannot update your own account")
     target_user = await user_service.get_user_by_id(user_id)
     if not target_user:
+        logger.warning("User update failed. Target user ID: %s not found", user_id)
         raise NotFoundException("User not found")
     await user_service.update_user(user_id, user_update.model_dump())
+    logger.info("User ID: %s updated successfully", user_id)
     return MessageResponse(message="User updated")

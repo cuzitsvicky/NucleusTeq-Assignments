@@ -103,6 +103,16 @@ async def schedule_interview(interview_data: dict, current_user_email: str):
             "An interview is already scheduled for this candidate with this interviewer on this date"
         )
 
+    # Check for interviewer schedule conflict
+    if await interview_repo.has_interviewer_conflict(
+        interview_data["interviewer_email"],
+        interview_data["interview_date"],
+        interview_data["interview_time"],
+    ):
+        raise ConflictException(
+            "Interviewer is already scheduled for another interview at this time"
+        )
+
     interview_data["status"] = InterviewStatus.SCHEDULED.value
     interview_id = await interview_repo.create_interview(interview_data)
 
@@ -131,6 +141,17 @@ async def update_interview_schedule(interview_id: str, interview_data: dict):
         "interview_time": interview_data["interview_time"],
         "focus_areas": interview_data["focus_areas"],
     }
+
+    # Check for interviewer schedule conflict (excluding current interview)
+    if await interview_repo.has_interviewer_conflict(
+        interview.get("interviewer_email"),
+        update_data["interview_date"],
+        update_data["interview_time"],
+        exclude_interview_id=interview_id,
+    ):
+        raise ConflictException(
+            "Interviewer is already scheduled for another interview at this time"
+        )
     modified_count = await interview_repo.update_interview_schedule(
         interview_id, update_data
     )

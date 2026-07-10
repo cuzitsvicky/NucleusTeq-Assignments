@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 # Get the current authenticated user using HTTP Basic authentication
 async def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    logger.info("Authenticating user via basic auth: %s", credentials.username)
     return await auth_service.authenticate_user(
         credentials.username,
         credentials.password,
@@ -28,6 +29,7 @@ async def get_current_user(credentials: HTTPBasicCredentials = Depends(security)
 # Check if the current user is required to reset their password on first login
 async def check_password_reset(current_user: dict = Depends(get_current_user)):
     if current_user.get("reset_required", False):
+        logger.warning("Password reset required before proceeding for user: %s", current_user.get("email", "Unknown"))
         raise ForbiddenException(detail="Password reset required on first login")
     return current_user
 
@@ -35,16 +37,19 @@ async def check_password_reset(current_user: dict = Depends(get_current_user)):
 # Define the login endpoint to authenticate users and return a token
 @router.post("/login", response_model=LoginResponse)
 async def login(credentials: LoginRequest):
+    logger.info("Login request for user: %s", credentials.email)
     user = await auth_service.authenticate_user(credentials.email, credentials.password)
 
     # Token generation
     token = auth_service.generate_basic_token(credentials.email, credentials.password)
+    logger.info("User %s successfully logged in", credentials.email)
     return LoginResponse(user=auth_service.build_user_response(user), token=token)
 
 
 # Define the endpoint to get the current authenticated user's information
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
+    logger.info("User info fetched for user: %s", current_user["email"])
     return auth_service.build_user_response(current_user)
 
 
@@ -53,6 +58,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 async def reset_password(
     payload: PasswordResetRequest, current_user: dict = Depends(get_current_user)
 ):
+    logger.info("Password reset requested for user: %s", current_user["email"])
     await auth_service.reset_password(str(current_user["_id"]), payload.new_password)
     logger.info("Password reset completed for user %s", current_user["email"])
     return MessageResponse(message="Password reset successfully")

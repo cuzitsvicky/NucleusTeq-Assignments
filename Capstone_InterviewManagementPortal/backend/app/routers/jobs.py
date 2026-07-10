@@ -1,3 +1,4 @@
+import logging
 from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, Query
 
@@ -11,6 +12,7 @@ from ..services import job_service
 from ..utils import require_roles
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 # Endpoint to create a new job posting
@@ -19,7 +21,9 @@ async def create_job(
     job: JobCreateRequest, current_user: dict = Depends(check_password_reset)
 ):
     require_roles(current_user, {UserRole.HR})
+    logger.info("API request to create job: %s by HR user: %s", job.title, current_user["email"])
     new_job = await job_service.create_job(job.model_dump())
+    logger.info("Job created successfully with ID: %s", new_job.get("id"))
     return JobResponse(**new_job)
 
 
@@ -34,6 +38,7 @@ async def get_jobs(
     experience: str = "",
     current_user: dict = Depends(check_password_reset),
 ):
+    logger.info("API request to fetch jobs with page: %d, limit: %d, title query: %s, user: %s", page, limit, name, current_user["email"])
     return await job_service.get_jobs(
         page=page,
         limit=limit,
@@ -47,7 +52,9 @@ async def get_jobs(
 # Endpoint to get a specific job by ID
 @router.get("/{job_id}", response_model=JobResponse)
 async def get_job(job_id: str, current_user: dict = Depends(check_password_reset)):
+    logger.info("API request to fetch job ID: %s by user: %s", job_id, current_user["email"])
     if not ObjectId.is_valid(job_id):
+        logger.warning("Invalid job ID format requested: %s", job_id)
         raise BadRequestException("Invalid job ID format")
     job = await job_service.get_job_by_id(job_id)
     return JobResponse(**job)
@@ -61,7 +68,10 @@ async def update_job(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.HR})
+    logger.info("API request to update job ID: %s by HR user: %s", job_id, current_user["email"])
     if not ObjectId.is_valid(job_id):
+        logger.warning("Invalid job ID format requested for update: %s", job_id)
         raise BadRequestException("Invalid job ID format")
     await job_service.update_job(job_id, job.model_dump())
+    logger.info("Job ID: %s updated successfully", job_id)
     return MessageResponse(message="Job updated")

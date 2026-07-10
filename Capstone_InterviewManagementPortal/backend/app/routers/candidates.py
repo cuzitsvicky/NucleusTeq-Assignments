@@ -51,6 +51,7 @@ async def create_candidate(
 ):
 
     require_roles(current_user, {UserRole.HR})
+    logger.info("API request to create candidate: %s %s by HR user: %s", first_name, last_name, current_user["email"])
 
     candidate_request = CandidateCreateRequest(
         first_name=first_name,
@@ -65,14 +66,17 @@ async def create_candidate(
     validate_resume_extension(resume.filename)
 
     if resume.content_type != "application/pdf":
+        logger.warning("Candidate creation failed. Resume must be a PDF file: %s", resume.content_type)
         raise BadRequestException("Resume must be a PDF file")
 
     resume_bytes = await resume.read()
 
     if len(resume_bytes) > MAX_RESUME_SIZE_BYTES:
+        logger.warning("Candidate creation failed. Resume file size (%d bytes) exceeds maximum limit", len(resume_bytes))
         raise BadRequestException("Resume file size must not exceed 5MB")
 
     resume_id = await candidate_service.upload_resume(resume.filename, resume_bytes)
+    logger.info("Resume uploaded successfully with ID: %s", resume_id)
 
     candidate = {
         "first_name": candidate_request.first_name,
@@ -90,6 +94,7 @@ async def create_candidate(
         candidate, current_user["email"]
     )
 
+    logger.info("Candidate %s created successfully with ID: %s by %s", candidate_request.email, candidate_id, current_user["email"])
     return MessageWithIdResponse(
         message="Candidate created successfully",
         id=candidate_id,
@@ -107,6 +112,7 @@ async def get_candidates(
     applied_job_id: str = "",
     current_user: dict = Depends(check_password_reset),
 ):
+    logger.info("API request to fetch candidates by user: %s (role: %s), page: %d, limit: %d", current_user["email"], current_user["role"], page, limit)
     return await candidate_service.get_candidates_for_user(
         current_user["role"],
         current_user["email"],
@@ -125,6 +131,7 @@ async def get_candidate(
     candidate_id: str,
     current_user: dict = Depends(check_password_reset),
 ):
+    logger.info("API request to fetch candidate details for ID: %s by user: %s", candidate_id, current_user["email"])
     return await candidate_service.get_candidate_for_user(
         candidate_id,
         current_user["role"],
@@ -138,11 +145,13 @@ async def get_resume(
     candidate_id: str,
     current_user: dict = Depends(check_password_reset),
 ):
+    logger.info("API request to download resume for candidate ID: %s by user: %s", candidate_id, current_user["email"])
     pdf, filename = await candidate_service.download_resume_for_user(
         candidate_id,
         current_user["role"],
         current_user["email"],
     )
+    logger.info("Resume downloaded successfully for candidate ID: %s", candidate_id)
     return Response(
         content=pdf,
         media_type="application/pdf",
@@ -158,6 +167,7 @@ async def update_candidate(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.HR})
+    logger.info("API request to update candidate ID: %s details by user: %s", candidate_id, current_user["email"])
 
     await candidate_service.update_candidate(
         candidate_id,
@@ -165,6 +175,7 @@ async def update_candidate(
         current_user["email"],
     )
 
+    logger.info("Candidate ID: %s updated successfully", candidate_id)
     return MessageResponse(message="Candidate updated successfully")
 
 
@@ -176,6 +187,7 @@ async def update_status(
     current_user: dict = Depends(check_password_reset),
 ):
     require_roles(current_user, {UserRole.HR})
+    logger.info("API request to update candidate ID: %s status to %s by user: %s", candidate_id, status_update.status, current_user["email"])
 
     await candidate_service.update_status(
         candidate_id,
@@ -183,6 +195,7 @@ async def update_status(
         current_user["email"],
     )
 
+    logger.info("Candidate ID: %s status updated successfully to %s", candidate_id, status_update.status)
     return MessageResponse(message="Status updated successfully")
 
 
@@ -196,6 +209,7 @@ async def get_history(
     limit: int = Query(10, ge=1, le=100),
     current_user: dict = Depends(check_password_reset),
 ):
+    logger.info("API request to fetch status history for candidate ID: %s by user: %s, page: %d, limit: %d", candidate_id, current_user["email"], page, limit)
     return await candidate_service.get_history_for_user(
         candidate_id,
         current_user["role"],
