@@ -24,7 +24,7 @@ export default function Login({ onLogin }) {
       <div className="login-panel">
         <div className="login-copy">
           <BriefcaseBusiness size={42} />
-          <h1>Interview Management Portal</h1>
+          <h1>Talent Flow</h1>
           <p>Manage jobs, candidates, interviews, and feedback from one focused workspace.</p>
         </div>
         <form className="box" onSubmit={submit}>

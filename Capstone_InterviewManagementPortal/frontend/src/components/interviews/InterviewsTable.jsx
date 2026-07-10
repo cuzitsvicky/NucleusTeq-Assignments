@@ -1,8 +1,8 @@
-import { Pencil } from 'lucide-react';
+import { FileText, Pencil } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateFormat.js';
 import { canSubmitFeedback } from '../../utils/interviewHelpers.js';
 
-export default function InterviewsTable({ interviews, user, onViewFeedback, onStartFeedback, onEdit }) {
+export default function InterviewsTable({ interviews, user, onViewFeedback, onStartFeedback, onOpenResume, onEdit }) {
   return (
     <table>
       <thead><tr><th>Candidate</th><th>Job</th><th>Date</th><th>Interviewer</th><th>Status</th><th>Feedback</th></tr></thead>
@@ -28,6 +28,9 @@ export default function InterviewsTable({ interviews, user, onViewFeedback, onSt
                   )}
                   {user?.role === 'HR' && item.status !== 'COMPLETED' && (
                     <button type="button" title="Edit interview" onClick={() => onEdit(item)}><Pencil size={16} />Edit</button>
+                  )}
+                  {user?.role === 'Interviewer' && (
+                    <button type="button" title="View resume" onClick={() => onOpenResume(item.candidate_id)}><FileText size={16} />Resume</button>
                   )}
                 </div>
               </td>

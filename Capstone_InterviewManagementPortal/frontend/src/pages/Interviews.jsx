@@ -169,6 +169,15 @@ export default function Interviews({ token, user }) {
     setFeedback(emptyFeedback);
   }
 
+  async function openResume(candidateId) {
+    try {
+      window.open(await apiService.downloadResume(token, candidateId), '_blank');
+    } catch (err) {
+      setMessageType('error');
+      setMessage(err.message);
+    }
+  }
+
   return (
     <section>
       <div className="page-head">
@@ -184,7 +193,7 @@ export default function Interviews({ token, user }) {
       {user?.role !== 'Interviewer' && showForm && (
         <InterviewScheduleForm form={form} candidates={candidates} interviewers={interviewers} minInterviewDate={minInterviewDate} isEditing={Boolean(editingId)} onCandidateChange={candidateChange} onChange={change} onSubmit={schedule} />
       )}
-      <InterviewsTable interviews={interviews} user={user} onViewFeedback={openFeedback} onStartFeedback={startFeedback} onEdit={editInterview} />
+      <InterviewsTable interviews={interviews} user={user} onViewFeedback={openFeedback} onStartFeedback={startFeedback} onOpenResume={openResume} onEdit={editInterview} />
       <Pagination pagination={pagination} loading={loading} onPageChange={load} />
       <FeedbackDetails feedback={viewFeedback} title={viewFeedbackTitle} onClose={closeFeedback} />
       <FeedbackForm activeId={activeId} user={user} feedback={feedback} onChange={feedbackChange} onSubmit={submitFeedback} onClose={closeFeedbackForm} />

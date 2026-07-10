@@ -63,7 +63,7 @@ export default function App() {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <h2>Interview Portal</h2>
+        <h2>Talent Flow</h2>
         <nav>
           <Link to="/"><Gauge size={17} />Dashboard</Link>
           {['Admin', 'HR', 'Interviewer'].includes(user?.role) && <Link to="/jobs"><BriefcaseBusiness size={17} />Jobs</Link>}
