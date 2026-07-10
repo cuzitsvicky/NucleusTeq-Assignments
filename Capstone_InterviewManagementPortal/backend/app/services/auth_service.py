@@ -1,5 +1,7 @@
 import base64
 import logging
+from fastapi import Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from ..enums import UserRole
 from ..exceptions import (
     BadRequestException,
@@ -95,3 +97,24 @@ async def reset_password(user_id: str, new_password: str):
     if updated == 0:
         raise BadRequestException("Password could not be updated")
     logger.info("Password reset successfully for user %s", user_id)
+
+
+security = HTTPBasic()
+
+
+# Get the current authenticated user using HTTP Basic authentication
+async def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    logger.info("Authenticating user via basic auth: %s", credentials.username)
+    return await authenticate_user(
+        credentials.username,
+        credentials.password,
+        is_basic_auth=True,
+    )
+
+
+# Check if the current user is required to reset their password on first login
+async def check_password_reset(current_user: dict = Depends(get_current_user)):
+    if current_user.get("reset_required", False):
+        logger.warning("Password reset required before proceeding for user: %s", current_user.get("email", "Unknown"))
+        raise ForbiddenException(detail="Password reset required on first login")
+    return current_user

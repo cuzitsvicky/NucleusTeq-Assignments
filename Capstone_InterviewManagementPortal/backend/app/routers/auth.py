@@ -1,6 +1,5 @@
 import logging
 from fastapi import APIRouter, Depends
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from ..schemas import (
     LoginRequest,
     LoginResponse,
@@ -9,29 +8,10 @@ from ..schemas import (
     UserResponse,
 )
 from ..services import auth_service
-from ..exceptions import ForbiddenException
+from ..services.auth_service import get_current_user, check_password_reset
 
 router = APIRouter()
-security = HTTPBasic()
 logger = logging.getLogger(__name__)
-
-
-# Get the current authenticated user using HTTP Basic authentication
-async def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
-    logger.info("Authenticating user via basic auth: %s", credentials.username)
-    return await auth_service.authenticate_user(
-        credentials.username,
-        credentials.password,
-        is_basic_auth=True,
-    )
-
-
-# Check if the current user is required to reset their password on first login
-async def check_password_reset(current_user: dict = Depends(get_current_user)):
-    if current_user.get("reset_required", False):
-        logger.warning("Password reset required before proceeding for user: %s", current_user.get("email", "Unknown"))
-        raise ForbiddenException(detail="Password reset required on first login")
-    return current_user
 
 
 # Define the login endpoint to authenticate users and return a token

@@ -28,7 +28,7 @@ from ..enums import UserRole
 from ..services import candidate_service
 from ..utils import require_roles
 from ..validators import validate_resume_extension
-from .auth import check_password_reset
+from ..services.auth_service import check_password_reset
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

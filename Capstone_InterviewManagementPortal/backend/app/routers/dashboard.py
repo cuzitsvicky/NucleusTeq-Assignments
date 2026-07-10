@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends
 from ..services import dashboard_service
-from .auth import check_password_reset
+from ..services.auth_service import check_password_reset
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

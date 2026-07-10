@@ -12,7 +12,7 @@ from ..schemas import (
 from ..enums import UserRole
 from ..services import interview_service
 from ..utils import require_roles
-from .auth import check_password_reset
+from ..services.auth_service import check_password_reset
 
 
 router = APIRouter()

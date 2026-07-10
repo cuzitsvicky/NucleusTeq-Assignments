@@ -2,7 +2,7 @@ import logging
 from bson.objectid import ObjectId
 from fastapi import APIRouter, Depends, Query
 
-from .auth import check_password_reset
+from ..services.auth_service import check_password_reset
 from ..exceptions import (
     BadRequestException,
 )
