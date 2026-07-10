@@ -13,6 +13,7 @@ from ..schemas import UserResponse
 from ..utils import get_password_hash, normalize_email, verify_password
 
 logger = logging.getLogger(__name__)
+security = HTTPBasic()
 
 
 def generate_basic_token(email: str, password: str) -> str:
@@ -97,9 +98,6 @@ async def reset_password(user_id: str, new_password: str):
     if updated == 0:
         raise BadRequestException("Password could not be updated")
     logger.info("Password reset successfully for user %s", user_id)
-
-
-security = HTTPBasic()
 
 
 # Get the current authenticated user using HTTP Basic authentication
