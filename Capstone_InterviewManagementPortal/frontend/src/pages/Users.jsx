@@ -132,7 +132,9 @@ export default function Users({ token }) {
       </div>
 
       {/* Global alert feedback messages */}
-      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      {!showForm && (
+        <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      )}
       {loading && <p>Loading...</p>}
 
       {/* Search filters options bar */}
@@ -140,7 +142,17 @@ export default function Users({ token }) {
 
       {/* Creation/Editing form */}
       {showForm && (
-        <UserForm form={form} editingId={editingId} active={active} setActive={setActive} onChange={change} onSubmit={submit} />
+        <UserForm 
+          form={form} 
+          editingId={editingId} 
+          active={active} 
+          setActive={setActive} 
+          onChange={change} 
+          onSubmit={submit} 
+          message={message} 
+          messageType={messageType} 
+          onClose={() => setMessage('')} 
+        />
       )}
 
       {/* Primary users details table */}

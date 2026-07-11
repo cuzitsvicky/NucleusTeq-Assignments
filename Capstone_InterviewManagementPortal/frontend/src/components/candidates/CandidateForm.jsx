@@ -1,13 +1,15 @@
 import { EXPERIENCE_PATTERN, MOBILE_PATTERN, NAME_PATTERN } from '../../utils/formConstants.js';
+import Alert from '../Alert.jsx';
 
 /**
  * CandidateForm component.
  * Renders form fields to create a new candidate or update an existing candidate profile.
  * Submissions validate string format requirements and enforce PDF resume uploads for new creations.
  */
-export default function CandidateForm({ form, jobs, editingId, onChange, onResumeChange, onSubmit }) {
+export default function CandidateForm({ form, jobs, editingId, onChange, onResumeChange, onSubmit, message, messageType, onClose }) {
   return (
     <form onSubmit={onSubmit} className="form">
+      <Alert message={message} type={messageType} onClose={onClose} />
       {/* Candidate Name inputs with formatting validators */}
       <div><label>First Name</label><input name="first_name" placeholder="First name" value={form.first_name} onChange={onChange} required maxLength="50" pattern={NAME_PATTERN} title="Only letters and spaces are allowed" /></div>
       <div><label>Last Name</label><input name="last_name" placeholder="Last name" value={form.last_name} onChange={onChange} required maxLength="50" pattern={NAME_PATTERN} title="Only letters and spaces are allowed" /></div>

@@ -49,6 +49,9 @@ export default function ResetPassword({ token, user, onReset }) {
   return (
     <section>
       <h1>Reset Password</h1>
+      {/* Global alert feedback messages */}
+      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      
       <form className="row" onSubmit={submit}>
         
         {/* New Password input with visibility toggle */}
@@ -97,9 +100,6 @@ export default function ResetPassword({ token, user, onReset }) {
         
         <button>Update</button>
       </form>
-
-      {/* Global alert feedback messages */}
-      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
     </section>
   );
 }

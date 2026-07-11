@@ -215,7 +215,9 @@ export default function Candidates({ token, user }) {
       </div>
 
       {/* Global alert feedback messages */}
-      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      {!showForm && (
+        <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      )}
       {loading && <p>Loading...</p>}
 
       {/* Candidate filtering inputs */}
@@ -223,7 +225,17 @@ export default function Candidates({ token, user }) {
 
       {/* Add / Edit candidate forms (available to HR only) */}
       {user?.role === 'HR' && showForm && (
-        <CandidateForm form={form} jobs={jobs} editingId={editingId} onChange={change} onResumeChange={e => setResume(e.target.files[0])} onSubmit={submit} />
+        <CandidateForm 
+          form={form} 
+          jobs={jobs} 
+          editingId={editingId} 
+          onChange={change} 
+          onResumeChange={e => setResume(e.target.files[0])} 
+          onSubmit={submit} 
+          message={message} 
+          messageType={messageType} 
+          onClose={() => setMessage('')} 
+        />
       )}
 
       {/* Primary candidates details table */}

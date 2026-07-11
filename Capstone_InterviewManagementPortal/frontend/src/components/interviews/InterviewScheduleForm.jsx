@@ -1,11 +1,8 @@
-/**
- * InterviewScheduleForm component.
- * Renders form fields to schedule or modify candidate interviews.
- * Associates candidates with active interviewers and filters out invalid dates in the past.
- */
-export default function InterviewScheduleForm({ form, candidates, interviewers, minInterviewDate, isEditing, onCandidateChange, onChange, onSubmit }) {
+import Alert from '../Alert.jsx';
+export default function InterviewScheduleForm({ form, candidates, interviewers, minInterviewDate, isEditing, onCandidateChange, onChange, onSubmit, message, messageType, onClose }) {
   return (
     <form onSubmit={onSubmit} className="form">
+      <Alert message={message} type={messageType} onClose={onClose} />
       {/* Candidate email selection dropdown. Disabled in edit mode to prevent changing candidates mid-process */}
       <div><label>Candidate Email</label><select name="candidate_id" value={form.candidate_id} onChange={onCandidateChange} disabled={isEditing} required>
         <option value="">Select candidate email</option>

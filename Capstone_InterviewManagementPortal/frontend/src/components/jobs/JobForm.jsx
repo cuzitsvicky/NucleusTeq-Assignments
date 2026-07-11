@@ -1,13 +1,15 @@
 import { EXPERIENCE_PATTERN } from '../../utils/formConstants.js';
+import Alert from '../Alert.jsx';
 
 /**
  * JobForm component.
  * Renders form fields for creating a new job posting or updating an existing one.
  * Includes text pattern validation on the experience input.
  */
-export default function JobForm({ form, editingId, onChange, onSubmit }) {
+export default function JobForm({ form, editingId, onChange, onSubmit, message, messageType, onClose }) {
   return (
     <form onSubmit={onSubmit} className="form">
+      <Alert message={message} type={messageType} onClose={onClose} />
       {/* Job Title input */}
       <div><label>Job Title</label><input name="title" placeholder="Title" value={form.title} onChange={onChange} required maxLength="150" /></div>
       

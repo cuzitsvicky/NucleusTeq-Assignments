@@ -1,14 +1,11 @@
-/**
- * FeedbackForm component.
- * Renders form fields allowing interviewers to grade candidates across technical,
- * communication, and problem-solving metrics, as well as make final recommendations.
- */
-export default function FeedbackForm({ activeId, user, feedback, onChange, onSubmit, onClose }) {
+import Alert from '../Alert.jsx';
+export default function FeedbackForm({ activeId, user, feedback, onChange, onSubmit, onClose, message, messageType, onCloseMessage }) {
   // Only allow authorized Interviewer role to submit feedback for active sessions
   if (!activeId || user?.role !== 'Interviewer') return null;
 
   return (
     <form onSubmit={onSubmit} className="form">
+      <Alert message={message} type={messageType} onClose={onCloseMessage} />
       <div className="page-head">
         <h3>Feedback</h3>
         <button type="button" className="add-btn" onClick={onClose}>Close</button>

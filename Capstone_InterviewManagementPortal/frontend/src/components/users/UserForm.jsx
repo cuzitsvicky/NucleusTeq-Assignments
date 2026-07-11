@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { NAME_PATTERN, NUCLEUSTEQ_EMAIL_PATTERN, PASSWORD_PATTERN } from '../../utils/formConstants.js';
+import Alert from '../Alert.jsx';
 
 /**
  * UserForm component.
  * Renders form fields for creating a new user or updating an existing user's details.
  * Email and password fields are omitted during editing, and an active/inactive status toggle is added.
  */
-export default function UserForm({ form, editingId, active, setActive, onChange, onSubmit }) {
+export default function UserForm({ form, editingId, active, setActive, onChange, onSubmit, message, messageType, onClose }) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form onSubmit={onSubmit} className="form">
+      <Alert message={message} type={messageType} onClose={onClose} />
       {/* Full Name input field with text formatting pattern */}
       <div><label>Full Name</label><input 
         name="name" 

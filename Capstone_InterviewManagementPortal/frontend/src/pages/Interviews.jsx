@@ -250,12 +250,26 @@ export default function Interviews({ token, user }) {
       </div>
 
       {/* Dynamic system notifications */}
-      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      {!showForm && !activeId && (
+        <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      )}
       {loading && <p>Loading...</p>}
 
       {/* Scheduling form (visible to HR when scheduling or rescheduling) */}
       {user?.role !== 'Interviewer' && showForm && (
-        <InterviewScheduleForm form={form} candidates={candidates} interviewers={interviewers} minInterviewDate={minInterviewDate} isEditing={Boolean(editingId)} onCandidateChange={candidateChange} onChange={change} onSubmit={schedule} />
+        <InterviewScheduleForm 
+          form={form} 
+          candidates={candidates} 
+          interviewers={interviewers} 
+          minInterviewDate={minInterviewDate} 
+          isEditing={Boolean(editingId)} 
+          onCandidateChange={candidateChange} 
+          onChange={change} 
+          onSubmit={schedule} 
+          message={message} 
+          messageType={messageType} 
+          onClose={() => setMessage('')} 
+        />
       )}
 
       {/* Scheduled interviews listings table */}
@@ -268,7 +282,17 @@ export default function Interviews({ token, user }) {
       <FeedbackDetails feedback={viewFeedback} title={viewFeedbackTitle} onClose={closeFeedback} />
 
       {/* Feedback entry form modal/panel */}
-      <FeedbackForm activeId={activeId} user={user} feedback={feedback} onChange={feedbackChange} onSubmit={submitFeedback} onClose={closeFeedbackForm} />
+      <FeedbackForm 
+        activeId={activeId} 
+        user={user} 
+        feedback={feedback} 
+        onChange={feedbackChange} 
+        onSubmit={submitFeedback} 
+        onClose={closeFeedbackForm} 
+        message={message} 
+        messageType={messageType} 
+        onCloseMessage={() => setMessage('')} 
+      />
     </section>
   );
 }

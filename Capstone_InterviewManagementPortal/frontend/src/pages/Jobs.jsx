@@ -151,7 +151,9 @@ export default function Jobs({ token, user }) {
       </div>
 
       {/* Global alert feedback messages */}
-      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      {!showForm && (
+        <Alert message={message} type={messageType} onClose={() => setMessage('')} />
+      )}
       {loading && <p>Loading...</p>}
 
       {/* Search filters options bar */}
@@ -159,7 +161,15 @@ export default function Jobs({ token, user }) {
 
       {/* Creation/Editing form (available to HR only) */}
       {user?.role === 'HR' && showForm && (
-        <JobForm form={form} editingId={editingId} onChange={change} onSubmit={submit} />
+        <JobForm 
+          form={form} 
+          editingId={editingId} 
+          onChange={change} 
+          onSubmit={submit} 
+          message={message} 
+          messageType={messageType} 
+          onClose={() => setMessage('')} 
+        />
       )}
 
       {/* Primary job details table */}
