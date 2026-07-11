@@ -9,8 +9,8 @@ export default function Alert({ message, type = 'error', onClose }) {
   useEffect(() => {
     if (!message || !onClose) return undefined;
 
-    // Set a timer to automatically trigger the onClose callback after 4 seconds
-    const timer = window.setTimeout(onClose, 4000);
+    // Set a timer to automatically trigger the onClose callback after 3 seconds
+    const timer = window.setTimeout(onClose, 3000);
 
     // Clear the timer if the alert message or onClose handler changes, or on unmount
     return () => window.clearTimeout(timer);
