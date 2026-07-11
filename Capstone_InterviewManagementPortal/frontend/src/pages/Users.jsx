@@ -81,6 +81,7 @@ export default function Users({ token }) {
     setEditingId('');
     setActive(true);
     setShowForm(false);
+    setMessage('');
   }
 
   /**

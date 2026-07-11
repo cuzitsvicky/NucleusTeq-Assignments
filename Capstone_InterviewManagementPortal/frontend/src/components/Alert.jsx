@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Alert notification component.
@@ -6,6 +6,8 @@ import { useEffect } from 'react';
  * Automatically dismisses itself after 4 seconds by calling the onClose callback.
  */
 export default function Alert({ message, type = 'error', onClose }) {
+  const alertRef = useRef(null);
+
   useEffect(() => {
     if (!message || !onClose) return undefined;
 
@@ -16,11 +18,17 @@ export default function Alert({ message, type = 'error', onClose }) {
     return () => window.clearTimeout(timer);
   }, [message, onClose]);
 
+  useEffect(() => {
+    if (message && alertRef.current) {
+      alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [message]);
+
   // Render nothing if there is no message to display
   if (!message) return null;
 
   return (
-    <div className={`alert alert-${type}`} role="alert">
+    <div ref={alertRef} className={`alert alert-${type}`} role="alert">
       {/* Capitalized message category title (e.g. Error, Info, Success) */}
       <strong>{type === 'error' ? 'Error' : type === 'info' ? 'Info' : 'Success'}</strong>
       <span>{message}</span>

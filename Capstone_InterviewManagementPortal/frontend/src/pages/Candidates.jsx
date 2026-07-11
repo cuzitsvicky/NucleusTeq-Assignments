@@ -105,6 +105,7 @@ export default function Candidates({ token, user }) {
     setResume(null);
     setEditingId('');
     setShowForm(false);
+    setMessage('');
   }
 
   /**
@@ -245,7 +246,9 @@ export default function Candidates({ token, user }) {
       <Pagination pagination={pagination} loading={loading} onPageChange={load} />
 
       {/* Sidebar/Modal tracking history logs for a candidate */}
-      <CandidateHistory historyName={historyName} history={history} onClose={() => setHistoryName('')} />
+      {historyName && (
+        <CandidateHistory historyName={historyName} history={history} onClose={() => setHistoryName('')} />
+      )}
     </section>
   );
 }

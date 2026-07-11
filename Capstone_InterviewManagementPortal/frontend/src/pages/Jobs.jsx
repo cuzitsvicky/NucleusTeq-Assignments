@@ -90,6 +90,7 @@ export default function Jobs({ token, user }) {
     setOriginalForm(null);
     setEditingId('');
     setShowForm(false);
+    setMessage('');
   }
 
   /**

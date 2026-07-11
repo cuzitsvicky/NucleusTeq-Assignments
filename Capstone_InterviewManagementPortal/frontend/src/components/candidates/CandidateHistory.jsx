@@ -10,9 +10,9 @@ export default function CandidateHistory({ historyName, history, onClose }) {
   if (!historyName) return null;
 
   return (
-    <div className="box">
+    <div className="form">
       <div className="page-head">
-        <h2>{historyName} History</h2>
+        <h2> History</h2>
         <button className="add-btn" onClick={onClose}>Close</button>
       </div>
       <table>

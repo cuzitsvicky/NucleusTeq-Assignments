@@ -105,6 +105,7 @@ export default function Interviews({ token, user }) {
     setEditingId('');
     setForm(emptyInterview);
     setShowForm(false);
+    setMessage('');
   }
 
   /**
@@ -223,6 +224,7 @@ export default function Interviews({ token, user }) {
   function closeFeedbackForm() {
     setActiveId('');
     setFeedback(emptyFeedback);
+    setMessage('');
   }
 
   /**
@@ -282,17 +284,19 @@ export default function Interviews({ token, user }) {
       <FeedbackDetails feedback={viewFeedback} title={viewFeedbackTitle} onClose={closeFeedback} />
 
       {/* Feedback entry form modal/panel */}
-      <FeedbackForm 
-        activeId={activeId} 
-        user={user} 
-        feedback={feedback} 
-        onChange={feedbackChange} 
-        onSubmit={submitFeedback} 
-        onClose={closeFeedbackForm} 
-        message={message} 
-        messageType={messageType} 
-        onCloseMessage={() => setMessage('')} 
-      />
+      {activeId && user?.role === 'Interviewer' && (
+        <FeedbackForm 
+          activeId={activeId} 
+          user={user} 
+          feedback={feedback} 
+          onChange={feedbackChange} 
+          onSubmit={submitFeedback} 
+          onClose={closeFeedbackForm} 
+          message={message} 
+          messageType={messageType} 
+          onCloseMessage={() => setMessage('')} 
+        />
+      )}
     </section>
   );
 }
