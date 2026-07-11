@@ -4,7 +4,7 @@ from ..exceptions import BadRequestException
 from ..enums import UserRole
 from ..repositories import interview_repo, user_repo
 from ..utils.pagination import build_paginated_response
-from ..utils import get_password_hash
+from ..utils import get_password_encoded
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ def format_user(user: dict):
 
 async def register_user(user_data: dict):
     """
-    Register a new user with hashed password.
+    Register a new user with encoded password.
     
     Args:
         user_data (dict): User details including email, password, name, and role.
@@ -34,7 +34,7 @@ async def register_user(user_data: dict):
     if existing_user:
         logger.warning("Registration failed. Email already registered: %s", user_data["email"])
         raise BadRequestException("Email already registered")
-    user_data["password"] = get_password_hash(user_data["password"])
+    user_data["password"] = get_password_encoded(user_data["password"])
     user_data.update({"active": True, "reset_required": True,})
     user_id = await user_repo.create_user(user_data)
     user_data["id"] = user_id

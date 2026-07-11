@@ -3,7 +3,7 @@ import pytest
 from app.exceptions import BadRequestException, ForbiddenException
 from app.utils import normalize_email, require_roles
 from app.utils.pagination import build_paginated_response, calculate_skip, paginate_collection
-from app.utils.security_utils import get_password_hash, verify_password
+from app.utils.security_utils import get_password_encoded, verify_encoded_password
 from app.validators.validators import validate_resume_extension
 
 
@@ -74,12 +74,12 @@ async def test_paginate_collection_without_sort():
     assert collection.cursor.calls == [("skip", 0), ("limit", 5)]
 
 
-def test_password_hash_and_verify():
-    hashed = get_password_hash("secret1")
+def test_password_encode_and_verify():
+    encoded = get_password_encoded("secret1")
 
-    assert hashed != "secret1"
-    assert verify_password("secret1", hashed) is True
-    assert verify_password("wrong", hashed) is False
+    assert encoded != "secret1"
+    assert verify_encoded_password("secret1", encoded) is True
+    assert verify_encoded_password("wrong", encoded) is False
 
 
 def test_validate_resume_extension_accepts_pdf():

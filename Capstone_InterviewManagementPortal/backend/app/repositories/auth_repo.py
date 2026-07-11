@@ -13,13 +13,13 @@ async def get_user_by_email(email: str):
 
 
 # Update Password for a user by their unique ID, ensuring the ID is valid before updating the database.
-async def update_password(user_id: str, hashed_password: str) -> int:
+async def update_password(user_id: str, encoded_password: str) -> int:
     logger.info("Updating password for user ID: %s in database", user_id)
     result = await db.users.update_one(
         {"_id": ObjectId(user_id)},
         {
             "$set": {
-                "password": hashed_password,
+                "password": encoded_password,
                 "reset_required": False,
             }
         },

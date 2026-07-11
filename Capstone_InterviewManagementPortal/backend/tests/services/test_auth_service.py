@@ -15,10 +15,10 @@ def test_generate_basic_token_normalizes_email():
 
 @pytest.mark.asyncio
 async def test_authenticate_user_success(monkeypatch):
-    hashed = auth_service.get_password_hash("pass1")
+    encoded = auth_service.get_password_encoded("pass1")
     monkeypatch.setattr(auth_service.auth_repo, "get_user_by_email", async_return({
         "email": "user@nucleusteq.com",
-        "password": hashed,
+        "password": encoded,
         "active": True,
         "role": "HR",
     }))
@@ -43,7 +43,7 @@ async def test_authenticate_user_invalid_credentials_with_basic_header(monkeypat
 async def test_authenticate_user_disabled(monkeypatch):
     monkeypatch.setattr(auth_service.auth_repo, "get_user_by_email", async_return({
         "email": "user@nucleusteq.com",
-        "password": auth_service.get_password_hash("pass1"),
+        "password": auth_service.get_password_encoded("pass1"),
         "active": False,
         "role": "HR",
     }))
@@ -58,7 +58,7 @@ async def test_authenticate_user_disabled(monkeypatch):
 async def test_authenticate_user_invalid_role(monkeypatch):
     monkeypatch.setattr(auth_service.auth_repo, "get_user_by_email", async_return({
         "email": "user@nucleusteq.com",
-        "password": auth_service.get_password_hash("pass1"),
+        "password": auth_service.get_password_encoded("pass1"),
         "active": True,
         "role": "Wrong",
     }))
@@ -78,7 +78,7 @@ async def test_reset_password_success(monkeypatch):
 
     update_password.assert_awaited_once()
     assert update_password.await_args.args[0] == "user-id"
-    assert update_password.await_args.args[1] == auth_service.get_password_hash("newpass1")
+    assert update_password.await_args.args[1] == auth_service.get_password_encoded("newpass1")
 
 
 @pytest.mark.asyncio

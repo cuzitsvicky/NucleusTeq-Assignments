@@ -10,7 +10,7 @@ from ..exceptions import (
 )
 from ..repositories import auth_repo
 from ..schemas import UserResponse
-from ..utils import get_password_hash, normalize_email, verify_password
+from ..utils import get_password_encoded, normalize_email, verify_encoded_password
 
 logger = logging.getLogger(__name__)
 security = HTTPBasic()
@@ -65,7 +65,7 @@ async def authenticate_user(
 
     email = normalize_email(email)
     user = await auth_repo.get_user_by_email(email)
-    if not user or not verify_password(password, user["password"]):
+    if not user or not verify_encoded_password(password, user["password"]):
         headers = {"WWW-Authenticate": "Basic"} if is_basic_auth else None
         raise UnauthorizedException(detail="Invalid email or password", headers=headers)
 
@@ -83,18 +83,18 @@ async def authenticate_user(
 
 async def reset_password(user_id: str, new_password: str):
     """
-    Update user password with hashed new password.
+    Update user password with encoded new password.
 
     Args:
         user_id (str): User ID.
-        new_password (str): New plain text password (will be hashed).
+        new_password (str): New plain text password (will be encoded).
 
     Raises:
         BadRequestException: Password update failed.
     """
 
-    hashed_password = get_password_hash(new_password)
-    updated = await auth_repo.update_password(user_id, hashed_password)
+    encoded_password = get_password_encoded(new_password)
+    updated = await auth_repo.update_password(user_id, encoded_password)
     if updated == 0:
         raise BadRequestException("Password could not be updated")
     logger.info("Password reset successfully for user %s", user_id)

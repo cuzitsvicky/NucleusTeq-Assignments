@@ -37,7 +37,7 @@ async def test_register_user_success(monkeypatch):
     assert user["id"] == "new-id"
     assert user["active"] is True
     assert user["reset_required"] is True
-    assert user["password"] == user_service.get_password_hash("pass1")
+    assert user["password"] == user_service.get_password_encoded("pass1")
 
 
 @pytest.mark.asyncio
