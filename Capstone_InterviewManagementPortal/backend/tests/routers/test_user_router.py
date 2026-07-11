@@ -12,7 +12,7 @@ async def test_register_requires_admin(hr_user):
         await users.register(UserCreateRequest(
             name="Test User",
             email="test@nucleusteq.com",
-            password="pass12",
+            password="pass12!",
             role="HR",
         ), hr_user)
 
@@ -31,7 +31,7 @@ async def test_register_success(monkeypatch, admin_user):
     result = await users.register(UserCreateRequest(
         name="Test User",
         email="test@nucleusteq.com",
-        password="pass12",
+        password="pass12!",
         role="HR",
     ), admin_user)
 

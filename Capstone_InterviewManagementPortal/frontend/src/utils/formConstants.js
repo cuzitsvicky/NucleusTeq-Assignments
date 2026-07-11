@@ -12,8 +12,8 @@ export const EXPERIENCE_PATTERN = '(\\d+(\\.\\d+)?(\\s*-\\s*\\d+(\\.\\d+)?)?\\s*
 // Format: <prefix>@nucleusteq.com
 export const NUCLEUSTEQ_EMAIL_PATTERN = '[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*@nucleusteq\\.com';
 
-// Pattern for passwords: 6-12 characters, must include at least one letter and one number
-export const PASSWORD_PATTERN = '(?=.*[A-Za-z])(?=.*\\d).{6,12}';
+// Pattern for passwords: 6-12 characters, must include at least one letter, one number, and one special character
+export const PASSWORD_PATTERN = '(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{6,12}';
 
 /**
  * Array of candidate status options.

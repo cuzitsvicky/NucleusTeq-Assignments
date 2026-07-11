@@ -52,7 +52,7 @@ export default function UserForm({ form, editingId, active, setActive, onChange,
             minLength="6" 
             maxLength="12" 
             pattern={PASSWORD_PATTERN} 
-            title="Password must be 6 to 12 characters and include at least one letter and one digit" 
+            title="Password must be 6 to 12 characters and include at least one letter, one digit, and one special character" 
           />
           <button
             type="button"

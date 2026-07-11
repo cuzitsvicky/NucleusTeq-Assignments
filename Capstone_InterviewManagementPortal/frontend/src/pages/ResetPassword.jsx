@@ -17,8 +17,8 @@ export default function ResetPassword({ token, user, onReset }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Pattern constraint: 6 to 12 characters, requiring at least one letter and one number
-  const passwordPattern = '(?=.*[A-Za-z])(?=.*\\d).{6,12}';
+  // Pattern constraint: 6 to 12 characters, requiring at least one letter, one number, and one special character
+  const passwordPattern = '(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{6,12}';
 
   /**
    * Validates matching inputs and sends the password reset request to the API.
@@ -62,7 +62,7 @@ export default function ResetPassword({ token, user, onReset }) {
             minLength="6"
             maxLength="12"
             pattern={passwordPattern}
-            title="Password must be 6 to 12 characters and include at least one letter and one digit"
+            title="Password must be 6 to 12 characters and include at least one letter, one digit, and one special character"
           />
           <button
             type="button"
@@ -84,7 +84,7 @@ export default function ResetPassword({ token, user, onReset }) {
             minLength="6"
             maxLength="12"
             pattern={passwordPattern}
-            title="Password must be 6 to 12 characters and include at least one letter and one digit"
+            title="Password must be 6 to 12 characters and include at least one letter, one digit, and one special character"
           />
           <button
             type="button"
