@@ -11,7 +11,7 @@ The **Interview Management Portal** is a secure, role-restricted, end-to-end rec
 *   **Candidate Profile Tracking**: Details like name, email (under `nucleusteq.com`), unique 10-digit mobile numbers, and experience metrics are strictly validated using Pydantic regex rules.
 *   **Resume Management with GridFS**: Seamless PDF uploads. The system validates file types and sizes (up to 5MB) and streams files directly to and from MongoDB GridFS buckets to prevent database bottlenecks.
 *   **Stateful Candidate Validation**: Enforces candidate state transitions through a logical pipeline:
-    $$\text{PROFILE\_CREATED} \rightarrow \text{INTERVIEW\_SCHEDULED} \rightarrow \text{INTERVIEW\_COMPLETED} \rightarrow \text{SELECTED / REJECTED}$$
+    Profile Created → Interview Scheduled →  Interview Completed → Selected / Rejected.
     Reversions and illegal status jumps are blocked by the backend validator.
 *   **Scheduling System**: HR can schedule and reschedule interviews with active interviewers at future date/times. The system prevents double-booking an interviewer at the same date and time.
 *   **Evaluation & Ratings**: Interviewers submit scored feedback (Technical, Communication, and Problem Solving on a 1-5 scale), tech topics covered, comments, and a selection recommendation after the scheduled interview time starts.
