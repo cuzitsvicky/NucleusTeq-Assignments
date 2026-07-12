@@ -1,88 +1,54 @@
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
+import CandidateFilters from '../components/candidates/CandidateFilters.jsx';
+import CandidateForm from '../components/candidates/CandidateForm.jsx';
+import CandidateHistory from '../components/candidates/CandidateHistory.jsx';
+import CandidatesTable from '../components/candidates/CandidatesTable.jsx';
 import Pagination from '../components/Pagination.jsx';
 import useDebouncedValue from '../hooks/useDebouncedValue.js';
-import { formatTimestamp } from '../utils/dateFormat.js';
+import { candidatesAreEqual, emptyCandidate, emptyCandidateFilters, validateCandidateForm } from '../utils/candidateHelpers.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
-import { Plus } from 'lucide-react';
 
-const empty = {
-  first_name: '',
-  last_name: '',
-  email: '',
-  mobile: '',
-  current_company: '',
-  total_experience: '',
-  applied_job_id: ''
-};
-
-const STATUS_OPTIONS = [
-  'PROFILE_CREATED',
-  'INTERVIEW_SCHEDULED',
-  'INTERVIEW_COMPLETED',
-  'SELECTED',
-  'REJECTED'
-];
-
-const NAME_PATTERN = '[A-Za-z ]+';
-const MOBILE_PATTERN = '[0-9\\s-]{7,12}';
-const EXPERIENCE_PATTERN = '(\\d+(\\.\\d+)?(\\s*-\\s*\\d+(\\.\\d+)?)?\\s*(year|years|month|months)|\\d+\\s*(year|years)\\s+\\d+\\s*(month|months))';
-
-function validateCandidateForm(form, resume, editingId) {
-  const labels = {
-    first_name: 'First name',
-    last_name: 'Last name',
-    email: 'Email',
-    mobile: 'Mobile',
-    current_company: 'Current company',
-    total_experience: 'Total experience',
-    applied_job_id: 'Applied job'
-  };
-
-  const missing = Object.entries(labels)
-    .filter(([key]) => !String(form[key] ?? '').trim())
-    .map(([, label]) => label);
-
-  if (missing.length) {
-    return `${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} required`;
-  }
-
-  if (!editingId && !resume) return 'Resume is required';
-  if (!editingId && resume?.type !== 'application/pdf') return 'Resume must be a PDF file';
-
-  return '';
-}
-
-function normalizeCandidate(candidate) {
-  return Object.fromEntries(
-    Object.entries(empty).map(([key]) => [key, String(candidate[key] ?? '').trim()])
-  );
-}
-
-function candidatesAreEqual(first, second) {
-  return JSON.stringify(normalizeCandidate(first)) === JSON.stringify(normalizeCandidate(second));
-}
-
+/**
+ * Candidates management component.
+ * Manages states and backend interactions for listing, filtering, creating, 
+ * updating, downloading resumes, and tracking history for candidate profiles.
+ */
 export default function Candidates({ token, user }) {
+  // Candidate list and page navigation states
   const [candidates, setCandidates] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
   const [loading, setLoading] = useState(false);
+
+  // Available job listings for dropdown selectors
   const [jobs, setJobs] = useState([]);
-  const [form, setForm] = useState(empty);
-  const [originalForm, setOriginalForm] = useState(null);
-  const [resume, setResume] = useState(null);
+
+  // Candidate creation/editing form states
+  const [form, setForm] = useState(emptyCandidate);
+  const [originalForm, setOriginalForm] = useState(null); // Used to verify if form contents changed
+  const [resume, setResume] = useState(null); // File object for resume uploads
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState('');
-  const [filters, setFilters] = useState({ name: '', email: '', status: '', applied_job_id: '' });
+
+  // Filtering states and history display logs
+  const [filters, setFilters] = useState(emptyCandidateFilters);
   const [history, setHistory] = useState([]);
-  const [historyName, setHistoryName] = useState('');
+  const [historyName, setHistoryName] = useState(''); // Current candidate name selected for history details
+
+  // Notification alert messages
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+
+  // Debounced filter values to optimize backend query request frequency
   const debouncedName = useDebouncedValue(filters.name);
   const debouncedEmail = useDebouncedValue(filters.email);
 
+  /**
+   * Fetches candidate listings from the backend based on filters and page selection.
+   */
   function load(nextPage = page) {
     setLoading(true);
     apiService.getCandidates(token, nextPage, pagination.limit, {
@@ -102,11 +68,13 @@ export default function Candidates({ token, user }) {
     });
   }
 
+  // Load and refresh lists when auth tokens, pagination pages, or search filters change
   useEffect(() => {
     setPage(1);
     load(1);
   }, [token, debouncedName, debouncedEmail, filters.status, filters.applied_job_id]);
 
+  // Load the complete list of jobs once on mount for dropdown inputs
   useEffect(() => {
     apiService.getJobs(token, 1, 100).then(response => setJobs(response.data)).catch(e => {
       setMessageType('error');
@@ -114,18 +82,35 @@ export default function Candidates({ token, user }) {
     });
   }, [token]);
 
+  /**
+   * Event handler for form input field changes.
+   */
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  /**
+   * Event handler for candidate query filter input changes.
+   */
   function changeFilter(e) {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   }
 
-  function clearFilters() {
-    setFilters({ name: '', email: '', status: '', applied_job_id: '' });
+  /**
+   * Clears form states and hides the creation/editing form view.
+   */
+  function closeForm() {
+    setForm(emptyCandidate);
+    setOriginalForm(null);
+    setResume(null);
+    setEditingId('');
+    setShowForm(false);
+    setMessage('');
   }
 
+  /**
+   * Handles form submit for creating or updating a candidate profile.
+   */
   async function submit(e) {
     e.preventDefault();
     const validationError = validateCandidateForm(form, resume, editingId);
@@ -135,6 +120,7 @@ export default function Candidates({ token, user }) {
       return;
     }
 
+    // Do not submit API call if no changes were made to edit form
     if (editingId && originalForm && candidatesAreEqual(form, originalForm)) {
       setMessageType('info');
       setMessage('No changes to update');
@@ -143,18 +129,16 @@ export default function Candidates({ token, user }) {
 
     try {
       if (editingId) {
+        // Edit candidate (uses JSON payload since resume updates are handled separately)
         await apiService.updateCandidate(token, editingId, form);
       } else {
+        // Create candidate (requires multipart/form-data for file upload)
         const data = new FormData();
         Object.entries(form).forEach(([key, value]) => data.append(key, value));
         data.append('resume', resume);
         await apiService.createCandidate(token, data);
       }
-      setForm(empty);
-      setOriginalForm(null);
-      setResume(null);
-      setEditingId('');
-      setShowForm(false);
+      closeForm();
       setMessageType('success');
       setMessage(editingId ? 'Candidate updated' : 'Candidate created');
       load();
@@ -164,6 +148,9 @@ export default function Candidates({ token, user }) {
     }
   }
 
+  /**
+   * Updates candidate lifecycle status (e.g. Applied -> Interviewing).
+   */
   async function changeStatus(id, status) {
     try {
       await apiService.updateCandidateStatus(token, id, status);
@@ -174,10 +161,16 @@ export default function Candidates({ token, user }) {
     }
   }
 
+  /**
+   * Requests resume blob from API and opens it in a new window tab.
+   */
   async function openResume(id) {
     window.open(await apiService.downloadResume(token, id), '_blank');
   }
 
+  /**
+   * Loads candidate history/audit logs and opens history detail panel.
+   */
   async function showHistory(candidate) {
     try {
       const response = await apiService.getCandidateHistory(token, candidate.id);
@@ -189,6 +182,9 @@ export default function Candidates({ token, user }) {
     }
   }
 
+  /**
+   * Populates the form inputs with details of a candidate to enable update mode.
+   */
   function editCandidate(candidate) {
     const nextForm = {
       first_name: candidate.first_name,
@@ -207,173 +203,51 @@ export default function Candidates({ token, user }) {
     setShowForm(true);
   }
 
-  function closeForm() {
-    setForm(empty);
-    setOriginalForm(null);
-    setResume(null);
-    setEditingId('');
-    setShowForm(false);
-  }
-
   return (
     <section>
+      {/* Page Header section */}
       <div className="page-head">
         <h1>Candidates</h1>
-
         {user?.role === 'HR' && (
-          <button
-            className="add-btn"
-            onClick={showForm ? closeForm : () => setShowForm(true)}
-          >
-            {showForm ? (
-              'Close'
-            ) : (
-              <>
-                <Plus size={18} />
-                Add Candidate
-              </>
-            )}
+          <button className={`add-btn ${showForm ? 'close-mode' : ''}`} onClick={showForm ? closeForm : () => setShowForm(true)}>
+            {showForm ? 'Close' : <><Plus size={18} />Add Candidate</>}
           </button>
         )}
       </div>
-      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
-      {loading && <p>Loading...</p>}
-      <div className="filters">
-        <input
-          name="name"
-          placeholder="Search by candidate name"
-          value={filters.name}
-          onChange={changeFilter}
-        />
-        <input
-          name="email"
-          placeholder="Search by email"
-          value={filters.email}
-          onChange={changeFilter}
-        />
-        <select name="applied_job_id" value={filters.applied_job_id} onChange={changeFilter}>
-          <option value="">All jobs</option>
-          {jobs.map(job => (
-            <option key={job.id} value={job.id}>{job.title}</option>
-          ))}
-        </select>
-        <select name="status" value={filters.status} onChange={changeFilter}>
-          <option value="">All statuses</option>
-          {STATUS_OPTIONS.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-        <button type="button" onClick={clearFilters}>Clear filters</button>
-      </div>
-      {user?.role === 'HR' && showForm && (
-        <form onSubmit={submit} className="form">
-          <input name="first_name" placeholder="First name" value={form.first_name} onChange={change} required maxLength="50" pattern={NAME_PATTERN} title="Only letters and spaces are allowed" />
-          <input name="last_name" placeholder="Last name" value={form.last_name} onChange={change} required maxLength="50" pattern={NAME_PATTERN} title="Only letters and spaces are allowed" />
-          <input name="email" type="email" placeholder="Email" value={form.email} onChange={change} required pattern="[A-Za-z0-9]+(\.[A-Za-z0-9]+)*@.+" title="Use a valid email. The local part can contain letters, numbers, and dots only" />
-          <input name="mobile" placeholder="Mobile" value={form.mobile} onChange={change} required inputMode="numeric" pattern={MOBILE_PATTERN} title="Enter 7 to 10 digits. Spaces and hyphens are allowed" />
-          <input name="current_company" placeholder="Current company" value={form.current_company} onChange={change} required />
-          <input name="total_experience" placeholder="2 years" value={form.total_experience} onChange={change} required pattern={EXPERIENCE_PATTERN} title='Use formats like "3 years", "6 months", or "2 years 3 months"' />
-          <select name="applied_job_id" value={form.applied_job_id} onChange={change} required>
-            <option value="">Select applied job</option>
-            {jobs.map(job => (
-              <option key={job.id} value={job.id}>
-                {job.title}
-              </option>
-            ))}
-          </select>
-          {!editingId && <input type="file" accept="application/pdf" required onChange={e => setResume(e.target.files[0])} />}
-          <button>{editingId ? 'Update Candidate' : 'Create Candidate'}</button>
-        </form>
+
+      {/* Global alert feedback messages */}
+      {!showForm && (
+        <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       )}
-      <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Job</th><th>Mobile</th><th>Current Company</th><th>Total Experience</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody>
-          {candidates.length === 0 ? (
-            <tr>
-              <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
-                No candidates available. Please create a new candidate.
-              </td>
-            </tr>
-          ) : (
-            candidates.map(c => (
-              <tr key={c.id}>
-                <td>{c.first_name} {c.last_name}</td>
-                <td>{c.email}</td>
-                <td>{c.job_title || c.applied_job_id}</td>
-                <td>{c.mobile}</td>
-                <td>{c.current_company}</td>
-                <td>{c.total_experience}</td>
-                <td>{c.status}</td>
-                <td>
-                  <div className="actions">
-                    <select
-                      onChange={e => changeStatus(c.id, e.target.value)}
-                      defaultValue=""
-                      disabled={['PROFILE_CREATED', 'INTERVIEW_SCHEDULED'].includes(c.status)}
-                      title={
-                        c.status === 'PROFILE_CREATED'
-                          ? 'Schedule an interview to move this candidate forward'
-                          :
-                          c.status === 'INTERVIEW_SCHEDULED'
-                            ? 'Available after interview feedback is submitted'
-                            : 'Change status'
-                      }
-                    >
-                      <option value="" disabled>
-                        {
-                          c.status === 'PROFILE_CREATED'
-                            ? 'Schedule interview'
-                            : c.status === 'INTERVIEW_SCHEDULED'
-                              ? 'Awaiting feedback'
-                              : 'Status'
-                        }
-                      </option>
-                      <option>INTERVIEW_COMPLETED</option>
-                      <option>SELECTED</option>
-                      <option>REJECTED</option>
-                    </select>
-                    <button type="button" onClick={() => openResume(c.id)}>
-                      Resume
-                    </button>
-                    <button type="button" onClick={() => showHistory(c)}>
-                      History
-                    </button>
-                    {user?.role === 'HR' && (
-                      <button type="button" onClick={() => editCandidate(c)}>
-                        Edit
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      <Pagination
-        pagination={pagination}
-        loading={loading}
-        onPageChange={load}
-      />
+      {loading && <p>Loading...</p>}
+
+      {/* Candidate filtering inputs */}
+      <CandidateFilters filters={filters} jobs={jobs} onChange={changeFilter} onClear={() => setFilters(emptyCandidateFilters)} />
+
+      {/* Add / Edit candidate forms (available to HR only) */}
+      {user?.role === 'HR' && showForm && (
+        <CandidateForm 
+          form={form} 
+          jobs={jobs} 
+          editingId={editingId} 
+          onChange={change} 
+          onResumeChange={e => setResume(e.target.files[0])} 
+          onSubmit={submit} 
+          message={message} 
+          messageType={messageType} 
+          onClose={() => setMessage('')} 
+        />
+      )}
+
+      {/* Primary candidates details table */}
+      <CandidatesTable candidates={candidates} user={user} onStatusChange={changeStatus} onOpenResume={openResume} onShowHistory={showHistory} onEdit={editCandidate} />
+
+      {/* Pagination navigation footer */}
+      <Pagination pagination={pagination} loading={loading} onPageChange={load} />
+
+      {/* Sidebar/Modal tracking history logs for a candidate */}
       {historyName && (
-        <div className="box">
-          <div className="page-head">
-            <h2>{historyName} History</h2>
-            <button className="add-btn" onClick={() => setHistoryName('')}>Close</button>
-          </div>
-          <table>
-            <thead><tr><th>Status</th><th>Updated By</th><th>Time</th></tr></thead>
-            <tbody>
-              {history.map(item => (
-                <tr key={item.id}>
-                  <td>{item.status}</td>
-                  <td>{item.updated_by}</td>
-                  <td>{formatTimestamp(item.timestamp)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <CandidateHistory historyName={historyName} history={history} onClose={() => setHistoryName('')} />
       )}
     </section>
   );

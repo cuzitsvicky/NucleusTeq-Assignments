@@ -36,12 +36,25 @@ def test_ensure_interview_time_has_started_rejects_invalid_schedule():
     assert exc.value.detail == "Interview schedule is invalid"
 
 
+def test_ensure_schedule_is_future_blocks_past_time():
+    past = datetime.now() - timedelta(minutes=5)
+
+    with pytest.raises(BadRequestException) as exc:
+        interview_service.ensure_schedule_is_future({
+            "interview_date": past.strftime("%Y-%m-%d"),
+            "interview_time": past.strftime("%H:%M"),
+        })
+
+    assert exc.value.detail == "Interview date and time must be in the future"
+
+
 @pytest.mark.asyncio
 async def test_schedule_interview_success(monkeypatch, interview_payload):
     monkeypatch.setattr(interview_service.candidate_repo, "get_candidate_by_id", async_return({"status": "PROFILE_CREATED"}))
     monkeypatch.setattr(interview_service.user_repo, "get_user_by_email", async_return({"role": "Interviewer", "active": True}))
     monkeypatch.setattr(interview_service.job_repo, "get_job_by_id", async_return({"id": "job"}))
     monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_candidate_and_date", async_return(None))
+    monkeypatch.setattr(interview_service.interview_repo, "has_interviewer_conflict", async_return(False))
     monkeypatch.setattr(interview_service.interview_repo, "create_interview", async_return("interview-id"))
     update_status = async_return(1)
     add_history = async_return(None)
@@ -170,6 +183,37 @@ async def test_get_interviews_handles_missing_related_data(monkeypatch, object_i
 
 
 @pytest.mark.asyncio
+async def test_update_interview_schedule_success(monkeypatch, object_ids):
+    future = datetime.now() + timedelta(days=1)
+    update = async_return(1)
+    monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_id", async_return({"status": "SCHEDULED"}))
+    monkeypatch.setattr(interview_service.interview_repo, "has_interviewer_conflict", async_return(False))
+    monkeypatch.setattr(interview_service.interview_repo, "update_interview_schedule", update)
+    payload = {
+        "interview_date": future.strftime("%Y-%m-%d"),
+        "interview_time": future.strftime("%H:%M"),
+        "focus_areas": "React",
+    }
+
+    await interview_service.update_interview_schedule(object_ids.interview, payload)
+
+    update.assert_awaited_once_with(object_ids.interview, payload)
+
+
+@pytest.mark.asyncio
+async def test_update_interview_schedule_rejects_completed(monkeypatch, object_ids):
+    future = datetime.now() + timedelta(days=1)
+    monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_id", async_return({"status": "COMPLETED"}))
+
+    with pytest.raises(ConflictException):
+        await interview_service.update_interview_schedule(object_ids.interview, {
+            "interview_date": future.strftime("%Y-%m-%d"),
+            "interview_time": future.strftime("%H:%M"),
+            "focus_areas": "React",
+        })
+
+
+@pytest.mark.asyncio
 async def test_submit_feedback_success(monkeypatch, object_ids, feedback_payload):
     past = datetime.now() - timedelta(days=1)
     monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_id", async_return({
@@ -232,3 +276,34 @@ async def test_submit_feedback_existing_feedback(monkeypatch, object_ids, feedba
 
     with pytest.raises(ConflictException):
         await interview_service.submit_feedback(object_ids.interview, feedback_payload, "i@nucleusteq.com")
+
+
+@pytest.mark.asyncio
+async def test_schedule_interview_interviewer_conflict(monkeypatch, interview_payload):
+    monkeypatch.setattr(interview_service.candidate_repo, "get_candidate_by_id", async_return({"status": "PROFILE_CREATED"}))
+    monkeypatch.setattr(interview_service.user_repo, "get_user_by_email", async_return({"role": "Interviewer", "active": True}))
+    monkeypatch.setattr(interview_service.job_repo, "get_job_by_id", async_return({"id": "job"}))
+    monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_candidate_and_date", async_return(None))
+    monkeypatch.setattr(interview_service.interview_repo, "has_interviewer_conflict", async_return(True))
+
+    with pytest.raises(ConflictException) as exc:
+        await interview_service.schedule_interview(interview_payload.copy(), "hr@nucleusteq.com")
+
+    assert exc.value.detail == "Interviewer is already scheduled for another interview at this time"
+
+
+@pytest.mark.asyncio
+async def test_update_interview_schedule_interviewer_conflict(monkeypatch, object_ids):
+    future = datetime.now() + timedelta(days=1)
+    monkeypatch.setattr(interview_service.interview_repo, "get_interview_by_id", async_return({"status": "SCHEDULED", "interviewer_email": "i@nucleusteq.com"}))
+    monkeypatch.setattr(interview_service.interview_repo, "has_interviewer_conflict", async_return(True))
+    payload = {
+        "interview_date": future.strftime("%Y-%m-%d"),
+        "interview_time": future.strftime("%H:%M"),
+        "focus_areas": "React",
+    }
+
+    with pytest.raises(ConflictException) as exc:
+        await interview_service.update_interview_schedule(object_ids.interview, payload)
+
+    assert exc.value.detail == "Interviewer is already scheduled for another interview at this time"

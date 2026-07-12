@@ -6,6 +6,7 @@ from .requests import (
     CandidateUpdateRequest,
     JobCreateRequest,
     InterviewCreateRequest,
+    InterviewUpdateRequest,
     FeedbackSubmitRequest,
     LoginRequest,
     CandidateCreateRequest
@@ -19,5 +20,7 @@ from .responses import (
     InterviewResponse,
     FeedbackResponse,
     LoginResponse,
-    PaginatedResponse
+    PaginatedResponse,
+    MessageResponse,
+    MessageWithIdResponse
 )

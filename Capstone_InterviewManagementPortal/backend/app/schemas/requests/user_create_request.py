@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from ...constants.app_constants import REQUIRED_EMAIL_DOMAIN
 from ...enums.user_role import UserRole
+from ...utils import normalize_email
 import re
 
 
@@ -27,7 +28,9 @@ class UserCreateRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def email_must_be_nucleusteq(cls, v: str) -> str:
-        v = v.strip().lower()
+        v = normalize_email(v)
+        if not v:
+            raise ValueError("Email cannot be blank")
         if not v.endswith(f"@{REQUIRED_EMAIL_DOMAIN}"):
             raise ValueError(f"Email must use the {REQUIRED_EMAIL_DOMAIN} domain")
         return v
@@ -46,10 +49,15 @@ class UserCreateRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def password_must_be_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Password cannot be blank")
         if not (6 <= len(v) <= 12):
             raise ValueError("Password must be between 6 and 12 characters")
         if not re.search(r"[A-Za-z]", v):
             raise ValueError("Password must contain at least one letter")
         if not re.search(r"\d", v):
             raise ValueError("Password must contain at least one digit")
+        if not re.search(r"[^A-Za-z0-9]", v):
+            raise ValueError("Password must contain at least one special character")
         return v

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
 import re
+from ...utils import normalize_email
 
 
 class CandidateCreateRequest(BaseModel):
@@ -26,12 +27,15 @@ class CandidateCreateRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def email_lowercase(cls, v: str) -> str:
-        return v.strip().lower()
+        return normalize_email(v)
 
     @field_validator("email")
     @classmethod
     def reject_strange_characters(cls, v: str) -> str:
         # Enforce that the local part only contains normal letters, numbers, dots
+        v = v.strip()
+        if not v:
+            raise ValueError("Email cannot be blank")
         local_part = v.split("@")[0]
         if not re.match(r"^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$", local_part):
             raise ValueError(
@@ -42,13 +46,20 @@ class CandidateCreateRequest(BaseModel):
     @field_validator("mobile")
     @classmethod
     def mobile_must_be_valid(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Mobile number cannot be blank")
+        # Remove spaces and hyphens
         digits = re.sub(r"[\s\-]", "", v)
+
+        # Must contain only digits
         if not digits.isdigit():
-            raise ValueError("Mobile number must contain only digits")
-        if len(digits) < 7:
-            raise ValueError("Mobile number must be at least 7 digits")
-        if len(digits) > 10:
-            raise ValueError("Mobile number must not exceed 10 digits")
+           raise ValueError("Mobile number must contain only digits")
+
+        # Must be exactly 10 digits
+        if len(digits) != 10:
+            raise ValueError("Mobile number must be exactly 10 digits")
+
         return digits
 
     @field_validator("current_company")

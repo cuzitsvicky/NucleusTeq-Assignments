@@ -1,17 +1,35 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
+/**
+ * Alert notification component.
+ * Displays error, success, or info messages to the user.
+ * Automatically dismisses itself after 4 seconds by calling the onClose callback.
+ */
 export default function Alert({ message, type = 'error', onClose }) {
+  const alertRef = useRef(null);
+
   useEffect(() => {
     if (!message || !onClose) return undefined;
 
-    const timer = window.setTimeout(onClose, 4000);
+    // Set a timer to automatically trigger the onClose callback after 3 seconds
+    const timer = window.setTimeout(onClose, 3000);
+
+    // Clear the timer if the alert message or onClose handler changes, or on unmount
     return () => window.clearTimeout(timer);
   }, [message, onClose]);
 
+  useEffect(() => {
+    if (message && alertRef.current) {
+      alertRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [message]);
+
+  // Render nothing if there is no message to display
   if (!message) return null;
 
   return (
-    <div className={`alert alert-${type}`} role="alert">
+    <div ref={alertRef} className={`alert alert-${type}`} role="alert">
+      {/* Capitalized message category title (e.g. Error, Info, Success) */}
       <strong>{type === 'error' ? 'Error' : type === 'info' ? 'Info' : 'Success'}</strong>
       <span>{message}</span>
     </div>

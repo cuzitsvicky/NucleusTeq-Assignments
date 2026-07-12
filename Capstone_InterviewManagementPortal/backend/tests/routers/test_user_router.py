@@ -12,7 +12,7 @@ async def test_register_requires_admin(hr_user):
         await users.register(UserCreateRequest(
             name="Test User",
             email="test@nucleusteq.com",
-            password="pass12",
+            password="pass12!",
             role="HR",
         ), hr_user)
 
@@ -31,7 +31,7 @@ async def test_register_success(monkeypatch, admin_user):
     result = await users.register(UserCreateRequest(
         name="Test User",
         email="test@nucleusteq.com",
-        password="pass12",
+        password="pass12!",
         role="HR",
     ), admin_user)
 
@@ -94,5 +94,5 @@ async def test_update_user_success(monkeypatch, admin_user):
 
     result = await users.update_user("target-id", UserUpdateRequest(name="Test User", role="HR", active=True), admin_user)
 
-    assert result == {"message": "User updated"}
+    assert result.message == "User updated"
     update.assert_awaited_once_with("target-id", {"name": "Test User", "role": "HR", "active": True})

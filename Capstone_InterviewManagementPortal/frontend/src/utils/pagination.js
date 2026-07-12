@@ -1,3 +1,6 @@
+/**
+ * Default pagination state template for lists (jobs, candidates, users, etc.).
+ */
 export const emptyPagination = {
   page: 1,
   limit: 10,
@@ -7,6 +10,10 @@ export const emptyPagination = {
   has_previous: false
 };
 
+/**
+ * Extracts and maps pagination fields from an API response structure
+ * into a standard format used by frontend list components.
+ */
 export function paginationFrom(response) {
   return {
     page: response.page,

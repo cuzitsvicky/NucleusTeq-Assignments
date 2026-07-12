@@ -26,7 +26,7 @@ class FeedbackSubmitRequest(BaseModel):
     def must_not_be_blank(cls, v: str) -> str:
         v = v.strip()
         if not v:
-            raise ValueError("Tech Ares Covered field cannot be blank")
+            raise ValueError("Tech Areas Covered field cannot be blank")
         return v
 
     @field_validator("comments")

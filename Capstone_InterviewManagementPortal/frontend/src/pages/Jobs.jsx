@@ -1,56 +1,48 @@
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { apiService } from '../apiService.js';
 import Alert from '../components/Alert.jsx';
+import JobFilters from '../components/jobs/JobFilters.jsx';
+import JobForm from '../components/jobs/JobForm.jsx';
+import JobsTable from '../components/jobs/JobsTable.jsx';
 import Pagination from '../components/Pagination.jsx';
 import useDebouncedValue from '../hooks/useDebouncedValue.js';
+import { emptyJob, emptyJobFilters, jobsAreEqual } from '../utils/jobHelpers.js';
 import { emptyPagination, paginationFrom } from '../utils/pagination.js';
-import { Plus } from 'lucide-react';
 
-const emptyJob = {
-  title: '',
-  job_details: '',
-  job_role: '',
-  required_skills: '',
-  experience_required: '',
-  employment_type: 'Full Time',
-  location: ''
-};
-
-const emptyFilters = {
-  name: '',
-  employment_type: '',
-  location: '',
-  experience: ''
-};
-
-const EXPERIENCE_PATTERN = '(\\d+(\\.\\d+)?(\\s*-\\s*\\d+(\\.\\d+)?)?\\s*(year|years|month|months)|\\d+\\s*(year|years)\\s+\\d+\\s*(month|months))';
-
-function normalizeJob(job) {
-  return Object.fromEntries(
-    Object.entries(emptyJob).map(([key]) => [key, String(job[key] ?? '').trim()])
-  );
-}
-
-function jobsAreEqual(first, second) {
-  return JSON.stringify(normalizeJob(first)) === JSON.stringify(normalizeJob(second));
-}
-
+/**
+ * Jobs management page component.
+ * Allows HR users to create, modify, and search jobs,
+ * while allowing other authenticated roles to view available jobs.
+ */
 export default function Jobs({ token, user }) {
+  // Main job list and pagination states
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(emptyPagination);
   const [loading, setLoading] = useState(false);
+
+  // Form inputs and unmodified backups (to track unsaved changes)
   const [form, setForm] = useState(emptyJob);
   const [originalForm, setOriginalForm] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState('');
-  const [filters, setFilters] = useState(emptyFilters);
+  const [editingId, setEditingId] = useState(''); // ID of the job listing currently being edited
+
+  // Search filter options state
+  const [filters, setFilters] = useState(emptyJobFilters);
+
+  // Alerts feedback messaging states
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
+
+  // Debounce search filters to minimize heavy API calls on rapid keyboard inputs
   const debouncedName = useDebouncedValue(filters.name);
   const debouncedLocation = useDebouncedValue(filters.location);
   const debouncedExperience = useDebouncedValue(filters.experience);
 
+  /**
+   * Fetches job listings from the backend based on query filters and page details.
+   */
   function load(nextPage = page) {
     setLoading(true);
     apiService.getJobs(token, nextPage, pagination.limit, {
@@ -70,31 +62,44 @@ export default function Jobs({ token, user }) {
     });
   }
 
+  // Refresh data whenever search filters or pagination settings change
   useEffect(() => {
     setPage(1);
     load(1);
-  }, [
-    token,
-    debouncedName,
-    filters.employment_type,
-    debouncedLocation,
-    debouncedExperience
-  ]);
+  }, [token, debouncedName, filters.employment_type, debouncedLocation, debouncedExperience]);
 
+  /**
+   * Event handler for form input changes.
+   */
   function change(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  /**
+   * Event handler for search filter input changes.
+   */
   function changeFilter(e) {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   }
 
-  function clearFilters() {
-    setFilters(emptyFilters);
+  /**
+   * Clears form states and hides the creation/editing form view.
+   */
+  function closeForm() {
+    setForm(emptyJob);
+    setOriginalForm(null);
+    setEditingId('');
+    setShowForm(false);
+    setMessage('');
   }
 
+  /**
+   * Handles form submit for creating or updating a job posting.
+   */
   async function submit(e) {
     e.preventDefault();
+    
+    // Prevent submissions if no field values were modified in edit mode
     if (editingId && originalForm && jobsAreEqual(form, originalForm)) {
       setMessageType('info');
       setMessage('No changes to update');
@@ -104,10 +109,7 @@ export default function Jobs({ token, user }) {
     try {
       if (editingId) await apiService.updateJob(token, editingId, form);
       else await apiService.createJob(token, form);
-      setForm(emptyJob);
-      setOriginalForm(null);
-      setShowForm(false);
-      setEditingId('');
+      closeForm();
       setMessageType('success');
       setMessage(editingId ? 'Job updated' : 'Job created');
       load();
@@ -117,6 +119,9 @@ export default function Jobs({ token, user }) {
     }
   }
 
+  /**
+   * Populates the form inputs with details of a job to enable update mode.
+   */
   function editJob(job) {
     const nextForm = {
       title: job.title,
@@ -134,128 +139,45 @@ export default function Jobs({ token, user }) {
     setShowForm(true);
   }
 
-  function closeForm() {
-    setForm(emptyJob);
-    setOriginalForm(null);
-    setEditingId('');
-    setShowForm(false);
-  }
-
   return (
     <section>
+      {/* Page Header */}
       <div className="page-head">
         <h1>Jobs</h1>
         {user?.role === 'HR' && (
-          <button
-            className="add-btn"
-            onClick={showForm ? closeForm : () => setShowForm(true)}
-          >
-            {showForm ? (
-              'Close'
-            ) : (
-              <>
-                <Plus size={18} />
-                Add Job
-              </>
-            )}
+          <button className={`add-btn ${showForm ? 'close-mode' : ''}`} onClick={showForm ? closeForm : () => setShowForm(true)}>
+            {showForm ? 'Close' : <><Plus size={18} />Add Job</>}
           </button>
         )}
       </div>
-      <Alert message={message} type={messageType} onClose={() => setMessage('')} />
-      {loading && <p>Loading...</p>}
-      <div className="filters">
-        <input
-          name="name"
-          placeholder="Search by job name"
-          value={filters.name}
-          onChange={changeFilter}
-        />
-        <select
-          name="employment_type"
-          value={filters.employment_type}
-          onChange={changeFilter}
-        >
-          <option value="">All job types</option>
-          <option>Full Time</option>
-          <option>Internship</option>
-        </select>
-        <input
-          name="location"
-          placeholder="Filter by location"
-          value={filters.location}
-          onChange={changeFilter}
-        />
-        <input
-          name="experience"
-          placeholder="Filter by experience"
-          value={filters.experience}
-          onChange={changeFilter}
-        />
-        <button type="button" onClick={clearFilters}>Clear filters</button>
-      </div>
-      {user?.role === 'HR' && showForm && (
-        <form onSubmit={submit} className="form">
-          <input name="title" placeholder="Title" value={form.title} onChange={change} required maxLength="150" />
-          <input name="job_role" placeholder="Job role" value={form.job_role} onChange={change} required />
-          <input name="required_skills" placeholder="Required skills" value={form.required_skills} onChange={change} required />
-          <input name="experience_required" placeholder="2 years" value={form.experience_required} onChange={change} required pattern={EXPERIENCE_PATTERN} title='Use formats like "2 years", "2-4 years", "6 months", or "2 years 3 months"' />
-          <select name="employment_type" value={form.employment_type} onChange={change} required>
-            <option>Full Time</option>
-            <option>Internship</option>
-          </select>
-          <input name="location" placeholder="Location" value={form.location} onChange={change} required />
-          <textarea name="job_details" placeholder="Job details" value={form.job_details} onChange={change} required />
-          <button>{editingId ? 'Update Job' : 'Create Job'}</button>
-        </form>
+
+      {/* Global alert feedback messages */}
+      {!showForm && (
+        <Alert message={message} type={messageType} onClose={() => setMessage('')} />
       )}
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th><th>Details</th><th>Role</th><th>Skills</th>
-            <th>Experience</th><th>Type</th><th>Location</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {jobs.length === 0 ? (
-            <tr>
-              <td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>
-                No jobs available. Please create a new job.
-              </td>
-            </tr>
-          ) : (
-            jobs.map(job => (
-              <tr key={job.id}>
-                <td>{job.title}</td>
-                <td>{job.job_details}</td>
-                <td>{job.job_role}</td>
-                <td>{job.required_skills}</td>
-                <td>{job.experience_required}</td>
-                <td>{job.employment_type}</td>
-                <td>{job.location}</td>
-                <td>
-                  {user?.role === 'HR' ? (
-                    <div className="actions">
-                      <button
-                        type="button"
-                        onClick={() => editJob(job)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  ) : (
-                    '-'
-                  )}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      <Pagination
-        pagination={pagination}
-        loading={loading}
-        onPageChange={load}
-      />
+      {loading && <p>Loading...</p>}
+
+      {/* Search filters options bar */}
+      <JobFilters filters={filters} onChange={changeFilter} onClear={() => setFilters(emptyJobFilters)} />
+
+      {/* Creation/Editing form (available to HR only) */}
+      {user?.role === 'HR' && showForm && (
+        <JobForm 
+          form={form} 
+          editingId={editingId} 
+          onChange={change} 
+          onSubmit={submit} 
+          message={message} 
+          messageType={messageType} 
+          onClose={() => setMessage('')} 
+        />
+      )}
+
+      {/* Primary job details table */}
+      <JobsTable jobs={jobs} user={user} onEdit={editJob} />
+
+      {/* Pagination control footer */}
+      <Pagination pagination={pagination} loading={loading} onPageChange={load} />
     </section>
   );
 }

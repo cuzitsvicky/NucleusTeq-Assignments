@@ -64,5 +64,5 @@ async def test_update_job_success(monkeypatch, hr_user, object_ids, job_payload)
 
     result = await jobs.update_job(object_ids.job, JobCreateRequest(**job_payload), hr_user)
 
-    assert result == {"message": "Job updated"}
+    assert result.message == "Job updated"
     update.assert_awaited_once()
