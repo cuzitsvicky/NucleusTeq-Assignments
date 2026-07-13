@@ -1,0 +1,1086 @@
+{
+  "info": {
+    "name": "Interview Management Portal",
+    "description": "Postman Collection for Capstone Interview Management Portal APIs. Consists of Authentication, User Management, Job Management, Candidate Ingestion (with Resume upload), Interview Scheduling, and Evaluation Feedback.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{auth_username}}\",\n  \"password\": \"{{auth_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticates credentials and returns user profile details with basic token."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Returns current logged in user details using credentials supplied via Basic Auth."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"new_password\": \"newSecurePass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Allows logged in user to update/reset their password. Required on first login for newly registered accounts."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. User Management (Admin Only)",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "admin1",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "admin@nucleusteq.com",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new_member@nucleusteq.com\",\n  \"password\": \"tempPass123\",\n  \"name\": \"John Doe\",\n  \"role\": \"Interviewer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registers a new system user. The newly created account starts with reset_required: true."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Users List",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "admin1",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "admin@nucleusteq.com",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/users?page=1&limit=10&name=&role=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "name",
+                  "value": ""
+                },
+                {
+                  "key": "role",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Admin endpoint to list, search, and filter system users."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Status / Details",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "admin1",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "admin@nucleusteq.com",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/users/{{user_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Updates details of user account (e.g., toggle active/inactive). Deactivating an interviewer with pending future sessions is blocked by backend validations."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Interviewers",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/interviewers?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "interviewers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lists active interviewer accounts. Typically used by HR to populate the assign-interviewer selection dropdown during scheduling."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Job Management (HR Only)",
+      "item": [
+        {
+          "name": "Get Jobs List",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/?page=1&limit=10&name=&employment_type=&location=&experience=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "name",
+                  "value": ""
+                },
+                {
+                  "key": "employment_type",
+                  "value": ""
+                },
+                {
+                  "key": "location",
+                  "value": ""
+                },
+                {
+                  "key": "experience",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Retrieves listings of jobs with search criteria filter."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Job",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Associate Software Engineer\",\n  \"job_details\": \"Looking for entry-level backend developers skilled in FastAPI and Python.\",\n  \"job_role\": \"Software Development\",\n  \"required_skills\": \"Python, FastAPI, MongoDB, Git\",\n  \"experience_required\": \"1 year\",\n  \"employment_type\": \"Full Time\",\n  \"location\": \"Pune\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                ""
+              ]
+            },
+            "description": "Creates a new job posting on the job board."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Associate Software Engineer - Updated\",\n  \"job_details\": \"Looking for entry-level developers skilled in Python/FastAPI.\",\n  \"job_role\": \"Backend Engineer\",\n  \"required_skills\": \"Python, FastAPI, MongoDB\",\n  \"experience_required\": \"1-2 years\",\n  \"employment_type\": \"Full Time\",\n  \"location\": \"Pune\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/{{job_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "jobs",
+                "{{job_id}}"
+              ]
+            },
+            "description": "Updates parameters of an existing job listing."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Candidate Management (HR/Interviewer)",
+      "item": [
+        {
+          "name": "Ingest Candidate Profile (Form Data with PDF Upload)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "Jane",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "jane.doe@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "mobile",
+                  "value": "9876543210",
+                  "type": "text"
+                },
+                {
+                  "key": "current_company",
+                  "value": "Tech Corp Ltd",
+                  "type": "text"
+                },
+                {
+                  "key": "total_experience",
+                  "value": "2 years 6 months",
+                  "type": "text"
+                },
+                {
+                  "key": "applied_job_id",
+                  "value": "{{job_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "resume",
+                  "description": "Candidate resume in PDF format (Max 5MB)",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "candidates",
+                ""
+              ]
+            },
+            "description": "Creates a candidate profile. Saves basic detail schemas in MongoDB and streams the PDF resume file upload directly into GridFS."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Candidates List",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/?page=1&limit=10&name=&email=&status=&applied_job_id=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "candidates",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "name",
+                  "value": ""
+                },
+                {
+                  "key": "email",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "applied_job_id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Lists candidates. Interviewer gets filtered records they are assigned to; HR/Admin gets all matching records."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Candidate By ID",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/{{candidate_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "candidates",
+                "{{candidate_id}}"
+              ]
+            },
+            "description": "Fetches candidate details by candidate ID. Validates interviewer access."
+          },
+          "response": []
+        },
+        {
+          "name": "Download Candidate Resume",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/{{candidate_id}}/resume",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "candidates",
+                "{{candidate_id}}",
+                "resume"
+              ]
+            },
+            "description": "Streams PDF resume file from GridFS. Returns response content-type application/pdf."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Candidate Profile",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Doe\",\n  \"email\": \"jane.doe.updated@example.com\",\n  \"mobile\": \"9876543210\",\n  \"current_company\": \"Alphabet Inc\",\n  \"total_experience\": \"3 years\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/{{candidate_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "candidates",
+                "{{candidate_id}}"
+              ]
+            },
+            "description": "Updates details of a candidate profile (HR only)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Candidate Status Manually (HR)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SELECTED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/{{candidate_id}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "candidates",
+                "{{candidate_id}}",
+                "status"
+              ]
+            },
+            "description": "Manually transitions candidate status (e.g. to SELECTED or REJECTED) after validation."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Status History Log",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/{{candidate_id}}/history?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "candidates",
+                "{{candidate_id}}",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Retrieves the status transition history log showing status shifts, timestamps, and who made the updates."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Interview Scheduling",
+      "item": [
+        {
+          "name": "Get Interviews List",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/interviews/?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "interviews",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lists interviews. Interviewers only get assigned ones; HR and Admin get all."
+          },
+          "response": []
+        },
+        {
+          "name": "Schedule Interview (HR)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidate_id\": \"{{candidate_id}}\",\n  \"job_id\": \"{{job_id}}\",\n  \"job_title\": \"Associate Software Engineer\",\n  \"interview_date\": \"2026-12-01\",\n  \"interview_time\": \"14:00\",\n  \"interviewer_email\": \"interviewer@nucleusteq.com\",\n  \"focus_areas\": \"FastAPI endpoints, asynchronous database calls, unit testing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/interviews/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "interviews",
+                "schedule"
+              ]
+            },
+            "description": "Schedules an interview for a candidate. Forces candidate status to INTERVIEW_SCHEDULED."
+          },
+          "response": []
+        },
+        {
+          "name": "Reschedule Interview (HR)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interview_date\": \"2026-12-02\",\n  \"interview_time\": \"15:30\",\n  \"focus_areas\": \"FastAPI, Motor, Pytest coverage\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/interviews/{{interview_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "interviews",
+                "{{interview_id}}"
+              ]
+            },
+            "description": "Reschedules a future interview schedule."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Evaluation & Feedback (Interviewer)",
+      "item": [
+        {
+          "name": "Submit Interview Feedback",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "int123",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "interviewer@nucleusteq.com",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technical_rating\": 4,\n  \"communication_rating\": 5,\n  \"problem_solving_rating\": 4,\n  \"tech_areas_covered\": \"Async views, PyMongo queries, basic Python inheritance\",\n  \"comments\": \"Strong candidate, good problem solver. Highly recommend to proceed.\",\n  \"recommendation\": \"NEXT_ROUND\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/interviews/{{interview_id}}/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "interviews",
+                "{{interview_id}}",
+                "feedback"
+              ]
+            },
+            "description": "Submits feedback evaluation scores and comments. Promotes candidate status to INTERVIEW_COMPLETED. Can only be sent after scheduled interview start time."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Dashboard Stats",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "{{auth_password}}",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "{{auth_username}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                ""
+              ]
+            },
+            "description": "Aggregates count data for the main dashboard (total jobs, candidates, status counts for admin/HR; assigned, pending, completed counts for interviewer)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "auth_username",
+      "value": "hr@nucleusteq.com",
+      "type": "string"
+    },
+    {
+      "key": "auth_password",
+      "value": "hr1234",
+      "type": "string"
+    },
+    {
+      "key": "job_id",
+      "value": "65b4c1a2e3f4a5b6c7d8e9f0",
+      "type": "string"
+    },
+    {
+      "key": "candidate_id",
+      "value": "65b4c1a2e3f4a5b6c7d8e9f1",
+      "type": "string"
+    },
+    {
+      "key": "interview_id",
+      "value": "65b4c1a2e3f4a5b6c7d8e9f2",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "65b4c1a2e3f4a5b6c7d8e9f3",
+      "type": "string"
+    }
+  ]
+}
