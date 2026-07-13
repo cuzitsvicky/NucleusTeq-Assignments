@@ -7,7 +7,7 @@ import Candidates from './pages/Candidates.jsx';
 import Interviews from './pages/Interviews.jsx';
 import Users from './pages/Users.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
-import { BriefcaseBusiness, CalendarCheck, Gauge, KeyRound, UsersRound, UserRoundCog } from 'lucide-react';
+import { BriefcaseBusiness, CalendarCheck, Gauge, KeyRound, UsersRound, UserRoundCog, Menu } from 'lucide-react';
 
 /**
  * Route guard component that restricts access to specific routes based on the user's role.
@@ -39,6 +39,7 @@ export default function App() {
   // React state for auth token and user profile details
   const [token, setToken] = useState(savedToken);
   const [user, setUser] = useState(savedUser);
+  const [open, setOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,8 +89,9 @@ export default function App() {
 
   return (
     <div className="layout">
+      <button className="menu-btn" onClick={() => setOpen(!open)} aria-label="Toggle Navigation Menu"><Menu size={20} /></button>
       {/* Navigation Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${open ? 'open' : ''}`} onClick={() => setOpen(false)}>
         <h2>Talent Flow</h2>
         <nav>
           {/* Dashboard link is accessible to all logged-in roles */}

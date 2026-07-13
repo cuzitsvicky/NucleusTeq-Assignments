@@ -12,7 +12,7 @@ class JobCreateRequest(BaseModel):
     employment_type: Literal["Full Time", "Internship"]
     location: str
 
-    @field_validator("title", "job_details", "job_role", "required_skills", "location")
+    @field_validator("title", "job_details", "job_role", "required_skills", "location","employment_type")
     @classmethod
     def must_not_be_blank(cls, v: str) -> str:
         v = v.strip()
@@ -20,6 +20,14 @@ class JobCreateRequest(BaseModel):
             raise ValueError("This field cannot be blank")
         return v
 
+    @field_validator("location")
+    @classmethod
+    def must_be_letters(cls, v: str) -> str:
+        v = v.strip()
+        if not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Location can only contain letters and spaces")
+        return v
+    
     @field_validator("title")
     @classmethod
     def title_max_length(cls, v: str) -> str:

@@ -598,34 +598,13 @@ tbody tr:hover {
   color: var(--danger);
 }
 
+.menu-btn { display: none; }
 @media (max-width: 900px) {
-  .layout {
-    display: block;
-  }
-
-  .sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    padding: 18px;
-    box-shadow: none;
-  }
-
-  .sidebar h2 {
-    margin-bottom: 16px;
-  }
-
-  .sidebar nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .account {
-    margin-top: 18px;
-  }
-
-  .content {
-    padding: 22px;
-  }
+  .menu-btn { display: block; position: fixed; top: 12px; left: 12px; z-index: 1000; background: #0f1b2d; color: white; border: 0; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+  .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100vh; transition: left 0.3s ease; z-index: 999; }
+  .sidebar.open { left: 0; }
+  .layout { display: block; }
+  .content { padding-top: 60px; }
 }
 
 @media (max-width: 640px) {
