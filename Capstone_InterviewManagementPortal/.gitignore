@@ -71,4 +71,4 @@ env/
 
 # additional files to ignore
 backend/uploads/**/*
-seed_db.py
+
