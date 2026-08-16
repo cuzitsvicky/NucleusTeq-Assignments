@@ -1,0 +1,69 @@
+{
+  "id": "interview-portal",
+  "realm": "interview-portal",
+  "enabled": true,
+  "users": [
+    {
+      "username": "admin@nucleusteq.com",
+      "email": "admin@nucleusteq.com",
+      "firstName": "System",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin1",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "hr@nucleusteq.com",
+      "email": "hr@nucleusteq.com",
+      "firstName": "HR",
+      "lastName": "Manager",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "hr1234",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "interviewer@nucleusteq.com",
+      "email": "interviewer@nucleusteq.com",
+      "firstName": "Senior",
+      "lastName": "Interviewer",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "int123",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "interview-portal-client",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://localhost:80/*",
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true
+    }
+  ]
+}

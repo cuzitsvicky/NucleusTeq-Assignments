@@ -10,7 +10,8 @@
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest",
-    "lucide-react": "latest"
+    "lucide-react": "latest",
+    "keycloak-js": "^24.0.2"
   },
   "devDependencies": {}
 }

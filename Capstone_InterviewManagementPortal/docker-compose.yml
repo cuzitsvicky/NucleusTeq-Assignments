@@ -8,6 +8,20 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.2
+    container_name: interview-portal-keycloak
+    command: start-dev --import-realm
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=dev-mem
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak-realm.json:/opt/keycloak/data/import/realm.json
+    restart: always
+
   backend:
     build:
       context: ./backend
@@ -19,8 +33,11 @@ services:
     environment:
       - MONGO_URI=mongodb://db:27017
       - DB_NAME=Interview_Management_Portal
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=interview-portal
     depends_on:
       - db
+      - keycloak
 
   frontend:
     build:

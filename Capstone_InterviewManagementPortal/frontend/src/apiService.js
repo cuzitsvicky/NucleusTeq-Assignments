@@ -6,8 +6,14 @@
 async function apiRequest(endpoint, options = {}, token = null) {
   const headers = { ...options.headers };
 
-  // Set up Basic authentication header if a token is provided
-  if (token) headers.Authorization = `Basic ${token}`;
+  // Set up authentication header if a token is provided
+  if (token) {
+    if (token.startsWith('Bearer ') || token.split('.').length === 3) {
+      headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    } else {
+      headers.Authorization = `Basic ${token}`;
+    }
+  }
   
   // Set Content-Type to JSON unless we are sending FormData or headers already specify Content-Type
   if (!(options.body instanceof FormData) && !headers['Content-Type']) {
