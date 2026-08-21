@@ -16,6 +16,9 @@ services:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - KC_DB=dev-mem
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
     ports:
       - "8080:8080"
     volumes:
@@ -49,6 +52,34 @@ services:
       - "5173:80"
     depends_on:
       - backend
+
+  basic-crud-backend:
+    build:
+      context: ./basic-crud-app/backend
+      dockerfile: Dockerfile
+    container_name: basic-crud-backend
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URI=mongodb://db:27017
+      - DB_NAME=basic_crud_db
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=interview-portal
+    depends_on:
+      - db
+      - keycloak
+
+  basic-crud-frontend:
+    build:
+      context: ./basic-crud-app/frontend
+      dockerfile: Dockerfile
+    container_name: basic-crud-frontend
+    restart: always
+    ports:
+      - "5174:80"
+    depends_on:
+      - basic-crud-backend
 
 volumes:
   mongodb_data:
